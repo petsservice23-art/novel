@@ -26,19 +26,6 @@ const DailyRewards = () => {
     }
   };
 
-  const handleClaimTicket = async () => {
-    setClaiming(true);
-    try {
-      const res = await axios.post(`${API_URL}/retention/daily-ticket`);
-      toast.success(res.data.message || 'Daily ticket claimed!');
-      await fetchUser();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Ticket already claimed today');
-    } finally {
-      setClaiming(false);
-    }
-  };
-
   return (
     <div style={{ 
       background: '#09090b', 
@@ -57,7 +44,7 @@ const DailyRewards = () => {
         <div>
           <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '6px', color: '#fafafa', letterSpacing: '-0.02em' }}>Daily Check-In</h3>
           <p style={{ fontSize: '14px', color: '#a1a1aa' }}>
-            Claim your daily coins and tickets. Current streak: <span style={{ color: '#fafafa', fontWeight: '600' }}>{user.reading_streak?.current_streak || 0} days</span>
+            Claim your daily bonus coins. Current streak: <span style={{ color: '#fafafa', fontWeight: '600' }}>{user.reading_streak?.current_streak || 0} days</span>
           </p>
         </div>
       </div>
@@ -80,26 +67,7 @@ const DailyRewards = () => {
           onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
           onMouseLeave={e => e.currentTarget.style.opacity = '1'}
         >
-          Claim Coins
-        </button>
-        <button 
-          onClick={handleClaimTicket}
-          disabled={claiming}
-          style={{
-            background: 'transparent',
-            color: '#fafafa',
-            border: '1px solid #27272a',
-            padding: '10px 20px',
-            borderRadius: '6px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: claiming ? 'not-allowed' : 'pointer',
-            transition: 'background 0.2s'
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = '#18181b'}
-          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-        >
-          Claim Ticket
+          Claim Daily Coins
         </button>
       </div>
     </div>

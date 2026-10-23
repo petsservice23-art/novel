@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
@@ -15,7 +15,7 @@ interface Novel {
   rating: number;
 }
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const queryParam = searchParams.get('q') || '';
   
@@ -92,19 +92,19 @@ export default function SearchPage() {
           label="Genre" 
           options={genres} 
           current={filter.genre} 
-          onSelect={(v) => setFilter({...filter, genre: v})} 
+          onSelect={(v: string) => setFilter({...filter, genre: v})} 
         />
         <FilterGroup 
           label="Status" 
           options={statuses} 
           current={filter.status} 
-          onSelect={(v) => setFilter({...filter, status: v})} 
+          onSelect={(v: string) => setFilter({...filter, status: v})} 
         />
         <FilterGroup 
           label="Sort By" 
           options={sorts} 
           current={filter.sort} 
-          onSelect={(v) => setFilter({...filter, sort: v})} 
+          onSelect={(v: string) => setFilter({...filter, sort: v})} 
         />
       </div>
 
@@ -165,6 +165,14 @@ export default function SearchPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div style={{ textAlign: 'center', padding: '100px', color: 'var(--text-muted)' }}>Loading search...</div>}>
+      <SearchContent />
+    </Suspense>
   );
 }
 

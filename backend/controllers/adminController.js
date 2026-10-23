@@ -102,7 +102,9 @@ exports.bulkImportChapters = async (req, res) => {
       title: titles[index] ? titles[index].trim() : `Chapter ${startNum + index}`,
       content: content.trim(),
       chapter_number: startNum + index,
-      is_premium: (startNum + index) > 10 // Example: lock chapters after 10
+      tier: (startNum + index) > 10 ? 'coin' : 'free',
+      is_locked: (startNum + index) > 10,
+      price: (startNum + index) > 10 ? 10 : 0
     }));
 
     const createdChapters = await Chapter.insertMany(chaptersToCreate);

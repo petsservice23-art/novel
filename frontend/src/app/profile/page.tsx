@@ -94,10 +94,6 @@ export default function ProfilePage() {
                 <span style={{ fontSize: '16px', fontWeight: '800', color: '#FFD700' }}>{profileData?.coins || user.coins || 0} ©</span>
               </div>
               <div style={statBoxStyle}>
-                <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Unlock Tickets</span>
-                <span style={{ fontSize: '16px', fontWeight: '800', color: '#fff' }}>{profileData?.unlock_tickets || user.unlock_tickets || 0} 🎟️</span>
-              </div>
-              <div style={statBoxStyle}>
                 <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Reading Streak</span>
                 <span style={{ fontSize: '16px', fontWeight: '800', color: '#FF4500' }}>{profileData?.reading_streak?.current_streak || 0} 🔥</span>
               </div>

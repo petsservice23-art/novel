@@ -136,10 +136,6 @@ export default function Navbar() {
                   <span style={{ color: '#FFD700', fontWeight: '700' }}>{user.coins || 0}</span>
                   <span style={{ color: '#FFD700', fontSize: '12px' }}>©</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <span style={{ color: 'var(--text-secondary)', fontWeight: '700' }}>{user.unlock_tickets || 0}</span>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>🎟️</span>
-                </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255, 69, 0, 0.1)', padding: '2px 8px', borderRadius: '100px' }}>
                   <span style={{ color: '#FF4500', fontWeight: '700' }}>{user.reading_streak?.current_streak || 0}</span>
                   <span style={{ color: '#FF4500', fontSize: '12px' }}>🔥</span>

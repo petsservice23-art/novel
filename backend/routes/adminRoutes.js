@@ -25,7 +25,11 @@ router.put('/chapter/:id', async (req, res) => {
     }
 
     if (content !== undefined) chapter.content = content;
-    if (tier !== undefined) chapter.tier = tier;
+    if (tier !== undefined) {
+      chapter.tier = tier;
+      chapter.is_locked = (tier === 'coin' || tier === 'paid');
+      chapter.price = chapter.is_locked ? 10 : 0;
+    }
     
     await chapter.save();
     res.json({ message: 'Chapter updated successfully', chapter });
@@ -39,12 +43,15 @@ router.put('/chapter/:id', async (req, res) => {
 router.post('/chapter', async (req, res) => {
   try {
     const { novel_id, title, content, chapter_number, tier } = req.body;
+    const isLocked = tier === 'coin' || tier === 'paid';
     const newChapter = new Chapter({
       novel_id,
       title,
       content,
       chapter_number,
-      tier: tier || 'free'
+      tier: tier || 'free',
+      is_locked: isLocked,
+      price: isLocked ? 10 : 0
     });
     await newChapter.save();
     res.json({ message: 'Chapter created successfully', chapter: newChapter });

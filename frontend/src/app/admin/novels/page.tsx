@@ -245,11 +245,10 @@ export default function ManageNovels() {
                       <select 
                         value={c.tier || 'free'}
                         onChange={(e) => handleTierChange(c._id, e.target.value)}
-                        style={{ padding: '8px', background: 'var(--bg-primary)', color: c.tier === 'free' ? '#34d399' : c.tier === 'ad' ? '#38bdf8' : '#f59e0b', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '13px', outline: 'none', cursor: 'pointer', fontWeight: '600' }}
+                        style={{ padding: '8px', background: 'var(--bg-primary)', color: c.tier === 'free' ? '#34d399' : '#f59e0b', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '13px', outline: 'none', cursor: 'pointer', fontWeight: '600' }}
                       >
                         <option value="free">🔓 Free / Unlock</option>
-                        <option value="ad">🎟️ Ads & Tickets</option>
-                        <option value="coin">🪙 Coins Only</option>
+                        <option value="coin">🪙 Coins (Locked)</option>
                       </select>
       
                       <button 

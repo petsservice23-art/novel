@@ -4,24 +4,17 @@ const User = require('../models/User');
 
 // Helper: Determine chapter tier based on novel length and chapter number
 const getChapterTier = (chapterNum, totalChapters) => {
-  let freeLimit, adLimit;
+  let freeLimit;
 
   if (totalChapters <= 140) {
-    // Short Novels (80–140)
     freeLimit = 50;
-    adLimit = 50 + 20; // 70
   } else if (totalChapters <= 220) {
-    // Medium Novels (140–220)
     freeLimit = 70;
-    adLimit = 70 + 30; // 100
   } else {
-    // Long Novels (220–400)
     freeLimit = 100;
-    adLimit = 100 + 40; // 140
   }
 
   if (chapterNum <= freeLimit) return 'free';
-  if (chapterNum <= adLimit) return 'ad';
   return 'paid';
 };
 
@@ -57,10 +50,10 @@ const getChaptersByNovel = async (req, res) => {
 
     fullList.sort((a, b) => a.chapter_number - b.chapter_number);
 
-    // Annotate each chapter with its tier
+    // Annotate each chapter with its tier (free or paid)
     const annotated = fullList.map(ch => ({
       ...ch,
-      tier: getChapterTier(ch.chapter_number, novel.total_chapters)
+      tier: ch.tier ? (ch.tier === 'free' ? 'free' : 'paid') : getChapterTier(ch.chapter_number, novel.total_chapters)
     }));
 
     res.json(annotated);
@@ -77,13 +70,12 @@ const getChaptersByNovel = async (req, res) => {
 const checkUserAccess = async (user, chapter, tier) => {
   if (!user) return false;
   if (['author', 'admin'].includes(user.role)) return true;
-  if (user.is_vip && tier === 'vip') return true;
+  if (user.is_vip) return true;
 
   const chapterId = chapter._id.toString();
-  const unlockedById = user.unlocked_chapters.map(id => id.toString());
-  const adUnlockedById = user.ad_unlocked_chapters.map(id => id.toString());
+  const unlockedById = (user.unlocked_chapters || []).map(id => id.toString());
 
-  return unlockedById.includes(chapterId) || adUnlockedById.includes(chapterId);
+  return unlockedById.includes(chapterId);
 };
 
 // @desc    Get single chapter content by ID
@@ -128,7 +120,7 @@ const getChapterById = async (req, res) => {
     if (!chapter) return res.status(404).json({ message: 'Chapter not found' });
 
     const novel = await Novel.findById(chapter.novel_id);
-    const tier = getChapterTier(chapter.chapter_number, novel.total_chapters);
+    const tier = chapter.tier ? (chapter.tier === 'free' ? 'free' : 'paid') : getChapterTier(chapter.chapter_number, novel.total_chapters);
 
     if (tier === 'free') return res.json({ ...chapter.toObject(), tier });
 
@@ -144,9 +136,8 @@ const getChapterById = async (req, res) => {
     // Return locked response with tier info for UI
     return res.status(403).json({
       message: 'Chapter is locked',
-      tier,
-      price: tier === 'paid' || tier === 'vip' ? 10 : 0,
-      userTickets: reqUser?.unlock_tickets || 0,
+      tier: 'paid',
+      price: chapter.price || 10,
       chapterId: chapter._id
     });
   } catch (error) {
@@ -189,7 +180,7 @@ const getChapterByNumber = async (req, res) => {
       await chapter.save();
     }
 
-    const tier = getChapterTier(chapter.chapter_number, novel.total_chapters);
+    const tier = chapter.tier ? (chapter.tier === 'free' ? 'free' : 'paid') : getChapterTier(chapter.chapter_number, novel.total_chapters);
 
     if (tier === 'free') return res.json({ ...chapter.toObject(), tier });
 
@@ -204,12 +195,9 @@ const getChapterByNumber = async (req, res) => {
 
     return res.status(403).json({
       message: 'Chapter is locked',
-      tier,
-      price: tier === 'paid' || tier === 'vip' ? 10 : 0,
-      userTickets: reqUser?.unlock_tickets || 0,
-      chapterId: chapter._id,
-      // "1 chapter left" psychology nudge
-      isNearUnlock: chapter.chapter_number > 0 && (tier === 'paid' || tier === 'ad')
+      tier: 'paid',
+      price: chapter.price || 10,
+      chapterId: chapter._id
     });
   } catch (error) {
     if (error.name === 'CastError') return res.status(404).json({ message: 'Chapter not found' });
@@ -282,74 +270,6 @@ const unlockChapter = async (req, res) => {
   }
 };
 
-// @desc    Use a ticket to unlock a chapter
-// @route   POST /api/chapters/:id/ticket-unlock
-// @access  Private
-const ticketUnlockChapter = async (req, res) => {
-  try {
-    let chapterId = req.params.id;
-    let chapter;
-
-    if (chapterId.startsWith('dynamic_')) {
-      const parts = chapterId.split('_');
-      const novelId = parts[1];
-      const chapterNum = Number(parts[2]);
-
-      const novel = await Novel.findById(novelId);
-      if (!novel) return res.status(404).json({ message: 'Novel not found' });
-
-      chapter = await Chapter.findOne({ novel_id: novelId, chapter_number: chapterNum });
-
-      if (!chapter) {
-        const isLocked = chapterNum > 3;
-        chapter = new Chapter({
-          novel_id: novelId,
-          chapter_number: chapterNum,
-          title: `Chapter ${chapterNum}: The Journey Unfolds`,
-          content: [
-            `As the sun rose high over the empire, the events of the previous days began to settle.`,
-            `This is Chapter ${chapterNum} of the grand epic "${novel.title}".`,
-            `With each page turned, the mystery deepens and the destiny of the characters unfolds further.`,
-            `“There is no turning back now,” a soft whisper echoed through the silent corridor. The truth was close, yet so far.`
-          ],
-          is_locked: isLocked,
-          price: isLocked ? 10 : 0
-        });
-        await chapter.save();
-      }
-    } else {
-      chapter = await Chapter.findById(chapterId);
-    }
-
-    if (!chapter) return res.status(404).json({ message: 'Chapter not found' });
-
-    const user = await User.findById(req.user._id);
-
-    if (user.unlocked_chapters.map(id => id.toString()).includes(chapter._id.toString())) {
-      return res.status(400).json({ message: 'Chapter already unlocked' });
-    }
-
-    if (user.unlock_tickets < 1) {
-      return res.status(400).json({ message: 'No unlock tickets remaining' });
-    }
-
-    const novel = await Novel.findById(chapter.novel_id);
-    const tier = getChapterTier(chapter.chapter_number, novel.total_chapters);
-
-    if (tier === 'vip') {
-      return res.status(403).json({ message: 'Tickets cannot be used on VIP chapters. Use coins.' });
-    }
-
-    user.unlock_tickets -= 1;
-    user.unlocked_chapters.push(chapter._id);
-    await user.save();
-
-    res.json({ message: 'Chapter unlocked with ticket!', tickets: user.unlock_tickets });
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
-  }
-};
-
 // @desc    Add a new chapter
 // @route   POST /api/chapters
 // @access  Private/Author
@@ -386,6 +306,5 @@ module.exports = {
   addChapter,
   getChapterByNumber,
   unlockChapter,
-  ticketUnlockChapter,
   getChapterTier
 };

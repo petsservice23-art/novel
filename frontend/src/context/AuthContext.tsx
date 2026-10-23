@@ -17,7 +17,7 @@ interface User {
   avatar: string;
   coins: number;
   library?: any[];
-  unlock_tickets?: number;
+  reading_history?: any[];
   reading_streak?: any;
   is_vip?: boolean;
 }

@@ -98,7 +98,6 @@ const updateUserProfile = async (req, res) => {
       role: updatedUser.role,
       avatar: updatedUser.avatar,
       coins: updatedUser.coins,
-      unlock_tickets: updatedUser.unlock_tickets,
       reading_streak: updatedUser.reading_streak,
       is_vip: updatedUser.is_vip
     });
