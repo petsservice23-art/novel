@@ -4,18 +4,8 @@ const User = require('../models/User');
 
 // Helper: Determine chapter tier based on novel length and chapter number
 const getChapterTier = (chapterNum, totalChapters) => {
-  let freeLimit;
-
-  if (totalChapters <= 140) {
-    freeLimit = 50;
-  } else if (totalChapters <= 220) {
-    freeLimit = 70;
-  } else {
-    freeLimit = 100;
-  }
-
-  if (chapterNum <= freeLimit) return 'free';
-  return 'paid';
+  if (chapterNum >= 201) return 'paid';
+  return 'free';
 };
 
 // @desc    Get chapters for a novel (list, no content)
@@ -35,13 +25,15 @@ const getChaptersByNovel = async (req, res) => {
 
     for (let i = 1; i <= novel.total_chapters; i++) {
       if (!existingNumbers.includes(i)) {
+        const isLocked = i >= 201;
         fullList.push({
           _id: `dynamic_${novel._id}_${i}`,
           novel_id: novel._id,
           chapter_number: i,
           title: `Chapter ${i}: The Journey Unfolds`,
-          is_locked: i > 3,
-          price: i > 3 ? 10 : 0,
+          is_locked: isLocked,
+          price: isLocked ? 10 : 0,
+          tier: isLocked ? 'coin' : 'free',
           createdAt: novel.createdAt,
           updatedAt: novel.updatedAt
         });
@@ -51,10 +43,16 @@ const getChaptersByNovel = async (req, res) => {
     fullList.sort((a, b) => a.chapter_number - b.chapter_number);
 
     // Annotate each chapter with its tier (free or paid)
-    const annotated = fullList.map(ch => ({
-      ...ch,
-      tier: ch.tier ? (ch.tier === 'free' ? 'free' : 'paid') : getChapterTier(ch.chapter_number, novel.total_chapters)
-    }));
+    const annotated = fullList.map(ch => {
+      const isPaid = ch.chapter_number >= 201 || ch.tier === 'coin' || ch.tier === 'paid' || ch.is_locked;
+      const tier = isPaid ? 'coin' : 'free';
+      return {
+        ...ch,
+        tier,
+        is_locked: isPaid,
+        price: isPaid ? (ch.price || 10) : 0
+      };
+    });
 
     res.json(annotated);
   } catch (error) {
@@ -120,7 +118,8 @@ const getChapterById = async (req, res) => {
     if (!chapter) return res.status(404).json({ message: 'Chapter not found' });
 
     const novel = await Novel.findById(chapter.novel_id);
-    const tier = chapter.tier ? (chapter.tier === 'free' ? 'free' : 'paid') : getChapterTier(chapter.chapter_number, novel.total_chapters);
+    const isPaid = chapter.chapter_number >= 201 || chapter.tier === 'coin' || chapter.tier === 'paid' || chapter.is_locked;
+    const tier = isPaid ? 'paid' : 'free';
 
     if (tier === 'free') return res.json({ ...chapter.toObject(), tier });
 
@@ -180,7 +179,8 @@ const getChapterByNumber = async (req, res) => {
       await chapter.save();
     }
 
-    const tier = chapter.tier ? (chapter.tier === 'free' ? 'free' : 'paid') : getChapterTier(chapter.chapter_number, novel.total_chapters);
+    const isPaid = chapter.chapter_number >= 201 || chapter.tier === 'coin' || chapter.tier === 'paid' || chapter.is_locked;
+    const tier = isPaid ? 'paid' : 'free';
 
     if (tier === 'free') return res.json({ ...chapter.toObject(), tier });
 

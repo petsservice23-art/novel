@@ -13,17 +13,19 @@ router.put('/novel/:id', adminController.updateNovel);
 router.delete('/novel/:id', adminController.deleteNovel);
 router.post('/import-chapters', adminController.bulkImportChapters);
 
-// Route 1: Direct Chapter Content Update
+// Route 1: Direct Chapter Content & Metadata Update
 router.put('/chapter/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { content, tier } = req.body;
+    const { content, tier, title, chapter_number } = req.body;
 
     const chapter = await Chapter.findById(id);
     if (!chapter) {
       return res.status(404).json({ message: 'Chapter not found' });
     }
 
+    if (title !== undefined) chapter.title = title;
+    if (chapter_number !== undefined) chapter.chapter_number = chapter_number;
     if (content !== undefined) chapter.content = content;
     if (tier !== undefined) {
       chapter.tier = tier;

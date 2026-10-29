@@ -20,6 +20,11 @@ export default function ManageNovels() {
   const [isTranslating, setIsTranslating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Chapter Title Edit State
+  const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
+  const [tempTitle, setTempTitle] = useState('');
+  const [isSavingTitle, setIsSavingTitle] = useState(false);
+
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
@@ -81,6 +86,31 @@ export default function ManageNovels() {
     }
   };
 
+  const startEditTitle = (c: any) => {
+    setEditingTitleId(c._id);
+    setTempTitle(c.title);
+  };
+
+  const cancelEditTitle = () => {
+    setEditingTitleId(null);
+    setTempTitle('');
+  };
+
+  const saveChapterTitle = async (chapterId: string) => {
+    if (!tempTitle.trim()) return toast.error('Chapter title cannot be empty');
+    setIsSavingTitle(true);
+    try {
+      await axios.put(`${API_URL}/admin/chapter/${chapterId}`, { title: tempTitle.trim() });
+      toast.success('Chapter title updated!');
+      setChapters(chapters.map(c => c._id === chapterId ? { ...c, title: tempTitle.trim() } : c));
+      setEditingTitleId(null);
+    } catch (err) {
+      toast.error('Failed to update chapter title');
+    } finally {
+      setIsSavingTitle(false);
+    }
+  };
+
   const openEditor = async (chapter: any) => {
     setEditingChapter(chapter);
     setRawText('');
@@ -127,8 +157,12 @@ export default function ManageNovels() {
         setChapters([...chapters, res.data.chapter]);
       } else {
         // Update existing chapter
-        await axios.put(`${API_URL}/admin/chapter/${editingChapter._id}`, { content: englishText });
-        toast.success('Chapter content saved successfully!');
+        await axios.put(`${API_URL}/admin/chapter/${editingChapter._id}`, { 
+          content: englishText,
+          title: editingChapter.title 
+        });
+        toast.success('Chapter content and title saved successfully!');
+        setChapters(chapters.map(c => c._id === editingChapter._id ? { ...c, title: editingChapter.title } : c));
       }
       setEditingChapter(null); // Close modal
     } catch (err: any) {
@@ -240,7 +274,48 @@ export default function ManageNovels() {
                   {chapters.map(c => (
                     <div key={c._id} style={{ display: 'grid', gridTemplateColumns: '100px 1fr 200px 120px', gap: '16px', padding: '16px 24px', borderBottom: '1px solid var(--border)', alignItems: 'center' }}>
                       <span style={{ color: '#a1a1aa', fontSize: '14px' }}>Ch. {c.chapter_number}</span>
-                      <span style={{ fontSize: '14px', fontWeight: '500', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.title}</span>
+                      
+                      {editingTitleId === c._id ? (
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                          <input 
+                            type="text" 
+                            value={tempTitle} 
+                            onChange={(e) => setTempTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') saveChapterTitle(c._id);
+                              if (e.key === 'Escape') cancelEditTitle();
+                            }}
+                            autoFocus
+                            style={{ ...inputStyle, padding: '6px 10px', fontSize: '13px', width: '100%' }}
+                          />
+                          <button 
+                            onClick={() => saveChapterTitle(c._id)}
+                            disabled={isSavingTitle}
+                            style={{ background: '#10b981', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                          >
+                            Save
+                          </button>
+                          <button 
+                            onClick={cancelEditTitle}
+                            style={{ background: 'transparent', border: '1px solid var(--border)', color: '#a1a1aa', padding: '6px 8px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                          <span style={{ fontSize: '14px', fontWeight: '500', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.title}</span>
+                          <button 
+                            onClick={() => startEditTitle(c)}
+                            title="Edit Chapter Title"
+                            style={{ background: 'transparent', border: 'none', color: '#71717a', cursor: 'pointer', padding: '2px 4px', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+                            onMouseEnter={e => e.currentTarget.style.color = '#38bdf8'}
+                            onMouseLeave={e => e.currentTarget.style.color = '#71717a'}
+                          >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                          </button>
+                        </div>
+                      )}
                       
                       <select 
                         value={c.tier || 'free'}
@@ -273,8 +348,20 @@ export default function ManageNovels() {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(9, 9, 11, 0.95)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px' }}>
           <div style={{ background: 'var(--bg-secondary)', width: '100%', maxWidth: '1200px', height: '100%', borderRadius: '16px', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
             
-            <div style={{ padding: '20px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-primary)' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#fff' }}>Editing: Chapter {editingChapter.chapter_number}</h2>
+            <div style={{ padding: '16px 32px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-primary)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, marginRight: '24px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#fff', whiteSpace: 'nowrap' }}>Editing: Ch. {editingChapter.chapter_number}</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '500px' }}>
+                  <span style={{ fontSize: '12px', color: '#a1a1aa', whiteSpace: 'nowrap' }}>Title:</span>
+                  <input 
+                    type="text"
+                    value={editingChapter.title || ''}
+                    onChange={e => setEditingChapter({ ...editingChapter, title: e.target.value })}
+                    placeholder="Chapter Title..."
+                    style={{ ...inputStyle, padding: '6px 12px', fontSize: '14px' }}
+                  />
+                </div>
+              </div>
               <button onClick={() => setEditingChapter(null)} style={{ background: 'transparent', border: 'none', color: '#a1a1aa', fontSize: '24px', cursor: 'pointer' }}>&times;</button>
             </div>
 
