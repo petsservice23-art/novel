@@ -189,7 +189,7 @@ export default function NovelDetail() {
           </div>
           {userUnlockedPaidCount > 0 && (
             <div style={{ ...badgeStyle, color: '#60a5fa', borderColor: '#3b82f6', background: 'rgba(59, 130, 246, 0.1)' }}>
-              ✓ {userUnlockedPaidCount} unlocked with coins
+              ✓ {userUnlockedPaidCount} unlocked with ©
             </div>
           )}
         </div>
@@ -286,12 +286,12 @@ export default function NovelDetail() {
             <h3 style={{ fontSize: '18px', fontWeight: '600' }}>Chapters <span style={{ color: '#71717a', fontSize: '14px', fontWeight: '400' }}>({chapters.length})</span></h3>
             <span style={{ fontSize: '13px', fontWeight: '600', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              {(lockedCount * 10).toLocaleString()} coins
+              {(lockedCount * 10).toLocaleString()} <span style={{ fontWeight: '800' }}>©</span>
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <button 
-              onClick={() => toast('To unlock all chapters at once, purchase a coin bundle or VIP Pass in the Coins store!', { icon: '🪙' })}
+              onClick={() => toast('To unlock all chapters at once, purchase a coin bundle or VIP Pass in the Coins store!', { icon: '©' })}
               style={{ background: 'transparent', border: '1px solid #f97316', color: '#f97316', padding: '6px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}
             >
               Unlock All
@@ -404,9 +404,12 @@ export default function NovelDetail() {
                       fontWeight: '700', 
                       color: '#f59e0b',
                       textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
+                      letterSpacing: '0.05em',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '3px'
                     }}>
-                      10 COINS
+                      10 <span style={{ fontWeight: '800' }}>©</span>
                     </span>
                   )}
                 </div>

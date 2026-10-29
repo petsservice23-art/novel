@@ -15,11 +15,11 @@ const faqs: FAQItem[] = [
   },
   {
     question: 'Are all chapters free to read?',
-    answer: 'Every novel features dozens to hundreds of completely free chapters. Advanced or completed chapters can be unlocked using Coins or accessed with VIP privileges.'
+    answer: 'Every novel features dozens to hundreds of completely free chapters. Advanced or completed chapters can be unlocked using © Coins or accessed with VIP privileges.'
   },
   {
     question: 'How do I get coins?',
-    answer: 'You can get coins easily by visiting the Coins page to purchase coin bundles, or by claiming daily reading streaks when logged in to your account.'
+    answer: 'You can get © coins easily by visiting the Coins page to purchase coin bundles, or by claiming daily reading streaks when logged in to your account.'
   },
   {
     question: 'Can I read on my phone?',

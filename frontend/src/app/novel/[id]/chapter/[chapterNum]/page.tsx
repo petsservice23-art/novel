@@ -143,12 +143,12 @@ export default function ReadingPage() {
 
   const handleUnlock = async () => {
     if (!user) { toast.error('Sign in to unlock'); return; }
-    if (user.coins < (price || 10)) { toast.error('Insufficient coins'); router.push('/coins'); return; }
+    if (user.coins < (price || 10)) { toast.error('Insufficient © coins'); router.push('/coins'); return; }
     setUnlocking(true);
     try {
       const targetId = chapterId || (await fetchChapterId());
       await axios.post(`${API_URL}/chapters/${targetId}/unlock`);
-      toast.success('Unlocked with Coins!');
+      toast.success('Unlocked with © Coins!');
       await fetchUser(); 
       const chapterRes = await axios.get(`${API_URL}/chapters/novel/${id}/chapter/${chapterNum}`);
       setChapter(chapterRes.data);
@@ -295,12 +295,12 @@ export default function ReadingPage() {
           }}>
             <div>
               <h2 style={{ marginBottom: '12px', fontSize: '24px', fontWeight: '600', color: '#fafafa' }}>Premium Chapter Locked</h2>
-              <p style={{ color: '#a1a1aa', fontSize: '15px' }}>Unlock with coins to continue reading.</p>
+              <p style={{ color: '#a1a1aa', fontSize: '15px' }}>Unlock with © to continue reading.</p>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '300px' }}>
               <button onClick={handleUnlock} disabled={unlocking} style={unlockBtnStyle}>
-                <span>🪙</span> Unlock for {price || 10} Coins
+                <span style={{ color: '#fbbf24', fontWeight: '800', fontSize: '16px' }}>©</span> Unlock for {price || 10} ©
               </button>
             </div>
           </div>

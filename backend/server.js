@@ -1,13 +1,15 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
 const dotenv = require('dotenv');
+
+// Load env vars
+dotenv.config({ path: path.join(__dirname, '.env') });
+
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db');
-
-// Load env vars
-dotenv.config();
 
 // Connect to database
 connectDB();

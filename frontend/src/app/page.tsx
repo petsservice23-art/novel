@@ -45,7 +45,7 @@ const DailyRewards = () => {
         <div>
           <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '6px', color: '#fafafa', letterSpacing: '-0.02em' }}>Daily Check-In</h3>
           <p style={{ fontSize: '14px', color: '#a1a1aa' }}>
-            Claim your daily bonus coins. Current streak: <span style={{ color: '#fafafa', fontWeight: '600' }}>{user.reading_streak?.current_streak || 0} days</span>
+            Claim your daily bonus © coins. Current streak: <span style={{ color: '#fafafa', fontWeight: '600' }}>{user.reading_streak?.current_streak || 0} days</span>
           </p>
         </div>
       </div>
@@ -63,11 +63,15 @@ const DailyRewards = () => {
             fontSize: '14px',
             fontWeight: '600',
             cursor: claiming ? 'not-allowed' : 'pointer',
-            transition: 'opacity 0.2s'
+            transition: 'opacity 0.2s',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
           }}
           onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
           onMouseLeave={e => e.currentTarget.style.opacity = '1'}
         >
+          <span style={{ color: '#f59e0b', fontWeight: '900' }}>©</span>
           Claim Daily Coins
         </button>
       </div>

@@ -139,7 +139,7 @@ export default function Navbar() {
           onMouseEnter={e => (e.currentTarget.style.opacity = '0.9')}
           onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
           >
-            <span>🪙</span>
+            <span style={{ fontWeight: '900', fontSize: '15px', lineHeight: 1 }}>©</span>
             <span>Get coins</span>
           </Link>
 
@@ -208,12 +208,18 @@ export default function Navbar() {
                   fontFamily: 'Inter, system-ui, sans-serif'
                 }}>
                   {/* User Profile Header */}
-                  <div style={{ padding: '12px 14px 14px', borderBottom: '1px solid #27272a', marginBottom: '6px' }}>
-                    <div style={{ fontSize: '14px', fontWeight: '700', color: '#fafafa', marginBottom: '2px' }}>
-                      {user.username}
+                  <div style={{ padding: '12px 14px 14px', borderBottom: '1px solid #27272a', marginBottom: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '700', color: '#fafafa', marginBottom: '2px' }}>
+                        {user.username}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#71717a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>
+                        {user.email}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '12px', color: '#71717a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {user.email}
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '3px 8px', borderRadius: '100px', fontSize: '12px', fontWeight: '700', color: '#f59e0b' }}>
+                      <span>{user.coins || 0}</span>
+                      <span style={{ fontWeight: '800' }}>©</span>
                     </div>
                   </div>
 
@@ -243,9 +249,7 @@ export default function Navbar() {
 
                     <MenuItem 
                       icon={
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="m7 6 5 5"/>
-                        </svg>
+                        <span style={{ color: '#fbbf24', fontWeight: '800', fontSize: '16px', lineHeight: 1 }}>©</span>
                       } 
                       label="Buy Coins" 
                       href="/coins" 

@@ -165,7 +165,7 @@ function ProfileContent() {
               <StatCard count={bookmarkedCount} label="Bookmarked" icon="🔖" color="#3b82f6" />
               <StatCard count={chaptersReadCount} label="Chapters Read" icon="📖" color="#10b981" />
               <StatCard count={0} label="Completed" icon="✓" color="#22c55e" />
-              <StatCard count={coinsSpent} label="Coins Spent" icon="🪙" color="#f59e0b" />
+              <StatCard count={coinsSpent} label="Coins Spent" icon="©" color="#f59e0b" />
             </div>
 
             {/* Bookmarked Library Section */}
@@ -338,7 +338,10 @@ function ProfileContent() {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#18181b', padding: '12px 20px', borderRadius: '12px', border: '1px solid #27272a' }}>
                 <span style={{ color: '#a1a1aa', fontSize: '14px' }}>Balance</span>
-                <span style={{ color: '#f59e0b', fontSize: '18px', fontWeight: '800' }}>🪙 {profileData?.coins || user.coins || 0}</span>
+                <span style={{ color: '#f59e0b', fontSize: '18px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span>{profileData?.coins || user.coins || 0}</span>
+                  <span style={{ fontSize: '16px' }}>©</span>
+                </span>
               </div>
             </div>
 
@@ -354,15 +357,16 @@ function ProfileContent() {
                 alignItems: 'center',
                 gap: '12px'
               }}>
-                <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b', fontSize: '28px', marginBottom: '8px' }}>
-                  🪙
+                <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b', fontSize: '26px', fontWeight: '900', marginBottom: '8px' }}>
+                  ©
                 </div>
                 <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#fff' }}>No transactions yet</h3>
                 <p style={{ color: '#a1a1aa', fontSize: '14px', maxWidth: '400px' }}>
                   Your coin purchases and chapter unlocks will appear here.
                 </p>
-                <Link href="/coins" style={{ marginTop: '12px', background: '#eab308', color: '#000', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: '700', fontSize: '14px' }}>
-                  Get Coins
+                <Link href="/coins" style={{ marginTop: '12px', background: '#eab308', color: '#000', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: '700', fontSize: '14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span>©</span>
+                  <span>Get Coins</span>
                 </Link>
               </div>
             ) : (
@@ -376,7 +380,7 @@ function ProfileContent() {
                 {transactions.map(t => (
                   <div key={t._id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', padding: '16px 24px', borderBottom: '1px solid #27272a', alignItems: 'center', fontSize: '14px' }}>
                     <span style={{ fontWeight: '600', color: '#fff' }}>{t.type === 'coins' ? 'Coin Bundle' : 'Chapter Unlock'}</span>
-                    <span style={{ color: '#f59e0b', fontWeight: '700' }}>+{t.coins_awarded} Coins</span>
+                    <span style={{ color: '#f59e0b', fontWeight: '700' }}>+{t.coins_awarded} ©</span>
                     <span style={{ color: t.status === 'success' ? '#22c55e' : '#ef4444', textTransform: 'capitalize', fontWeight: '600' }}>{t.status}</span>
                     <span style={{ textAlign: 'right', color: '#71717a', fontSize: '13px' }}>
                       {new Date(t.createdAt).toLocaleDateString()}

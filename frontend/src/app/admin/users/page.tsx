@@ -69,7 +69,7 @@ export default function ManageUsers() {
                     {u.role.toUpperCase()}
                   </span>
                 </td>
-                <td style={tdStyle}>🪙 {u.coins}</td>
+                <td style={tdStyle}><span style={{ color: '#fbbf24', fontWeight: '800' }}>©</span> {u.coins}</td>
                 <td style={tdStyle}>
                   <button style={{ background: 'none', border: 'none', color: 'var(--accent)', fontWeight: '700', cursor: 'pointer' }}>View</button>
                 </td>

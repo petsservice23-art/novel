@@ -284,8 +284,8 @@ export default function ManageNovels() {
               <span style={{ fontSize: '13px', color: '#34d399', fontWeight: '600', background: 'rgba(52, 211, 153, 0.1)', padding: '6px 12px', borderRadius: '6px' }}>
                 🔓 {chapters.filter(c => c.tier === 'free').length} Free
               </span>
-              <span style={{ fontSize: '13px', color: '#f59e0b', fontWeight: '600', background: 'rgba(245, 158, 11, 0.1)', padding: '6px 12px', borderRadius: '6px' }}>
-                🪙 {chapters.filter(c => c.tier !== 'free').length} Locked
+              <span style={{ fontSize: '13px', color: '#f59e0b', fontWeight: '600', background: 'rgba(245, 158, 11, 0.1)', padding: '6px 12px', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontWeight: '800' }}>©</span> {chapters.filter(c => c.tier !== 'free').length} Locked
               </span>
             </div>
           </div>
@@ -303,7 +303,7 @@ export default function ManageNovels() {
               style={{ ...inputStyle, width: '90px', textAlign: 'center', fontWeight: '700', fontSize: '15px', color: '#34d399' }}
             />
             <span style={{ fontSize: '14px', color: '#e4e4e7' }}>
-              <b>FREE</b>, and lock all chapters from <b>{bulkFreeUntil + 1}</b> onwards with <b>10 Coins</b>.
+              <b>FREE</b>, and lock all chapters from <b>{bulkFreeUntil + 1}</b> onwards with <b>10 ©</b>.
             </span>
             <button 
               onClick={handleBulkLock}
@@ -396,7 +396,7 @@ export default function ManageNovels() {
                         style={{ padding: '8px', background: 'var(--bg-primary)', color: c.tier === 'free' ? '#34d399' : '#f59e0b', border: '1px solid var(--border)', borderRadius: '6px', fontSize: '13px', outline: 'none', cursor: 'pointer', fontWeight: '600' }}
                       >
                         <option value="free">🔓 Free / Unlock</option>
-                        <option value="coin">🪙 Coins (Locked)</option>
+                        <option value="coin">© Coins (Locked)</option>
                       </select>
       
                       <button 
