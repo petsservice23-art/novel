@@ -245,10 +245,34 @@ const mockBuyCoins = async (req, res) => {
     user.coins = (user.coins || 0) + amount;
     await user.save();
 
+    // Create a transaction record for mock buy as well
+    await Transaction.create({
+      user_id: req.user._id,
+      amount: amount / 100,
+      coins_awarded: amount,
+      type: 'coins',
+      payment_provider: 'stripe',
+      currency: 'USD',
+      status: 'success',
+      payment_id: 'mock_' + Date.now()
+    });
+
     res.json({ success: true, message: `Successfully purchased ${amount} coins`, coins: user.coins });
   } catch (error) {
     res.status(500).json({ message: 'Server error during mock purchase' });
   }
 };
 
-module.exports = { createPayment, verifyRazorpay, verifyPayPal, mockBuyCoins };
+// @desc    Get user's transactions
+// @route   GET /api/payments/transactions
+// @access  Private
+const getUserTransactions = async (req, res) => {
+  try {
+    const transactions = await Transaction.find({ user_id: req.user._id }).sort({ createdAt: -1 });
+    res.json(transactions);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = { createPayment, verifyRazorpay, verifyPayPal, mockBuyCoins, getUserTransactions };

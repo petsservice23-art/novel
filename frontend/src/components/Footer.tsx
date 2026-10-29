@@ -18,6 +18,7 @@ export default function Footer() {
             <FooterLink text="Browse Novels" href="/browse" />
             <FooterLink text="Genres" href="/genres" />
             <FooterLink text="Coins & VIP" href="/coins" />
+            <FooterLink text="Help Center" href="/help" />
             <FooterLink text="Contact Us" href="/contact" />
           </div>
         </div>

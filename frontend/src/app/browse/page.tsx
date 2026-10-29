@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
+import { formatTimeAgo } from '@/utils/timeAgo';
 
 interface Novel {
   _id: string;
@@ -13,6 +14,7 @@ interface Novel {
   publishing_status?: string;
   genres: string[];
   total_chapters?: number;
+  updatedAt?: string;
 }
 
 export default function BrowsePage() {
@@ -241,13 +243,18 @@ export default function BrowsePage() {
                           {novel.title}
                         </h3>
                         
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <p style={{ color: '#71717a', fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '120px' }}>
-                            {displayAuthor}
-                          </p>
-                          <span style={{ color: '#a1a1aa', fontSize: '11px', padding: '2px 6px', border: '1px solid #27272a', borderRadius: '4px' }}>
-                            {novel.genres?.[0] || 'Novel'}
-                          </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <p style={{ color: '#71717a', fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '120px', margin: 0 }}>
+                              {displayAuthor}
+                            </p>
+                            <span style={{ color: '#a1a1aa', fontSize: '11px', padding: '1px 6px', border: '1px solid #27272a', borderRadius: '4px' }}>
+                              {novel.genres?.[0] || 'Novel'}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#71717a' }}>
+                            {novel.total_chapters || 0} chapters · {formatTimeAgo(novel.updatedAt)}
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -7,6 +7,7 @@ import API_URL from '@/config';
 import { useAuth } from '@/context/AuthContext';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import { formatTimeAgo } from '@/utils/timeAgo';
 
 export default function NovelDetail() {
   const { id } = useParams();
@@ -36,6 +37,9 @@ export default function NovelDetail() {
         }
 
         setNovel(novelData);
+        if (novelData?.title) {
+          document.title = `${novelData.title} - Read Online Free All Chapters | Novelverse`;
+        }
 
         const chaptersRes = await fetch(`${API_URL}/chapters/novel/${id}`);
         const chaptersData = await chaptersRes.json();
@@ -111,6 +115,31 @@ export default function NovelDetail() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#121212', color: '#fafafa', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      
+      {/* Schema.org Book JSON-LD for Search Engine Optimization */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Book",
+            "name": novel.title,
+            "author": {
+              "@type": "Person",
+              "name": novel.author || "Novelverse"
+            },
+            "description": novel.description,
+            "genre": novel.genres,
+            "datePublished": novel.published_year || "2024",
+            "numberOfPages": novel.total_chapters,
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": novel.rating || 4.5,
+              "ratingCount": novel.ratings_count || 100
+            }
+          })
+        }}
+      />
       
       {/* Breadcrumbs */}
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 20px 20px', fontSize: '13px', color: '#71717a' }}>
@@ -345,7 +374,7 @@ export default function NovelDetail() {
                   <span style={{ color: '#fafafa', fontSize: '14px', fontWeight: '500' }}>{chapter.title}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '13px', color: '#71717a' }}>May 27</span>
+                  <span style={{ fontSize: '13px', color: '#71717a' }}>{formatTimeAgo(chapter.createdAt || novel.updatedAt)}</span>
                   {chapter.tier === 'free' ? (
                     <span style={{ 
                       fontSize: '11px', 

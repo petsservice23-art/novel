@@ -6,6 +6,7 @@ import API_URL from '@/config';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
+import { formatTimeAgo } from '@/utils/timeAgo';
 
 const DailyRewards = () => {
   const { user, fetchUser } = useAuth();
@@ -149,8 +150,9 @@ const NovelCard = ({ novel }: { novel: any }) => (
         }}>
           {novel.title}
         </h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#71717a', fontSize: '13px' }}>
-          <span>{novel.author && novel.author.toLowerCase() !== 'novelverse' ? novel.author : 'Unknown Author'}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          <span style={{ color: '#71717a', fontSize: '13px' }}>{novel.author && novel.author.toLowerCase() !== 'novelverse' ? novel.author : 'Unknown Author'}</span>
+          <span style={{ color: '#52525b', fontSize: '11px' }}>{novel.total_chapters || 0} chapters · {formatTimeAgo(novel.updatedAt)}</span>
         </div>
       </div>
     </div>
