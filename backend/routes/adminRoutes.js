@@ -41,6 +41,42 @@ router.put('/chapter/:id', async (req, res) => {
   }
 });
 
+// Route 1.2: Bulk Update Chapter Locking Rules for a Novel
+router.put('/novel/:id/bulk-lock', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { freeUntil } = req.body;
+    const freeNum = parseInt(freeUntil, 10);
+    if (isNaN(freeNum) || freeNum < 0) {
+      return res.status(400).json({ message: 'Invalid free chapter count' });
+    }
+
+    const Novel = require('../models/Novel');
+    const novel = await Novel.findById(id);
+    if (!novel) return res.status(404).json({ message: 'Novel not found' });
+
+    // Chapters 1 to freeNum are free
+    await Chapter.updateMany(
+      { novel_id: id, chapter_number: { $lte: freeNum } },
+      { $set: { is_locked: false, tier: 'free', price: 0 } }
+    );
+
+    // Chapters greater than freeNum are locked
+    await Chapter.updateMany(
+      { novel_id: id, chapter_number: { $gt: freeNum } },
+      { $set: { is_locked: true, tier: 'coin', price: 10 } }
+    );
+
+    res.json({ 
+      message: `Updated! Chapters 1 to ${freeNum} are Free. Chapters ${freeNum + 1}+ are Locked with 10 Coins.`,
+      freeUntil: freeNum
+    });
+  } catch (error) {
+    console.error("Bulk lock error:", error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Route 1.5: Create a Single New Chapter
 router.post('/chapter', async (req, res) => {
   try {

@@ -25,6 +25,10 @@ export default function ManageNovels() {
   const [tempTitle, setTempTitle] = useState('');
   const [isSavingTitle, setIsSavingTitle] = useState(false);
 
+  // Bulk Locking State
+  const [bulkFreeUntil, setBulkFreeUntil] = useState<number>(200);
+  const [isApplyingBulk, setIsApplyingBulk] = useState(false);
+
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
@@ -57,8 +61,28 @@ export default function ManageNovels() {
       const res = await axios.get(`${API_URL}/chapters/novel/${novelId}`);
       const sorted = res.data.sort((a: any, b: any) => a.chapter_number - b.chapter_number);
       setChapters(sorted);
+      const freeCount = sorted.filter((c: any) => c.tier === 'free').length;
+      setBulkFreeUntil(freeCount || 200);
     } catch (err) {
       toast.error('Failed to load chapters');
+    }
+  };
+
+  const handleBulkLock = async () => {
+    if (!selectedNovel) return;
+    if (bulkFreeUntil < 0) return toast.error('Chapter number must be 0 or higher');
+    setIsApplyingBulk(true);
+    try {
+      const res = await axios.put(`${API_URL}/admin/novel/${selectedNovel}/bulk-lock`, { freeUntil: bulkFreeUntil });
+      toast.success(res.data.message || 'Bulk locking rules applied!');
+      setChapters(chapters.map(c => ({
+        ...c,
+        tier: c.chapter_number <= bulkFreeUntil ? 'free' : 'coin'
+      })));
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to apply bulk locking');
+    } finally {
+      setIsApplyingBulk(false);
     }
   };
 
@@ -247,8 +271,57 @@ export default function ManageNovels() {
         </div>
       )}
 
-            {selectedNovel && (
-              <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
+      {selectedNovel && (
+        <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '12px', padding: '24px', marginBottom: '32px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#fafafa', marginBottom: '4px' }}>⚡ BULK CHAPTER LOCKING RULES</h3>
+              <p style={{ color: '#a1a1aa', fontSize: '13px', margin: 0 }}>
+                Directly configure how many chapters are free vs. locked for coins across this entire novel.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <span style={{ fontSize: '13px', color: '#34d399', fontWeight: '600', background: 'rgba(52, 211, 153, 0.1)', padding: '6px 12px', borderRadius: '6px' }}>
+                🔓 {chapters.filter(c => c.tier === 'free').length} Free
+              </span>
+              <span style={{ fontSize: '13px', color: '#f59e0b', fontWeight: '600', background: 'rgba(245, 158, 11, 0.1)', padding: '6px 12px', borderRadius: '6px' }}>
+                🪙 {chapters.filter(c => c.tier !== 'free').length} Locked
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', background: 'var(--bg-primary)', padding: '16px 20px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+            <span style={{ fontSize: '14px', color: '#e4e4e7' }}>
+              Keep chapters <b>1</b> to
+            </span>
+            <input 
+              type="number"
+              min="0"
+              max={chapters.length || 1000}
+              value={bulkFreeUntil}
+              onChange={(e) => setBulkFreeUntil(Math.max(0, parseInt(e.target.value) || 0))}
+              style={{ ...inputStyle, width: '90px', textAlign: 'center', fontWeight: '700', fontSize: '15px', color: '#34d399' }}
+            />
+            <span style={{ fontSize: '14px', color: '#e4e4e7' }}>
+              <b>FREE</b>, and lock all chapters from <b>{bulkFreeUntil + 1}</b> onwards with <b>10 Coins</b>.
+            </span>
+            <button 
+              onClick={handleBulkLock}
+              disabled={isApplyingBulk}
+              style={{ 
+                background: '#749275', color: '#fff', border: 'none', padding: '10px 20px', 
+                borderRadius: '6px', fontWeight: '600', fontSize: '13px', cursor: 'pointer',
+                marginLeft: 'auto', transition: 'opacity 0.2s', opacity: isApplyingBulk ? 0.6 : 1
+              }}
+            >
+              {isApplyingBulk ? 'Applying Rule...' : 'Apply Bulk Locking Rule'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {selectedNovel && (
+        <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid var(--border)', background: 'var(--bg-primary)' }}>
                   <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#71717a', margin: 0 }}>CHAPTER LIST</h3>
                   <button 

@@ -16,6 +16,7 @@ interface User {
   role: string;
   avatar: string;
   coins: number;
+  unlocked_chapters?: any[];
   library?: any[];
   reading_history?: any[];
   reading_streak?: any;

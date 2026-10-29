@@ -23,6 +23,7 @@ export default function NovelDetail() {
   const [savingLibrary, setSavingLibrary] = useState(false);
 
   useEffect(() => {
+    fetchUser();
     const fetchData = async () => {
       try {
         const novelRes = await fetch(`${API_URL}/novels/${id}`);
@@ -92,8 +93,21 @@ export default function NovelDetail() {
   const validActiveRange = activeRange >= numRanges && numRanges > 0 ? numRanges - 1 : activeRange;
   const displayedChapters = filteredChapters.slice(validActiveRange * chaptersPerPage, (validActiveRange + 1) * chaptersPerPage);
 
+  const isChapterUnlocked = (ch: any) => {
+    if (ch.tier === 'free') return true;
+    if (!user) return false;
+    if (['author', 'admin'].includes(user.role)) return true;
+    if (user.is_vip) return true;
+    const chIdStr = ch._id?.toString();
+    return (user.unlocked_chapters || []).some((unlocked: any) => {
+      const uId = typeof unlocked === 'string' ? unlocked : (unlocked?._id || unlocked?.toString());
+      return uId === chIdStr;
+    });
+  };
+
   const freeCount = chapters.filter(c => c.tier === 'free').length;
   const lockedCount = chapters.length - freeCount;
+  const userUnlockedPaidCount = chapters.filter(c => c.tier !== 'free' && isChapterUnlocked(c)).length;
 
   return (
     <div style={{ minHeight: '100vh', background: '#121212', color: '#fafafa', fontFamily: 'Inter, system-ui, sans-serif' }}>
@@ -144,6 +158,11 @@ export default function NovelDetail() {
           <div style={{ ...badgeStyle, color: '#34d399' }}>
             {freeCount} free chapters
           </div>
+          {userUnlockedPaidCount > 0 && (
+            <div style={{ ...badgeStyle, color: '#60a5fa', borderColor: '#3b82f6', background: 'rgba(59, 130, 246, 0.1)' }}>
+              ✓ {userUnlockedPaidCount} unlocked with coins
+            </div>
+          )}
         </div>
 
         {/* Short Meta Text */}
@@ -327,15 +346,40 @@ export default function NovelDetail() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <span style={{ fontSize: '13px', color: '#71717a' }}>May 27</span>
-                  <span style={{ 
-                    fontSize: '11px', 
-                    fontWeight: '700', 
-                    color: chapter.tier === 'free' ? '#34d399' : '#f59e0b',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}>
-                    {chapter.tier === 'free' ? 'FREE' : '10 COINS'}
-                  </span>
+                  {chapter.tier === 'free' ? (
+                    <span style={{ 
+                      fontSize: '11px', 
+                      fontWeight: '700', 
+                      color: '#34d399',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em'
+                    }}>
+                      FREE
+                    </span>
+                  ) : isChapterUnlocked(chapter) ? (
+                    <span style={{ 
+                      fontSize: '11px', 
+                      fontWeight: '700', 
+                      color: '#60a5fa',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      ✓ UNLOCKED
+                    </span>
+                  ) : (
+                    <span style={{ 
+                      fontSize: '11px', 
+                      fontWeight: '700', 
+                      color: '#f59e0b',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em'
+                    }}>
+                      10 COINS
+                    </span>
+                  )}
                 </div>
               </div>
             </Link>
