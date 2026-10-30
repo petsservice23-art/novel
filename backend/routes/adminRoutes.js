@@ -2,6 +2,7 @@ const express = require('express');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Chapter = require('../models/Chapter');
 const adminController = require('../controllers/adminController');
+const { uploadChapterContent } = require('../utils/r2Service');
 const router = express.Router();
 
 // Missing Controller Routes
@@ -26,7 +27,16 @@ router.put('/chapter/:id', async (req, res) => {
 
     if (title !== undefined) chapter.title = title;
     if (chapter_number !== undefined) chapter.chapter_number = chapter_number;
-    if (content !== undefined) chapter.content = content;
+    if (content !== undefined) {
+      try {
+        const r2_key = await uploadChapterContent(chapter.novel_id, chapter.chapter_number, content);
+        chapter.r2_key = r2_key;
+        chapter.content = null; // Stored in R2!
+      } catch (e) {
+        console.error('R2 upload failed during chapter edit:', e.message);
+        chapter.content = content;
+      }
+    }
     if (tier !== undefined) {
       chapter.tier = tier;
       chapter.is_locked = (tier === 'coin' || tier === 'paid');
@@ -82,10 +92,21 @@ router.post('/chapter', async (req, res) => {
   try {
     const { novel_id, title, content, chapter_number, tier } = req.body;
     const isLocked = tier === 'coin' || tier === 'paid';
+    
+    let r2_key = null;
+    if (content) {
+      try {
+        r2_key = await uploadChapterContent(novel_id, chapter_number, content);
+      } catch (e) {
+        console.error('R2 upload failed during chapter create:', e.message);
+      }
+    }
+
     const newChapter = new Chapter({
       novel_id,
       title,
-      content,
+      content: r2_key ? null : content,
+      r2_key,
       chapter_number,
       tier: tier || 'free',
       is_locked: isLocked,

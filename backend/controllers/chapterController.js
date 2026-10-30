@@ -1,6 +1,19 @@
 const Chapter = require('../models/Chapter');
 const Novel = require('../models/Novel');
 const User = require('../models/User');
+const { uploadChapterContent, getChapterContent } = require('../utils/r2Service');
+
+// Helper: Resolve chapter content from R2 if stored externally
+const resolveChapterPayload = async (chapter, tier) => {
+  const chapterObj = chapter.toObject ? chapter.toObject() : { ...chapter };
+  if (chapter.r2_key) {
+    const r2Content = await getChapterContent(chapter.r2_key);
+    if (r2Content) {
+      chapterObj.content = r2Content;
+    }
+  }
+  return { ...chapterObj, tier };
+};
 
 // Helper: Determine chapter tier based on novel length and chapter number
 const getChapterTier = (chapterNum, totalChapters) => {
@@ -121,16 +134,16 @@ const getChapterById = async (req, res) => {
     const isPaid = chapter.chapter_number >= 201 || chapter.tier === 'coin' || chapter.tier === 'paid' || chapter.is_locked;
     const tier = isPaid ? 'paid' : 'free';
 
-    if (tier === 'free') return res.json({ ...chapter.toObject(), tier });
+    if (tier === 'free') return res.json(await resolveChapterPayload(chapter, tier));
 
     const reqUser = req.user ? await User.findById(req.user._id) : null;
 
     if (reqUser && ['author', 'admin'].includes(reqUser.role)) {
-      return res.json({ ...chapter.toObject(), tier });
+      return res.json(await resolveChapterPayload(chapter, tier));
     }
 
     const hasAccess = await checkUserAccess(reqUser, chapter, tier);
-    if (hasAccess) return res.json({ ...chapter.toObject(), tier });
+    if (hasAccess) return res.json(await resolveChapterPayload(chapter, tier));
 
     // Return locked response with tier info for UI
     return res.status(403).json({
@@ -182,16 +195,16 @@ const getChapterByNumber = async (req, res) => {
     const isPaid = chapter.chapter_number >= 201 || chapter.tier === 'coin' || chapter.tier === 'paid' || chapter.is_locked;
     const tier = isPaid ? 'paid' : 'free';
 
-    if (tier === 'free') return res.json({ ...chapter.toObject(), tier });
+    if (tier === 'free') return res.json(await resolveChapterPayload(chapter, tier));
 
     const reqUser = req.user ? await User.findById(req.user._id) : null;
 
     if (reqUser && ['author', 'admin'].includes(reqUser.role)) {
-      return res.json({ ...chapter.toObject(), tier });
+      return res.json(await resolveChapterPayload(chapter, tier));
     }
 
     const hasAccess = await checkUserAccess(reqUser, chapter, tier);
-    if (hasAccess) return res.json({ ...chapter.toObject(), tier });
+    if (hasAccess) return res.json(await resolveChapterPayload(chapter, tier));
 
     return res.status(403).json({
       message: 'Chapter is locked',
@@ -283,11 +296,21 @@ const addChapter = async (req, res) => {
     return res.status(403).json({ message: 'Not authorized to add chapter to this novel' });
   }
 
+  let r2_key = null;
+  if (content) {
+    try {
+      r2_key = await uploadChapterContent(novel_id, chapter_number, content);
+    } catch (e) {
+      console.error('Failed to upload chapter to R2:', e.message);
+    }
+  }
+
   const chapter = await Chapter.create({
     novel_id,
     chapter_number,
     title,
-    content,
+    content: r2_key ? null : content, // Clear MongoDB storage when offloaded to R2
+    r2_key,
     is_locked,
     price
   });
