@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SupportChatWidget from "@/components/SupportChatWidget";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 
@@ -27,6 +28,7 @@ export default function RootLayout({
           <Navbar />
           {children}
           <Footer />
+          <SupportChatWidget />
           <Toaster position="bottom-right" toastOptions={{
             style: {
               background: 'var(--bg-secondary)',

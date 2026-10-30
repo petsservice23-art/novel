@@ -26,6 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Manage Novels', href: '/admin/novels', icon: '📚' },
     { name: 'Bulk Importer', href: '/admin/importer', icon: '⚡' },
     { name: 'Users', href: '/admin/users', icon: '👥' },
+    { name: 'Support Inbox', href: '/admin/support', icon: '💬' },
   ];
 
   return (

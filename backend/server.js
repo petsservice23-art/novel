@@ -32,6 +32,7 @@ app.use('/api/gamification', require('./routes/gamificationRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
 app.use('/api/retention', require('./routes/retentionRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/support', require('./routes/supportRoutes'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', message: 'API is running' }));
 
