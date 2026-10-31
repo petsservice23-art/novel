@@ -97,11 +97,9 @@ export default function NovelDetail() {
   const validActiveRange = activeRange >= numRanges && numRanges > 0 ? numRanges - 1 : activeRange;
   const displayedChapters = filteredChapters.slice(validActiveRange * chaptersPerPage, (validActiveRange + 1) * chaptersPerPage);
 
-  const isChapterUnlocked = (ch: any) => {
-    if (ch.tier === 'free') return true;
-    if (!user) return false;
-    if (['author', 'admin'].includes(user.role)) return true;
-    if (user.is_vip) return true;
+  // Checks if this paid chapter was specifically purchased/unlocked by the user with coins
+  const isPaidChapterUnlockedByUser = (ch: any) => {
+    if (!user || ch.tier === 'free') return false;
     const chIdStr = ch._id?.toString();
     return (user.unlocked_chapters || []).some((unlocked: any) => {
       const uId = typeof unlocked === 'string' ? unlocked : (unlocked?._id || unlocked?.toString());
@@ -111,7 +109,7 @@ export default function NovelDetail() {
 
   const freeCount = chapters.filter(c => c.tier === 'free').length;
   const lockedCount = chapters.length - freeCount;
-  const userUnlockedPaidCount = chapters.filter(c => c.tier !== 'free' && isChapterUnlocked(c)).length;
+  const userUnlockedPaidCount = chapters.filter(c => c.tier !== 'free' && isPaidChapterUnlockedByUser(c)).length;
 
   return (
     <div style={{ minHeight: '100vh', background: '#121212', color: '#fafafa', fontFamily: 'Inter, system-ui, sans-serif' }}>
@@ -385,7 +383,7 @@ export default function NovelDetail() {
                     }}>
                       FREE
                     </span>
-                  ) : isChapterUnlocked(chapter) ? (
+                  ) : isPaidChapterUnlockedByUser(chapter) ? (
                     <span style={{ 
                       fontSize: '11px', 
                       fontWeight: '700', 

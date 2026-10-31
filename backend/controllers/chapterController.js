@@ -55,9 +55,9 @@ const getChaptersByNovel = async (req, res) => {
 
     fullList.sort((a, b) => a.chapter_number - b.chapter_number);
 
-    // Annotate each chapter with its tier (free or paid)
+    // Annotate each chapter with its tier (free or paid) based on database tier and lock status
     const annotated = fullList.map(ch => {
-      const isPaid = ch.chapter_number >= 201 || ch.tier === 'coin' || ch.tier === 'paid' || ch.is_locked;
+      const isPaid = ch.tier === 'coin' || ch.tier === 'paid' || ch.is_locked === true;
       const tier = isPaid ? 'coin' : 'free';
       return {
         ...ch,
@@ -80,7 +80,6 @@ const getChaptersByNovel = async (req, res) => {
 // Helper: Check if user has access to a chapter
 const checkUserAccess = async (user, chapter, tier) => {
   if (!user) return false;
-  if (['author', 'admin'].includes(user.role)) return true;
   if (user.is_vip) return true;
 
   const chapterId = chapter._id.toString();
@@ -131,16 +130,12 @@ const getChapterById = async (req, res) => {
     if (!chapter) return res.status(404).json({ message: 'Chapter not found' });
 
     const novel = await Novel.findById(chapter.novel_id);
-    const isPaid = chapter.chapter_number >= 201 || chapter.tier === 'coin' || chapter.tier === 'paid' || chapter.is_locked;
+    const isPaid = chapter.tier === 'coin' || chapter.tier === 'paid' || chapter.is_locked === true;
     const tier = isPaid ? 'paid' : 'free';
 
     if (tier === 'free') return res.json(await resolveChapterPayload(chapter, tier));
 
     const reqUser = req.user ? await User.findById(req.user._id) : null;
-
-    if (reqUser && ['author', 'admin'].includes(reqUser.role)) {
-      return res.json(await resolveChapterPayload(chapter, tier));
-    }
 
     const hasAccess = await checkUserAccess(reqUser, chapter, tier);
     if (hasAccess) return res.json(await resolveChapterPayload(chapter, tier));
@@ -192,16 +187,12 @@ const getChapterByNumber = async (req, res) => {
       await chapter.save();
     }
 
-    const isPaid = chapter.chapter_number >= 201 || chapter.tier === 'coin' || chapter.tier === 'paid' || chapter.is_locked;
+    const isPaid = chapter.tier === 'coin' || chapter.tier === 'paid' || chapter.is_locked === true;
     const tier = isPaid ? 'paid' : 'free';
 
     if (tier === 'free') return res.json(await resolveChapterPayload(chapter, tier));
 
     const reqUser = req.user ? await User.findById(req.user._id) : null;
-
-    if (reqUser && ['author', 'admin'].includes(reqUser.role)) {
-      return res.json(await resolveChapterPayload(chapter, tier));
-    }
 
     const hasAccess = await checkUserAccess(reqUser, chapter, tier);
     if (hasAccess) return res.json(await resolveChapterPayload(chapter, tier));

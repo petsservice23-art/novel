@@ -45,7 +45,7 @@ export default function ReadingPage() {
         setNovel(novelData);
 
         try {
-          const chapterRes = await axios.get(`${API_URL}/chapters/novel/${id}/chapter/${chapterNum}`);
+          const chapterRes = await axios.get(`${API_URL}/chapters/novel/${id}/chapter/${chapterNum}`, { withCredentials: true });
           const chData = chapterRes.data;
           setChapter(chData);
           setIsLocked(false);
@@ -147,18 +147,22 @@ export default function ReadingPage() {
     setUnlocking(true);
     try {
       const targetId = chapterId || (await fetchChapterId());
-      await axios.post(`${API_URL}/chapters/${targetId}/unlock`);
+      await axios.post(`${API_URL}/chapters/${targetId}/unlock`, {}, { withCredentials: true });
       toast.success('Unlocked with © Coins!');
       await fetchUser(); 
-      const chapterRes = await axios.get(`${API_URL}/chapters/novel/${id}/chapter/${chapterNum}`);
+      const chapterRes = await axios.get(`${API_URL}/chapters/novel/${id}/chapter/${chapterNum}`, { withCredentials: true });
       setChapter(chapterRes.data);
       setIsLocked(false);
       calculateStats(chapterRes.data.content);
-    } catch (err) { toast.error('Unlock failed'); } finally { setUnlocking(false); }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Unlock failed');
+    } finally {
+      setUnlocking(false);
+    }
   };
 
   const fetchChapterId = async () => {
-    const listRes = await axios.get(`${API_URL}/chapters/novel/${id}`);
+    const listRes = await axios.get(`${API_URL}/chapters/novel/${id}`, { withCredentials: true });
     const chapterMetadata = listRes.data.find((c: any) => c.chapter_number === Number(chapterNum));
     return chapterMetadata?._id;
   };
