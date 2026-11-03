@@ -11,11 +11,14 @@ const razorpay = new Razorpay({
 
 // Exact Package Pricing Mapping
 const packages = {
-  'Standard': { coins: 499, bonus: 51, priceUSD: 5.99, priceINR: 499 },
-  'Pro': { coins: 999, bonus: 201, priceUSD: 11.99, priceINR: 999 },
-  'Elite': { coins: 1999, bonus: 601, priceUSD: 23.99, priceINR: 1999 },
-  'Master': { coins: 3499, bonus: 1301, priceUSD: 41.99, priceINR: 3499 },
-  'Legend': { coins: 4999, bonus: 2501, priceUSD: 59.99, priceINR: 4999 }
+  // Current Active Packages (matching frontend/src/app/coins/page.tsx)
+  'Starter': { coins: 1000, bonus: 50, priceUSD: 9.99, priceINR: 999 },
+  'Pro': { coins: 2400, bonus: 360, priceUSD: 23.99, priceINR: 1399 },
+  'Elite': { coins: 4200, bonus: 1050, priceUSD: 41.99, priceINR: 4199 },
+  'Master': { coins: 6000, bonus: 2100, priceUSD: 59.99, priceINR: 5999 },
+  'Legend': { coins: 10000, bonus: 4500, priceUSD: 99.99, priceINR: 9999 },
+  // Backward compatibility for legacy package requests
+  'Standard': { coins: 499, bonus: 51, priceUSD: 5.99, priceINR: 499 }
 };
 
 // PayPal Helpers

@@ -159,9 +159,9 @@ export default function SupportChatWidget() {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            background: '#18181b',
-            color: '#fafafa',
-            border: '1px solid #27272a',
+            background: '#1d2621',
+            color: '#e4e4e7',
+            border: '1px solid rgba(34, 197, 94, 0.25)',
             borderRadius: '9999px',
             padding: '10px 18px',
             fontSize: '14px',
@@ -173,11 +173,13 @@ export default function SupportChatWidget() {
           }}
           onMouseEnter={e => {
             e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.borderColor = '#3f3f46';
+            e.currentTarget.style.background = '#233229';
+            e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.45)';
           }}
           onMouseLeave={e => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.borderColor = '#27272a';
+            e.currentTarget.style.background = '#1d2621';
+            e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.25)';
           }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -192,16 +194,16 @@ export default function SupportChatWidget() {
         <div
           style={{
             position: 'fixed',
-            bottom: isFullScreen ? '5vh' : '24px',
-            right: isFullScreen ? '5vw' : '24px',
-            width: isFullScreen ? '90vw' : '400px',
-            maxWidth: isFullScreen ? '820px' : 'calc(100vw - 32px)',
-            height: isFullScreen ? '85vh' : '540px',
+            bottom: isFullScreen ? '4vh' : '24px',
+            right: isFullScreen ? '4vw' : '24px',
+            width: isFullScreen ? '92vw' : '420px',
+            maxWidth: isFullScreen ? '900px' : 'calc(100vw - 32px)',
+            height: isFullScreen ? '88vh' : '560px',
             maxHeight: 'calc(100vh - 48px)',
-            background: '#121212',
-            border: '1px solid #27272a',
+            background: '#121316',
+            border: '1px solid #23252c',
             borderRadius: '16px',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
+            boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.9)',
             display: 'flex',
             flexDirection: 'column',
             zIndex: 1000,
@@ -212,31 +214,40 @@ export default function SupportChatWidget() {
         >
           {/* Header */}
           <div style={{
-            padding: '16px 20px',
-            borderBottom: '1px solid #27272a',
+            padding: '14px 18px',
+            borderBottom: '1px solid #23252c',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            background: '#18181b'
+            background: '#16171c'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <div style={{
                 width: '36px',
                 height: '36px',
                 borderRadius: '8px',
-                background: 'rgba(34, 197, 94, 0.1)',
+                background: 'rgba(34, 197, 94, 0.08)',
+                border: '1px solid rgba(34, 197, 94, 0.25)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#22c55e'
               }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '15px', fontWeight: '700', color: '#fafafa' }}>Novelverse Support</span>
+                  <span style={{
+                    width: '7px',
+                    height: '7px',
+                    borderRadius: '50%',
+                    background: '#22c55e',
+                    display: 'inline-block',
+                    boxShadow: '0 0 8px rgba(34, 197, 94, 0.8)'
+                  }} />
                 </div>
                 <div style={{ fontSize: '12px', color: '#a1a1aa' }}>Direct chat with our team</div>
               </div>
@@ -247,21 +258,29 @@ export default function SupportChatWidget() {
               <button
                 onClick={() => setIsFullScreen(!isFullScreen)}
                 style={{
-                  background: 'transparent',
+                  background: 'rgba(255, 255, 255, 0.03)',
                   border: '1px solid #27272a',
-                  color: '#a1a1aa',
+                  color: '#d4d4d8',
                   borderRadius: '6px',
-                  padding: '5px 10px',
+                  padding: '5px 11px',
                   fontSize: '12px',
                   fontWeight: '500',
                   cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px',
-                  transition: 'color 0.15s, border-color 0.15s'
+                  gap: '5px',
+                  transition: 'color 0.15s, border-color 0.15s, background 0.15s'
                 }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#3f3f46'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = '#a1a1aa'; e.currentTarget.style.borderColor = '#27272a'; }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = '#fff';
+                  e.currentTarget.style.borderColor = '#3f3f46';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color = '#d4d4d8';
+                  e.currentTarget.style.borderColor = '#27272a';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                }}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
@@ -279,7 +298,10 @@ export default function SupportChatWidget() {
                   fontSize: '18px',
                   cursor: 'pointer',
                   padding: '4px 8px',
-                  borderRadius: '6px'
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
                 onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
                 onMouseLeave={e => (e.currentTarget.style.color = '#a1a1aa')}
@@ -461,7 +483,8 @@ export default function SupportChatWidget() {
                   cursor: 'pointer',
                   padding: '4px',
                   display: 'flex',
-                  alignItems: 'center'
+                  alignItems: 'center',
+                  transition: 'color 0.15s'
                 }}
                 onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
                 onMouseLeave={e => (e.currentTarget.style.color = '#a1a1aa')}
@@ -473,16 +496,39 @@ export default function SupportChatWidget() {
                 </svg>
               </button>
 
+              {/* Attachment / Paperclip Button */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                title="Attach file"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#a1a1aa',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'color 0.15s'
+                }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#a1a1aa')}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                </svg>
+              </button>
+
               {/* Send Button */}
               <button
                 type="button"
                 onClick={handleSend}
                 disabled={(!message.trim() && !attachment) || sending}
                 style={{
-                  background: message.trim() || attachment ? '#22c55e' : 'transparent',
-                  color: message.trim() || attachment ? '#000' : '#52525b',
+                  background: message.trim() || attachment ? '#22c55e' : 'rgba(34, 197, 94, 0.15)',
+                  color: message.trim() || attachment ? '#09090b' : '#3f3f46',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: '50%',
                   width: '32px',
                   height: '32px',
                   display: 'flex',
@@ -492,7 +538,7 @@ export default function SupportChatWidget() {
                   transition: 'background 0.15s, transform 0.1s'
                 }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <line x1="22" y1="2" x2="11" y2="13"/>
                   <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                 </svg>
