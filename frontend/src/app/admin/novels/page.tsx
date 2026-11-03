@@ -10,7 +10,7 @@ export default function ManageNovels() {
   const [selectedNovel, setSelectedNovel] = useState<string>('');
 
   // Novel Metadata State
-  const [novelMeta, setNovelMeta] = useState<any>({ author: '', alternative_titles: '', published_year: '', publishing_status: 'ongoing' });
+  const [novelMeta, setNovelMeta] = useState<any>({ author: '', alternative_titles: '', published_year: '', publishing_status: 'ongoing', description: '' });
   const [isSavingMeta, setIsSavingMeta] = useState(false);
 
   // Editor Modal State
@@ -53,7 +53,8 @@ export default function ManageNovels() {
         author: n.author || '',
         alternative_titles: n.alternative_titles || '',
         published_year: n.published_year || '',
-        publishing_status: n.publishing_status || 'ongoing'
+        publishing_status: n.publishing_status || 'ongoing',
+        description: n.description || ''
       });
     }
     
@@ -267,6 +268,22 @@ export default function ManageNovels() {
                 <option value="completed">Completed</option>
               </select>
             </div>
+          </div>
+
+          <div style={{ marginTop: '20px' }}>
+            <label style={{ display: 'block', fontSize: '12px', color: '#a1a1aa', marginBottom: '8px' }}>Synopsis / Description</label>
+            <textarea
+              rows={5}
+              value={novelMeta.description || ''}
+              onChange={e => setNovelMeta({...novelMeta, description: e.target.value})}
+              placeholder="Enter synopsis or novel description..."
+              style={{
+                ...inputStyle,
+                width: '100%',
+                lineHeight: '1.6',
+                resize: 'vertical'
+              }}
+            />
           </div>
         </div>
       )}
