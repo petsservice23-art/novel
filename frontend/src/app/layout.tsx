@@ -41,10 +41,10 @@ export const metadata: Metadata = {
   publisher: "SegyeNovels",
   icons: {
     icon: [
-      { url: "/images/logo-symbol.png", sizes: "any" },
-      { url: "/favicon.png", sizes: "any" }
+      { url: "/favicon.png", sizes: "any" },
+      { url: "/favicon.ico", sizes: "any" }
     ],
-    apple: "/images/logo-symbol.png",
+    apple: "/favicon.png",
   },
   openGraph: {
     title: "SegyeNovels — Read Korean & Asian Web Novels Online",
