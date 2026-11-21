@@ -22,6 +22,8 @@ export default function NovelDetail() {
   const [jumpToChapter, setJumpToChapter] = useState('');
   const [sortAsc, setSortAsc] = useState(true);
   const [savingLibrary, setSavingLibrary] = useState(false);
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
+  const [isUnlockingAll, setIsUnlockingAll] = useState(false);
 
   useEffect(() => {
     fetchUser();
@@ -38,7 +40,7 @@ export default function NovelDetail() {
 
         setNovel(novelData);
         if (novelData?.title) {
-          document.title = `${novelData.title} - Read Online Free All Chapters | Novelverse`;
+          document.title = `${novelData.title} - Read Online All Chapters | SegyeNovels`;
         }
 
         const chaptersRes = await fetch(`${API_URL}/chapters/novel/${id}`);
@@ -58,8 +60,18 @@ export default function NovelDetail() {
     if (id) fetchData();
   }, [id]);
 
-  if (loading) return <div style={{ minHeight: '100vh', background: '#0f0f0f', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a1a1aa' }}>Loading...</div>;
-  if (!novel) return <div style={{ minHeight: '100vh', background: '#0f0f0f', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a1a1aa' }}>Novel Not Found</div>;
+  if (loading) return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+      Loading novel details...
+    </div>
+  );
+
+  if (!novel) return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', gap: '16px' }}>
+      <h2>Novel Not Found</h2>
+      <Link href="/browse" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: '600' }}>← Return to Library</Link>
+    </div>
+  );
 
   const sortedChapters = [...chapters].sort((a, b) => 
     sortAsc ? a.chapter_number - b.chapter_number : b.chapter_number - a.chapter_number
@@ -97,9 +109,9 @@ export default function NovelDetail() {
   const validActiveRange = activeRange >= numRanges && numRanges > 0 ? numRanges - 1 : activeRange;
   const displayedChapters = filteredChapters.slice(validActiveRange * chaptersPerPage, (validActiveRange + 1) * chaptersPerPage);
 
-  // Checks if this paid chapter was specifically purchased/unlocked by the user with coins
   const isPaidChapterUnlockedByUser = (ch: any) => {
     if (!user || ch.tier === 'free') return false;
+    if (user.role === 'admin' || user.role === 'superadmin' || user.is_vip) return true;
     const chIdStr = ch._id?.toString();
     return (user.unlocked_chapters || []).some((unlocked: any) => {
       const uId = typeof unlocked === 'string' ? unlocked : (unlocked?._id || unlocked?.toString());
@@ -110,11 +122,52 @@ export default function NovelDetail() {
   const freeCount = chapters.filter(c => c.tier === 'free').length;
   const lockedCount = chapters.length - freeCount;
   const userUnlockedPaidCount = chapters.filter(c => c.tier !== 'free' && isPaidChapterUnlockedByUser(c)).length;
+  const lockedPaidChapters = chapters.filter(c => c.tier !== 'free');
+  const remainingLockedCount = lockedPaidChapters.filter(c => !isPaidChapterUnlockedByUser(c)).length;
+  const isCompleted = (novel.publishing_status || 'completed').toLowerCase() === 'completed';
+
+  const handleUnlockAll = async () => {
+    if (!user) {
+      toast.error('Please sign in to unlock chapters');
+      router.push('/login');
+      return;
+    }
+    if (remainingLockedCount === 0) {
+      toast.success('All chapters for this novel are already unlocked!');
+      return;
+    }
+    const neededCoins = remainingLockedCount * 10;
+    if ((user.coins || 0) < neededCoins) {
+      toast.error(`You need ${neededCoins} coins to unlock all remaining chapters. You have ${user.coins || 0} coins.`);
+      setTimeout(() => router.push('/coins'), 1500);
+      return;
+    }
+
+    if (!window.confirm(`Unlock all ${remainingLockedCount} remaining chapters for ${neededCoins} coins?`)) {
+      return;
+    }
+
+    setIsUnlockingAll(true);
+    try {
+      const res = await axios.post(`${API_URL}/chapters/novel/${id}/unlock-all`, {}, { withCredentials: true });
+      toast.success(res.data.message || 'Unlocked all chapters!');
+      await fetchUser();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to unlock chapters');
+    } finally {
+      setIsUnlockingAll(false);
+    }
+  };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#121212', color: '#fafafa', fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'var(--bg-primary)', 
+      color: 'var(--text-primary)', 
+      transition: 'background-color 0.2s, color 0.2s' 
+    }}>
       
-      {/* Schema.org Book JSON-LD for Search Engine Optimization */}
+      {/* Schema.org Book JSON-LD for SEO */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -124,34 +177,47 @@ export default function NovelDetail() {
             "name": novel.title,
             "author": {
               "@type": "Person",
-              "name": novel.author || "Novelverse"
+              "name": novel.author || "SegyeNovels"
             },
             "description": novel.description,
             "genre": novel.genres,
             "datePublished": novel.published_year || "2024",
             "numberOfPages": novel.total_chapters,
+            "publisher": {
+              "@type": "Organization",
+              "name": "SegyeNovels"
+            },
             "aggregateRating": {
               "@type": "AggregateRating",
-              "ratingValue": novel.rating || 4.5,
-              "ratingCount": novel.ratings_count || 100
+              "ratingValue": novel.rating || 4.7,
+              "ratingCount": novel.ratings_count || 150
             }
           })
         }}
       />
       
       {/* Breadcrumbs */}
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 20px 20px', fontSize: '13px', color: '#71717a' }}>
-        <Link href="/" style={{ color: '#71717a', textDecoration: 'none' }}>Home</Link>
+      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '28px 20px 16px', fontSize: '13px', color: 'var(--text-muted)' }}>
+        <Link href="/" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Home</Link>
         <span style={{ margin: '0 8px' }}>&gt;</span>
-        <Link href="/browse" style={{ color: '#71717a', textDecoration: 'none' }}>Novels</Link>
+        <Link href="/browse" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Novels</Link>
         <span style={{ margin: '0 8px' }}>&gt;</span>
-        <span style={{ color: '#fafafa' }}>{novel.title}</span>
+        <span style={{ color: 'var(--text-primary)', fontWeight: '500' }}>{novel.title}</span>
       </div>
 
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 20px 100px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         
         {/* Cover Image */}
-        <div style={{ width: '260px', height: '380px', borderRadius: '16px', overflow: 'hidden', marginBottom: '32px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+        <div style={{ 
+          width: '240px', 
+          aspectRatio: '2/3', 
+          borderRadius: '16px', 
+          overflow: 'hidden', 
+          marginBottom: '28px', 
+          boxShadow: 'var(--shadow-md)',
+          border: '1px solid var(--border)',
+          background: 'var(--bg-card)'
+        }}>
           <img 
             src={novel.cover_image} 
             alt={novel.title} 
@@ -161,73 +227,110 @@ export default function NovelDetail() {
         </div>
 
         {/* Title */}
-        <h1 style={{ fontSize: '42px', fontWeight: '700', marginBottom: '8px', textAlign: 'center', letterSpacing: '-0.02em', fontFamily: 'Merriweather, serif' }}>{novel.title}</h1>
+        <h1 style={{ 
+          fontSize: 'clamp(28px, 4vw, 38px)', 
+          fontWeight: '800', 
+          marginBottom: '8px', 
+          textAlign: 'center', 
+          letterSpacing: '-0.02em', 
+          color: 'var(--text-primary)' 
+        }}>
+          {novel.title}
+        </h1>
         
         {/* Alternate / Original Title Area */}
-        <div style={{ color: '#a1a1aa', textAlign: 'center', fontSize: '14px', marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <span style={{ fontStyle: 'italic', color: '#fafafa', fontSize: '15px' }}>{novel.title.split(' ')[0].toUpperCase()}</span>
-          {novel.alternative_titles && <span>Also known as: {novel.alternative_titles}</span>}
+        <div style={{ color: 'var(--text-secondary)', textAlign: 'center', fontSize: '14px', marginBottom: '28px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {novel.alternative_titles && <span>Also known as: <i>{novel.alternative_titles}</i></span>}
         </div>
 
         {/* Badges */}
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '28px' }}>
           <div style={badgeStyle}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            {novel.published_year || '2024'}
+            {novel.published_year || '2021'}
           </div>
-          <div style={{ ...badgeStyle, color: novel.publishing_status === 'completed' ? '#3b82f6' : '#34d399', background: 'rgba(255,255,255,0.05)' }}>
-            {novel.publishing_status === 'completed' ? 'Completed' : 'Ongoing'}
+          <div style={{ 
+            ...badgeStyle, 
+            color: isCompleted ? 'var(--green)' : '#3b82f6', 
+            background: isCompleted ? 'rgba(76, 175, 125, 0.12)' : 'rgba(59, 130, 246, 0.12)',
+            border: isCompleted ? '1px solid rgba(76, 175, 125, 0.3)' : '1px solid rgba(59, 130, 246, 0.3)',
+            fontWeight: '700'
+          }}>
+            {isCompleted ? 'Completed' : 'Ongoing'}
           </div>
           <div style={badgeStyle}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
             {novel.total_chapters} chapters
           </div>
-          <div style={{ ...badgeStyle, color: '#34d399' }}>
+          <div style={{ ...badgeStyle, color: 'var(--green)' }}>
             {freeCount} free chapters
           </div>
           {userUnlockedPaidCount > 0 && (
-            <div style={{ ...badgeStyle, color: '#60a5fa', borderColor: '#3b82f6', background: 'rgba(59, 130, 246, 0.1)' }}>
+            <div style={{ ...badgeStyle, color: 'var(--accent)', borderColor: 'var(--accent)', background: 'var(--accent-soft)' }}>
               ✓ {userUnlockedPaidCount} unlocked with ©
             </div>
           )}
         </div>
 
         {/* Short Meta Text */}
-        <p style={{ color: '#a1a1aa', textAlign: 'center', fontSize: '14px', lineHeight: '1.6', maxWidth: '700px', marginBottom: '32px' }}>
-          <i>{novel.title}</i> is written by <b>{novel.author || 'Novelverse'}</b> and was first published in {novel.published_year || '2024'}. It is a {novel.genres?.join(', ') || 'Novel'} novel with {novel.total_chapters} chapters available on Novelverse. The story is {novel.publishing_status === 'completed' ? 'complete.' : 'ongoing. New chapters are updated regularly.'}
+        <p style={{ color: 'var(--text-secondary)', textAlign: 'center', fontSize: '14px', lineHeight: '1.65', maxWidth: '680px', marginBottom: '28px' }}>
+          <i>{novel.title}</i> is written by <b>{novel.author || 'Korean Author'}</b> and was first published in {novel.published_year || '2021'}. It is a {novel.genres?.join(', ') || 'Web'} novel with {novel.total_chapters} chapters available on SegyeNovels.
         </p>
 
         {/* Genres */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '40px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '36px' }}>
           {novel.genres?.map((g: string) => (
             <span key={g} style={tagStyle}>{g}</span>
           ))}
         </div>
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '400px', marginBottom: '60px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '380px', marginBottom: '48px' }}>
           <Link href={`/novel/${id}/chapter/1`} style={{ textDecoration: 'none' }}>
             <button style={{ 
-              width: '100%', padding: '16px', borderRadius: '12px', border: 'none', background: '#749275', 
-              color: '#fff', fontSize: '15px', fontWeight: '600', cursor: 'pointer', transition: 'opacity 0.2s' 
+              width: '100%', 
+              padding: '14px', 
+              borderRadius: '100px', 
+              border: 'none', 
+              background: 'var(--accent-gradient)', 
+              color: '#fff', 
+              fontSize: '15px', 
+              fontWeight: '700', 
+              cursor: 'pointer', 
+              transition: 'opacity 0.2s, transform 0.15s',
+              boxShadow: 'var(--shadow-sm)'
             }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+            onMouseEnter={e => {
+              e.currentTarget.style.opacity = '0.92';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.opacity = '1';
+              e.currentTarget.style.transform = 'none';
+            }}
             >
-              Read Now
+              Start Reading (Chapter 1)
             </button>
           </Link>
+
           <button 
             onClick={handleToggleLibrary}
             disabled={savingLibrary}
             style={{ 
-              width: '100%', padding: '16px', borderRadius: '12px', 
-              border: isInLibrary ? '1px solid #749275' : '1px solid #27272a', 
-              background: isInLibrary ? 'rgba(116, 146, 117, 0.15)' : 'transparent', 
-              color: isInLibrary ? '#749275' : '#fafafa', 
-              fontSize: '15px', fontWeight: '600', cursor: savingLibrary ? 'wait' : 'pointer', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-              transition: 'all 0.2s'
+              width: '100%', 
+              padding: '13px', 
+              borderRadius: '100px', 
+              border: '1px solid var(--border)', 
+              background: isInLibrary ? 'var(--accent-soft)' : 'var(--bg-card)', 
+              color: isInLibrary ? 'var(--accent)' : 'var(--text-primary)', 
+              fontSize: '14px', 
+              fontWeight: '600', 
+              cursor: savingLibrary ? 'wait' : 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '8px',
+              transition: 'all 0.15s'
             }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill={isInLibrary ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
@@ -235,36 +338,130 @@ export default function NovelDetail() {
             </svg>
             {savingLibrary ? 'Updating...' : isInLibrary ? 'In Library ✓' : 'Add to Library'}
           </button>
+
+          {/* Unlock All Chapters Button */}
+          {remainingLockedCount > 0 ? (
+            <button 
+              onClick={handleUnlockAll}
+              disabled={isUnlockingAll}
+              style={{ 
+                width: '100%', 
+                padding: '13px', 
+                borderRadius: '100px', 
+                border: '1px solid rgba(234, 179, 8, 0.45)', 
+                background: 'rgba(234, 179, 8, 0.12)', 
+                color: '#eab308', 
+                fontSize: '14px', 
+                fontWeight: '700', 
+                cursor: isUnlockingAll ? 'wait' : 'pointer', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                gap: '8px',
+                transition: 'all 0.15s'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(234, 179, 8, 0.22)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(234, 179, 8, 0.12)';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+              </svg>
+              {isUnlockingAll 
+                ? 'Unlocking Chapters...' 
+                : `Unlock All (${remainingLockedCount} chapters · ${remainingLockedCount * 10} ©)`}
+            </button>
+          ) : lockedPaidChapters.length > 0 ? (
+            <div style={{
+              width: '100%',
+              padding: '12px',
+              borderRadius: '100px',
+              border: '1px solid rgba(76, 175, 125, 0.35)',
+              background: 'rgba(76, 175, 125, 0.12)',
+              color: 'var(--green)',
+              fontSize: '13px',
+              fontWeight: '700',
+              textAlign: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}>
+              ✓ All Chapters Unlocked
+            </div>
+          ) : null}
+
           <button 
             onClick={() => document.getElementById('chapters-section')?.scrollIntoView({ behavior: 'smooth' })}
             style={{ 
-              width: '100%', padding: '16px', borderRadius: '12px', border: '1px solid #27272a', background: 'transparent', 
-              color: '#fafafa', fontSize: '15px', fontWeight: '500', cursor: 'pointer' 
+              width: '100%', 
+              padding: '13px', 
+              borderRadius: '100px', 
+              border: '1px solid var(--border)', 
+              background: 'transparent', 
+              color: 'var(--text-secondary)', 
+              fontSize: '14px', 
+              fontWeight: '600', 
+              cursor: 'pointer',
+              transition: 'all 0.15s'
             }}
+            onMouseEnter={e => e.currentTarget.style.color = 'var(--text-primary)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}
           >
-            All Chapters
+            All Chapters ({chapters.length})
           </button>
-          <div style={{ textAlign: 'center', fontSize: '12px', color: '#71717a', marginTop: '4px' }}>
-            {user ? (isInLibrary ? 'Saved to your personal collection' : 'Click to save to your collection') : 'Sign in to save this novel'}
-          </div>
         </div>
 
         {/* Divider */}
-        <div style={{ width: '100%', height: '1px', background: '#27272a', marginBottom: '40px' }}></div>
+        <div style={{ width: '100%', height: '1px', background: 'var(--border)', marginBottom: '36px' }}></div>
 
-        {/* Synopsis Section */}
-        <div style={{ width: '100%', textAlign: 'left', marginBottom: '60px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '24px' }}>Synopsis</h2>
-          <p style={{ color: '#a1a1aa', lineHeight: '1.8', fontSize: '15px', whiteSpace: 'pre-wrap' }}>
-            {novel.description}
-          </p>
+        {/* Synopsis Section with Read more / Show less */}
+        <div style={{ width: '100%', textAlign: 'left', marginBottom: '36px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '14px', color: 'var(--text-primary)' }}>Synopsis</h2>
+          <div style={{ position: 'relative' }}>
+            <p style={{ 
+              color: 'var(--text-secondary)', 
+              lineHeight: '1.8', 
+              fontSize: '15px', 
+              whiteSpace: 'pre-wrap',
+              margin: 0
+            }}>
+              {isDescExpanded || (novel.description || '').length <= 320 
+                ? novel.description 
+                : `${(novel.description || '').slice(0, 320)}...`}
+            </p>
+            {(novel.description || '').length > 320 && (
+              <button
+                onClick={() => setIsDescExpanded(!isDescExpanded)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: 'var(--accent)',
+                  fontWeight: '700',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  padding: '8px 0',
+                  marginTop: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                {isDescExpanded ? 'Show less ↑' : 'Read more ↓'}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Tags Section */}
         {novel.tags && novel.tags.length > 0 && (
-          <div style={{ width: '100%', textAlign: 'left', marginBottom: '60px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '24px' }}>Tags</h2>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ width: '100%', textAlign: 'left', marginBottom: '48px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>Tags</h2>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {novel.tags.map((t: string) => (
                 <span key={t} style={tagStyle}>{t}</span>
               ))}
@@ -273,33 +470,23 @@ export default function NovelDetail() {
         )}
 
         {/* Chapters Header Section */}
-        <div id="chapters-section" style={{ width: '100%', borderBottom: '1px solid #27272a', paddingBottom: '16px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-          <h2 style={{ fontSize: '18px', fontWeight: '600' }}>Chapters <span style={{ color: '#71717a', fontSize: '14px', fontWeight: '400' }}>({chapters.length})</span></h2>
-        </div>
-
-        {/* Chapter Controls Row */}
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600' }}>Chapters <span style={{ color: '#71717a', fontSize: '14px', fontWeight: '400' }}>({chapters.length})</span></h3>
-            <span style={{ fontSize: '13px', fontWeight: '600', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              {(lockedCount * 10).toLocaleString()} <span style={{ fontWeight: '800' }}>©</span>
-            </span>
+        <div id="chapters-section" style={{ width: '100%', borderBottom: '1px solid var(--border)', paddingBottom: '16px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--accent)' }}>
+              <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+            <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)' }}>
+              Chapters <span style={{ color: 'var(--text-muted)', fontSize: '14px', fontWeight: '500' }}>({chapters.length})</span>
+            </h2>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button 
-              onClick={() => toast('To unlock all chapters at once, purchase a coin bundle or VIP Pass in the Coins store!', { icon: '©' })}
-              style={{ background: 'transparent', border: '1px solid #f97316', color: '#f97316', padding: '6px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}
-            >
-              Unlock All
-            </button>
-            <span style={{ fontSize: '13px', color: '#71717a' }}>Showing {Math.min(filteredChapters.length, chaptersPerPage)} of {filteredChapters.length}</span>
-          </div>
+          <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--gold)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            {(lockedCount * 10).toLocaleString()} <span style={{ fontWeight: '800' }}>©</span>
+          </span>
         </div>
 
         {/* Chapter Search / Filter Row */}
-        <div style={{ width: '100%', display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
+        <div style={{ width: '100%', display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button 
               onClick={() => { setActiveRange(0); document.getElementById('chapters-section')?.scrollIntoView({ behavior: 'smooth' }); }}
@@ -314,70 +501,85 @@ export default function NovelDetail() {
               Last
             </button>
           </div>
-          <div style={{ flex: 1, position: 'relative', minWidth: '200px' }}>
-            <svg style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#71717a' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          
+          <div style={{ flex: 1, position: 'relative', minWidth: '180px' }}>
+            <svg style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <input 
               type="text" 
-              placeholder="Search chapters by title or number..." 
+              placeholder="Search chapter title or #..." 
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setActiveRange(0); }}
-              style={{ width: '100%', padding: '10px 16px 10px 40px', background: 'transparent', border: '1px solid #27272a', borderRadius: '20px', color: '#fafafa', fontSize: '14px', outline: 'none' }}
+              style={{ width: '100%', padding: '9px 16px 9px 38px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '100px', color: 'var(--text-primary)', fontSize: '13px', outline: 'none' }}
             />
           </div>
+
           <div style={{ display: 'flex', gap: '8px' }}>
             <button 
               onClick={() => setSortAsc(!sortAsc)}
-              title={sortAsc ? "Sort: Ascending (Click for Descending)" : "Sort: Descending (Click for Ascending)"}
+              title={sortAsc ? "Sort: Ascending" : "Sort: Descending"}
               style={{ 
                 ...circleBtnStyle, 
                 padding: '0 12px',
-                background: !sortAsc ? 'rgba(255,255,255,0.1)' : 'transparent',
-                borderColor: !sortAsc ? '#749275' : '#27272a'
+                background: !sortAsc ? 'var(--accent-soft)' : 'var(--bg-card)',
+                borderColor: !sortAsc ? 'var(--accent)' : 'var(--border)'
               }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
             </button>
+            
             <input 
               type="number" 
-              placeholder="Go to #" 
+              placeholder="Go #" 
               value={jumpToChapter}
               onChange={(e) => setJumpToChapter(e.target.value)}
-              style={{ width: '80px', padding: '10px 16px', background: 'transparent', border: '1px solid #27272a', borderRadius: '20px', color: '#fafafa', fontSize: '14px', outline: 'none' }}
+              style={{ width: '70px', padding: '9px 12px', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '100px', color: 'var(--text-primary)', fontSize: '13px', outline: 'none', textAlign: 'center' }}
             />
             <button 
               onClick={() => { if(jumpToChapter) window.location.href = `/novel/${id}/chapter/${jumpToChapter}`; }}
               style={circleBtnStyle}
-            >Go</button>
+            >
+              Go
+            </button>
           </div>
         </div>
 
         {/* Chapters List */}
-        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', border: '1px solid #27272a', borderRadius: '12px', overflow: 'hidden' }}>
+        <div style={{ 
+          width: '100%', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          border: '1px solid var(--border)', 
+          borderRadius: '14px', 
+          overflow: 'hidden',
+          background: 'var(--bg-card)',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
           {displayedChapters.map((chapter: any, index: number) => (
             <Link key={chapter._id} href={`/novel/${id}/chapter/${chapter.chapter_number}`} style={{ textDecoration: 'none' }}>
               <div style={{ 
-                padding: '16px 20px', 
+                padding: '14px 18px', 
                 display: 'flex', 
                 justifyContent: 'space-between', 
                 alignItems: 'center',
-                borderBottom: index !== displayedChapters.length - 1 ? '1px solid #27272a' : 'none',
+                borderBottom: index !== displayedChapters.length - 1 ? '1px solid var(--border)' : 'none',
                 background: 'transparent',
-                transition: 'background 0.2s'
+                transition: 'background-color 0.15s'
               }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <span style={{ fontSize: '14px', color: '#a1a1aa', width: '30px', textAlign: 'right' }}>{chapter.chapter_number}</span>
-                  <span style={{ color: '#fafafa', fontSize: '14px', fontWeight: '500' }}>{chapter.title}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
+                  <span style={{ fontSize: '13px', color: 'var(--text-muted)', width: '32px', textAlign: 'right', flexShrink: 0 }}>{chapter.chapter_number}</span>
+                  <span style={{ color: 'var(--text-primary)', fontSize: '14px', fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{chapter.title}</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '13px', color: '#71717a' }}>{formatTimeAgo(chapter.createdAt || novel.updatedAt)}</span>
+                
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{formatTimeAgo(chapter.createdAt || novel.updatedAt)}</span>
                   {chapter.tier === 'free' ? (
                     <span style={{ 
                       fontSize: '11px', 
                       fontWeight: '700', 
-                      color: '#34d399',
+                      color: 'var(--green)',
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em'
                     }}>
@@ -387,7 +589,7 @@ export default function NovelDetail() {
                     <span style={{ 
                       fontSize: '11px', 
                       fontWeight: '700', 
-                      color: '#60a5fa',
+                      color: 'var(--accent)',
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
                       display: 'flex',
@@ -400,7 +602,7 @@ export default function NovelDetail() {
                     <span style={{ 
                       fontSize: '11px', 
                       fontWeight: '700', 
-                      color: '#f59e0b',
+                      color: 'var(--gold)',
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
                       display: 'flex',
@@ -415,19 +617,19 @@ export default function NovelDetail() {
             </Link>
           ))}
           {displayedChapters.length === 0 && (
-            <div style={{ padding: '40px', textAlign: 'center', color: '#71717a', fontSize: '14px' }}>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '14px' }}>
               No chapters found matching your search.
             </div>
           )}
         </div>
 
-        {/* Pagination Block (Screenshot accurate) */}
+        {/* Pagination Block */}
         {numRanges > 1 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '28px', flexWrap: 'wrap', justifyContent: 'center' }}>
             <button 
               onClick={() => setActiveRange(Math.max(0, activeRange - 1))}
               disabled={activeRange === 0}
-              style={{ background: 'transparent', border: 'none', color: activeRange === 0 ? '#3f3f46' : '#a1a1aa', fontSize: '14px', cursor: activeRange === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+              style={{ background: 'transparent', border: 'none', color: activeRange === 0 ? 'var(--text-muted)' : 'var(--text-primary)', fontSize: '13px', cursor: activeRange === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px' }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m15 18-6-6 6-6"/></svg>
               Previous
@@ -438,15 +640,16 @@ export default function NovelDetail() {
                 key={i}
                 onClick={() => setActiveRange(i)}
                 style={{
-                  background: activeRange === i ? '#5e8b60' : 'transparent',
-                  color: activeRange === i ? '#fff' : '#a1a1aa',
-                  border: 'none',
+                  background: activeRange === i ? 'var(--accent)' : 'var(--bg-card)',
+                  color: activeRange === i ? '#fff' : 'var(--text-primary)',
+                  border: '1px solid var(--border)',
                   width: '32px',
                   height: '32px',
-                  borderRadius: '50%',
+                  borderRadius: '8px',
                   fontSize: '13px',
-                  fontWeight: '500',
-                  cursor: 'pointer'
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s'
                 }}
               >
                 {i + 1}
@@ -456,7 +659,7 @@ export default function NovelDetail() {
             <button 
               onClick={() => setActiveRange(Math.min(numRanges - 1, activeRange + 1))}
               disabled={activeRange === numRanges - 1}
-              style={{ background: 'transparent', border: 'none', color: activeRange === numRanges - 1 ? '#3f3f46' : '#a1a1aa', fontSize: '14px', cursor: activeRange === numRanges - 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+              style={{ background: 'transparent', border: 'none', color: activeRange === numRanges - 1 ? 'var(--text-muted)' : 'var(--text-primary)', fontSize: '13px', cursor: activeRange === numRanges - 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: '6px 10px' }}
             >
               Next
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m9 18 6-6-6-6"/></svg>
@@ -469,35 +672,37 @@ export default function NovelDetail() {
   );
 }
 
-// Reusable Styles for badges and buttons
 const badgeStyle = {
-  background: 'rgba(255,255,255,0.05)',
+  background: 'var(--bg-card)',
+  border: '1px solid var(--border)',
   padding: '6px 12px',
-  borderRadius: '20px',
+  borderRadius: '100px',
   fontSize: '12px',
   fontWeight: '500',
-  color: '#a1a1aa',
+  color: 'var(--text-secondary)',
   display: 'flex',
   alignItems: 'center',
-  gap: '6px'
+  gap: '6px',
+  boxShadow: 'var(--shadow-sm)'
 };
 
 const tagStyle = {
-  border: '1px solid #27272a',
-  padding: '6px 16px',
-  borderRadius: '20px',
+  border: '1px solid var(--border)',
+  padding: '6px 14px',
+  borderRadius: '100px',
   fontSize: '12px',
-  color: '#a1a1aa',
-  background: 'transparent'
+  color: 'var(--text-secondary)',
+  background: 'var(--bg-card)'
 };
 
 const circleBtnStyle = {
-  background: 'transparent',
-  border: '1px solid #27272a',
-  color: '#fafafa',
+  background: 'var(--bg-card)',
+  border: '1px solid var(--border)',
+  color: 'var(--text-primary)',
   padding: '8px 16px',
-  borderRadius: '20px',
+  borderRadius: '100px',
   fontSize: '13px',
+  fontWeight: '600',
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',

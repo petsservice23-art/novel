@@ -1,19 +1,89 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #0f0f13;
-  --bg-secondary: #16161e;
-  --bg-card: #1e1e2a;
-  --bg-hover: #26263a;
-  --border: #2a2a3d;
-  --text-primary: #e8e8f0;
-  --text-secondary: #8888a8;
-  --text-muted: #55556e;
-  --accent: #7c6af7;
-  --accent-hover: #6b5de6;
-  --accent-soft: rgba(124, 106, 247, 0.12);
-  --green: #4caf7d;
-  --red: #f06292;
+  /* Default: Warm Elegant Minimalist Paper Light Theme (Ownverso-style reading vibes) */
+  --bg-primary: #F8F5EE;
+  --bg-secondary: #F2ECE1;
+  --bg-card: #FFFFFF;
+  --bg-hover: #ECE4D6;
+  --border: #E5DFD3;
+  --border-subtle: #EDE7DC;
+  --text-primary: #111111; /* Clean black text everywhere */
+  --text-secondary: #4A4A52;
+  --text-muted: #737380;
+  --accent: #8E6BAF; /* SegyeNovels celestial logo purple/lavender */
+  --accent-hover: #755296;
+  --accent-soft: rgba(142, 107, 175, 0.12);
+  --accent-gradient: linear-gradient(135deg, #8E6BAF 0%, #6E4991 100%);
+  --tag-bg: rgba(255, 255, 255, 0.85);
+  --tag-border: rgba(229, 223, 211, 0.9);
+  --tag-text: #111111;
+  --shadow-sm: 0 2px 8px rgba(74, 60, 48, 0.06);
+  --shadow-md: 0 8px 24px rgba(74, 60, 48, 0.1);
+  --green: #0d766e;
+  --red: #d81b60;
+  --gold: #d97706;
+  color-scheme: light;
+}
+
+[data-theme="light"],
+html.light,
+html[data-theme="light"],
+body[data-theme="light"],
+.light {
+  /* Explicit Light Theme: Warm Minimalist Paper Tone & Black Text */
+  --bg-primary: #F8F5EE !important;
+  --bg-secondary: #F2ECE1 !important;
+  --bg-card: #FFFFFF !important;
+  --bg-hover: #ECE4D6 !important;
+  --border: #E5DFD3 !important;
+  --border-subtle: #EDE7DC !important;
+  --text-primary: #111111 !important; /* Pure black text */
+  --text-secondary: #4A4A52 !important;
+  --text-muted: #737380 !important;
+  --accent: #8E6BAF !important;
+  --accent-hover: #755296 !important;
+  --accent-soft: rgba(142, 107, 175, 0.12) !important;
+  --accent-gradient: linear-gradient(135deg, #8E6BAF 0%, #6E4991 100%) !important;
+  --tag-bg: rgba(255, 255, 255, 0.85) !important;
+  --tag-border: rgba(229, 223, 211, 0.9) !important;
+  --tag-text: #111111 !important;
+  --shadow-sm: 0 2px 8px rgba(74, 60, 48, 0.06) !important;
+  --shadow-md: 0 8px 24px rgba(74, 60, 48, 0.1) !important;
+  --green: #0d766e !important;
+  --red: #d81b60 !important;
+  --gold: #d97706 !important;
+  color-scheme: light;
+}
+
+[data-theme="dark"],
+html.dark,
+html[data-theme="dark"],
+body[data-theme="dark"],
+.dark {
+  /* Dark Theme: Velvety Celestial Obsidian Night Plum */
+  --bg-primary: #121118 !important;
+  --bg-secondary: #1a1824 !important;
+  --bg-card: #232030 !important;
+  --bg-hover: #2d293d !important;
+  --border: #322e42 !important;
+  --border-subtle: #252233 !important;
+  --text-primary: #FFFFFF !important;
+  --text-secondary: #D4CEE0 !important;
+  --text-muted: #8E879C !important;
+  --accent: #B69ACF !important;
+  --accent-hover: #D5BFF0 !important;
+  --accent-soft: rgba(182, 154, 207, 0.18) !important;
+  --accent-gradient: linear-gradient(135deg, #B69ACF 0%, #9C82B8 100%) !important;
+  --tag-bg: rgba(35, 32, 48, 0.85) !important;
+  --tag-border: rgba(182, 154, 207, 0.25) !important;
+  --tag-text: #FFFFFF !important;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  --green: #34d399 !important;
+  --red: #f472b6 !important;
+  --gold: #fbbf24 !important;
+  color-scheme: dark;
 }
 
 * {
@@ -24,16 +94,79 @@
 
 html {
   scroll-behavior: smooth;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.6;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Glassmorphism utility for badges & cards */
+.glass-tag {
+  background: var(--tag-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--tag-border);
+  color: var(--tag-text);
+}
+
+/* Responsive visibility utilities */
+@media (min-width: 768px) {
+  .mobile-only {
+    display: none !important;
+  }
+  .desktop-only {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-only {
+    display: flex !important;
+  }
+}
+
+/* Floating Chat Widget Positioning: strictly removed on mobile, corner on desktop */
+@media (max-width: 767px) {
+  .chat-widget-btn,
+  .chat-widget-modal {
+    display: none !important;
+  }
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .chat-widget-btn {
+    bottom: 24px !important;
+    right: 24px !important;
+  }
+  .chat-widget-modal {
+    bottom: 24px !important;
+    right: 24px !important;
+    width: 420px !important;
+  }
+  .hide-on-desktop {
+    display: none !important;
+  }
+}
+
+/* Dark mode brand wordmark illumination */
+html.dark .brand-wordmark {
+  filter: brightness(2.2) contrast(1.1) drop-shadow(0 0 10px rgba(182, 154, 207, 0.45));
+}
+
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -43,7 +176,7 @@ body {
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 3px;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
@@ -55,4 +188,17 @@ body {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Suppress Next.js Turbopack dev indicator ("N" symbol at bottom left) */
+nextjs-portal,
+#nextjs-dev-indicator,
+[data-nextjs-toast],
+[data-nextjs-dev-indicator],
+[data-nextjs-route-announcer],
+[data-nextjs-dialog-overlay] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
 }

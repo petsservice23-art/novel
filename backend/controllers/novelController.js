@@ -19,9 +19,9 @@ const getNovelById = async (req, res) => {
   try {
     const novel = await Novel.findById(req.params.id).populate('author_id', 'username avatar');
     if (novel) {
-      // Increment views
+      // Increment views without changing updatedAt
+      await Novel.updateOne({ _id: novel._id }, { $inc: { views: 1 } }, { timestamps: false });
       novel.views += 1;
-      await novel.save();
       res.json(novel);
     } else {
       res.status(404).json({ message: 'Novel not found' });

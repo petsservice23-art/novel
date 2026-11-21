@@ -104,14 +104,14 @@ function ProfileContent() {
 
   const switchTab = (tab: 'dashboard' | 'settings' | 'transactions') => {
     setActiveTab(tab);
-    router.replace(`/profile?tab=${tab}`);
+    router.replace(`/profile?tab=${tab}`, { scroll: false });
   };
 
   if (!user) {
     return (
-      <div style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', background: '#121212', color: '#a1a1aa' }}>
-        <h2>Sign in to access your profile</h2>
-        <Link href="/login" style={{ background: '#749275', color: '#fff', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: '600' }}>
+      <div style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)', color: 'var(--text-secondary)', padding: '20px' }}>
+        <h2 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '12px', color: 'var(--text-primary)' }}>Please sign in to view your profile</h2>
+        <Link href="/login" style={{ background: 'var(--accent)', color: '#fff', padding: '12px 28px', borderRadius: '10px', textDecoration: 'none', fontWeight: '700' }}>
           Sign In
         </Link>
       </div>
@@ -124,14 +124,22 @@ function ProfileContent() {
   const chaptersReadCount = profileData?.reading_history?.length || user.reading_history?.length || 0;
   const unlockedChaptersCount = profileData?.unlocked_chapters?.length || user.unlocked_chapters?.length || 0;
   const coinsSpent = unlockedChaptersCount * 10;
-  const memberSince = profileData?.createdAt ? new Date(profileData.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'September 22, 2024';
+  const memberSince = profileData?.createdAt ? new Date(profileData.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'October 2024';
 
   return (
-    <div style={{ minHeight: '90vh', background: '#121212', color: '#fafafa', padding: '40px 20px 100px', fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div style={{ minHeight: '90vh', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '24px 16px 100px', transition: 'background-color 0.2s, color 0.2s' }}>
       <div style={{ maxWidth: '960px', margin: '0 auto' }}>
         
         {/* Navigation Tabs Header */}
-        <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid #27272a', paddingBottom: '16px', marginBottom: '36px' }}>
+        <div style={{ 
+          display: 'flex', 
+          gap: '8px', 
+          borderBottom: '1px solid var(--border)', 
+          paddingBottom: '12px', 
+          marginBottom: '28px',
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch'
+        }}>
           <TabButton 
             active={activeTab === 'dashboard'} 
             onClick={() => switchTab('dashboard')} 
@@ -152,73 +160,108 @@ function ProfileContent() {
           />
         </div>
 
-        {/* 1. DASHBOARD TAB (Screenshot Accurate - Image 2) */}
+        {/* 1. DASHBOARD TAB */}
         {activeTab === 'dashboard' && (
           <div>
-            <div style={{ marginBottom: '32px' }}>
-              <h1 style={{ fontSize: '32px', fontWeight: '800', marginBottom: '8px', color: '#fff' }}>Dashboard</h1>
-              <p style={{ color: '#a1a1aa', fontSize: '15px' }}>Your reading activity at a glance</p>
+            <div style={{ marginBottom: '24px' }}>
+              <h1 style={{ fontSize: 'clamp(24px, 3.5vw, 32px)', fontWeight: '800', marginBottom: '6px', color: 'var(--text-primary)' }}>
+                Dashboard
+              </h1>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Your reading activity at a glance</p>
             </div>
 
-            {/* 4 Stat Cards in a row */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '48px' }}>
-              <StatCard count={bookmarkedCount} label="Bookmarked" icon="🔖" color="#3b82f6" />
+            {/* 4 Stat Cards: strictly 2 columns on mobile, 4 on desktop */}
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', 
+              gap: '12px', 
+              marginBottom: '36px' 
+            }}>
+              <StatCard count={bookmarkedCount} label="Bookmarked" icon="🔖" color="#8E6BAF" />
               <StatCard count={chaptersReadCount} label="Chapters Read" icon="📖" color="#10b981" />
-              <StatCard count={0} label="Completed" icon="✓" color="#22c55e" />
+              <StatCard count={unlockedChaptersCount} label="Unlocked" icon="🔓" color="#6366f1" />
               <StatCard count={coinsSpent} label="Coins Spent" icon="©" color="#f59e0b" />
             </div>
 
             {/* Bookmarked Library Section */}
             {bookmarkedCount === 0 ? (
               <div style={{ 
-                padding: '60px 24px', 
-                background: '#18181b', 
-                border: '1px solid #27272a', 
+                padding: '60px 20px', 
+                background: 'var(--bg-card)', 
+                border: '1px solid var(--border)', 
                 borderRadius: '16px', 
                 textAlign: 'center',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '12px'
+                gap: '12px',
+                boxShadow: 'var(--shadow-sm)'
               }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#27272a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a1a1aa', fontSize: '20px', marginBottom: '8px' }}>
-                  📱
+                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '20px', marginBottom: '4px' }}>
+                  📚
                 </div>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#fff' }}>Your library is empty</h3>
-                <p style={{ color: '#a1a1aa', fontSize: '14px', maxWidth: '440px', lineHeight: '1.6' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)' }}>Your library is empty</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', maxWidth: '440px', lineHeight: '1.6' }}>
                   Start bookmarking novels to build your library. Tap the bookmark icon on any novel to save it here and track your reading progress.
                 </p>
-                <Link href="/browse" style={{ marginTop: '12px', background: '#749275', color: '#fff', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: '600', fontSize: '14px' }}>
+                <Link href="/browse" style={{ marginTop: '10px', background: 'var(--accent)', color: '#fff', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: '700', fontSize: '14px' }}>
                   Browse Novels
                 </Link>
               </div>
             ) : (
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                  <h2 style={{ fontSize: '20px', fontWeight: '700' }}>My Bookmarks ({bookmarkedCount})</h2>
-                  <Link href="/browse" style={{ color: '#749275', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <h2 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)' }}>
+                    My Bookmarks ({bookmarkedCount})
+                  </h2>
+                  <Link href="/browse" style={{ color: 'var(--accent)', textDecoration: 'none', fontSize: '13px', fontWeight: '700' }}>
                     + Find More
                   </Link>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px' }}>
+                
+                {/* Strictly 2 Columns on Mobile, up to 5 on Desktop */}
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
+                  gap: '14px',
+                  rowGap: '20px'
+                }}>
                   {libraryNovels.map((novel: any) => (
-                    <Link key={novel._id} href={`/novel/${novel._id}`} style={{ textDecoration: 'none' }}>
+                    <Link key={novel._id} href={`/novel/${novel._id}`} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column' }}>
                       <div style={{ 
-                        background: '#18181b', 
-                        border: '1px solid #27272a', 
+                        background: 'var(--bg-card)', 
+                        border: '1px solid var(--border)', 
                         borderRadius: '12px', 
                         overflow: 'hidden',
-                        transition: 'transform 0.2s, border-color 0.2s'
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = '#749275'; }}
-                      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = '#27272a'; }}
-                      >
-                        <div style={{ height: '260px', overflow: 'hidden' }}>
-                          <img src={novel.cover_image || '/covers/default.jpg'} alt={novel.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        transition: 'transform 0.2s, border-color 0.2s',
+                        boxShadow: 'var(--shadow-sm)'
+                      }}>
+                        <div style={{ aspectRatio: '3/4', overflow: 'hidden', background: 'var(--bg-secondary)' }}>
+                          <img 
+                            src={novel.cover_image || '/covers/default.jpg'} 
+                            alt={novel.title} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                            onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${novel._id}/300/400`; }}
+                          />
                         </div>
-                        <div style={{ padding: '16px' }}>
-                          <h4 style={{ color: '#fff', fontSize: '15px', fontWeight: '600', marginBottom: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{novel.title}</h4>
-                          <span style={{ fontSize: '12px', color: '#749275', fontWeight: '600' }}>Continue Reading &rarr;</span>
+                        <div style={{ padding: '10px 12px' }}>
+                          <h4 style={{ 
+                            color: 'var(--text-primary)', 
+                            fontSize: '13px', 
+                            fontWeight: '700', 
+                            lineHeight: '1.3',
+                            marginBottom: '4px', 
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            minHeight: '34px'
+                          }}>
+                            {novel.title}
+                          </h4>
+                          <span style={{ fontSize: '11px', color: 'var(--accent)', fontWeight: '600' }}>
+                            Continue Reading →
+                          </span>
                         </div>
                       </div>
                     </Link>
@@ -229,48 +272,48 @@ function ProfileContent() {
           </div>
         )}
 
-        {/* 2. SETTINGS TAB (Screenshot Accurate - Image 3) */}
+        {/* 2. SETTINGS TAB */}
         {activeTab === 'settings' && (
           <div>
-            <div style={{ marginBottom: '32px' }}>
-              <h1 style={{ fontSize: '32px', fontWeight: '800', marginBottom: '8px', color: '#fff' }}>Settings</h1>
+            <div style={{ marginBottom: '24px' }}>
+              <h1 style={{ fontSize: 'clamp(24px, 3.5vw, 32px)', fontWeight: '800', marginBottom: '6px', color: 'var(--text-primary)' }}>
+                Settings
+              </h1>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Manage your profile, account and preferences</p>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               
               {/* Profile Card */}
-              <div style={{ background: '#18181b', border: '1px solid #27272a', borderRadius: '16px', padding: '32px' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '20px', color: '#fff' }}>Profile</h3>
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: 'clamp(18px, 3vw, 28px)', boxShadow: 'var(--shadow-sm)' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>Profile</h3>
                 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px' }}>
-                  <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#27272a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: '700' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--accent-soft)', border: '1px solid var(--border)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: '800' }}>
                     {displayName.slice(0, 2).toUpperCase() || 'U'}
                   </div>
                   <div>
-                    <div style={{ display: 'flex', gap: '12px', marginBottom: '4px' }}>
-                      <span style={{ color: '#749275', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Change</span>
-                      <span style={{ color: '#ef4444', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Remove</span>
-                    </div>
-                    <p style={{ color: '#71717a', fontSize: '12px', margin: 0 }}>JPEG, PNG, WebP, GIF, or AVIF · Max 2MB</p>
+                    <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)' }}>{user.username}</div>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: 0 }}>Role: {user.role?.toUpperCase() || 'READER'}</p>
                   </div>
                 </div>
 
-                <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '480px' }}>
+                <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '440px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#a1a1aa', marginBottom: '8px' }}>Display Name</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '6px' }}>Display Name</label>
                     <input 
                       type="text" 
                       value={displayName} 
                       onChange={e => setDisplayName(e.target.value)} 
                       style={inputFieldStyle}
                     />
-                    <span style={{ display: 'block', color: '#71717a', fontSize: '12px', marginTop: '6px' }}>This name will be shown on your profile and comments.</span>
+                    <span style={{ display: 'block', color: 'var(--text-muted)', fontSize: '11px', marginTop: '4px' }}>This name is shown across your comments and profile.</span>
                   </div>
 
                   <button 
                     type="submit" 
                     disabled={isSavingProfile}
-                    style={{ background: '#fafafa', color: '#09090b', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: '700', fontSize: '14px', cursor: 'pointer', width: 'fit-content' }}
+                    style={{ background: 'var(--accent)', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: '700', fontSize: '13px', cursor: 'pointer', width: 'fit-content' }}
                   >
                     {isSavingProfile ? 'Saving...' : 'Save Changes'}
                   </button>
@@ -278,37 +321,37 @@ function ProfileContent() {
               </div>
 
               {/* Account Card */}
-              <div style={{ background: '#18181b', border: '1px solid #27272a', borderRadius: '16px', padding: '32px' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '20px', color: '#fff' }}>Account</h3>
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: 'clamp(18px, 3vw, 28px)', boxShadow: 'var(--shadow-sm)' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>Account Details</h3>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
                   <div>
-                    <span style={{ display: 'block', fontSize: '12px', color: '#71717a', marginBottom: '4px' }}>Email</span>
-                    <span style={{ fontSize: '15px', color: '#fafafa', fontWeight: '500' }}>{email}</span>
+                    <span style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', marginBottom: '4px' }}>Email</span>
+                    <span style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: '600', wordBreak: 'break-all' }}>{email}</span>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '12px', color: '#71717a', marginBottom: '4px' }}>Username</span>
-                    <span style={{ fontSize: '15px', color: '#fafafa', fontWeight: '500' }}>{user.username}</span>
+                    <span style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', marginBottom: '4px' }}>Username</span>
+                    <span style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: '600' }}>{user.username}</span>
                   </div>
                   <div>
-                    <span style={{ display: 'block', fontSize: '12px', color: '#71717a', marginBottom: '4px' }}>Member since</span>
-                    <span style={{ fontSize: '15px', color: '#fafafa', fontWeight: '500' }}>{memberSince}</span>
+                    <span style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', marginBottom: '4px' }}>Member since</span>
+                    <span style={{ fontSize: '14px', color: 'var(--text-primary)', fontWeight: '600' }}>{memberSince}</span>
                   </div>
                 </div>
               </div>
 
               {/* Security Card */}
-              <div style={{ background: '#18181b', border: '1px solid #27272a', borderRadius: '16px', padding: '32px' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '20px', color: '#fff' }}>Security</h3>
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: 'clamp(18px, 3vw, 28px)', boxShadow: 'var(--shadow-sm)' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>Security & Password</h3>
                 
-                <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '480px' }}>
+                <form onSubmit={handleChangePassword} style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '440px' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#a1a1aa', marginBottom: '8px' }}>New Password</label>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '6px' }}>New Password</label>
                     <input 
                       type="password" 
                       value={newPassword} 
                       onChange={e => setNewPassword(e.target.value)} 
-                      placeholder="Enter at least 6 characters..."
+                      placeholder="At least 6 characters..."
                       style={inputFieldStyle}
                     />
                   </div>
@@ -316,7 +359,7 @@ function ProfileContent() {
                   <button 
                     type="submit" 
                     disabled={isChangingPassword || !newPassword}
-                    style={{ background: '#27272a', color: '#fff', border: '1px solid #3f3f46', padding: '10px 20px', borderRadius: '8px', fontWeight: '600', fontSize: '14px', cursor: 'pointer', width: 'fit-content' }}
+                    style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border)', padding: '10px 20px', borderRadius: '8px', fontWeight: '700', fontSize: '13px', cursor: 'pointer', width: 'fit-content' }}
                   >
                     {isChangingPassword ? 'Updating...' : 'Change Password'}
                   </button>
@@ -327,66 +370,73 @@ function ProfileContent() {
           </div>
         )}
 
-        {/* 3. TRANSACTIONS TAB (Screenshot Accurate - Image 4) */}
+        {/* 3. TRANSACTIONS TAB */}
         {activeTab === 'transactions' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <h1 style={{ fontSize: '32px', fontWeight: '800', marginBottom: '8px', color: '#fff' }}>Transactions</h1>
-                <p style={{ color: '#a1a1aa', fontSize: '15px' }}>{transactions.length} total transactions</p>
+                <h1 style={{ fontSize: 'clamp(24px, 3.5vw, 32px)', fontWeight: '800', marginBottom: '4px', color: 'var(--text-primary)' }}>
+                  Transactions
+                </h1>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{transactions.length} total transactions</p>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#18181b', padding: '12px 20px', borderRadius: '12px', border: '1px solid #27272a' }}>
-                <span style={{ color: '#a1a1aa', fontSize: '14px' }}>Balance</span>
-                <span style={{ color: '#f59e0b', fontSize: '18px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-card)', padding: '8px 16px', borderRadius: '100px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
+                <span style={{ color: 'var(--text-secondary)', fontSize: '13px', fontWeight: '600' }}>Balance:</span>
+                <span style={{ color: 'var(--gold)', fontSize: '16px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <span>{profileData?.coins || user.coins || 0}</span>
-                  <span style={{ fontSize: '16px' }}>©</span>
+                  <span>©</span>
                 </span>
               </div>
             </div>
 
             {transactions.length === 0 ? (
               <div style={{ 
-                padding: '80px 24px', 
-                background: '#18181b', 
-                border: '1px solid #27272a', 
+                padding: '60px 20px', 
+                background: 'var(--bg-card)', 
+                border: '1px solid var(--border)', 
                 borderRadius: '16px', 
                 textAlign: 'center',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: '12px'
+                gap: '12px',
+                boxShadow: 'var(--shadow-sm)'
               }}>
-                <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b', fontSize: '26px', fontWeight: '900', marginBottom: '8px' }}>
+                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b', fontSize: '24px', fontWeight: '900', marginBottom: '4px' }}>
                   ©
                 </div>
-                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#fff' }}>No transactions yet</h3>
-                <p style={{ color: '#a1a1aa', fontSize: '14px', maxWidth: '400px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)' }}>No transactions yet</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', maxWidth: '400px' }}>
                   Your coin purchases and chapter unlocks will appear here.
                 </p>
-                <Link href="/coins" style={{ marginTop: '12px', background: '#eab308', color: '#000', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: '700', fontSize: '14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <Link href="/coins" style={{ marginTop: '10px', background: 'var(--accent)', color: '#fff', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: '700', fontSize: '14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                   <span>©</span>
                   <span>Get Coins</span>
                 </Link>
               </div>
             ) : (
-              <div style={{ background: '#18181b', border: '1px solid #27272a', borderRadius: '16px', overflow: 'hidden' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', padding: '16px 24px', borderBottom: '1px solid #27272a', color: '#71717a', fontSize: '12px', fontWeight: '700', letterSpacing: '0.05em' }}>
-                  <span>TYPE</span>
-                  <span>AMOUNT</span>
-                  <span>STATUS</span>
-                  <span style={{ textAlign: 'right' }}>DATE</span>
-                </div>
-                {transactions.map(t => (
-                  <div key={t._id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', padding: '16px 24px', borderBottom: '1px solid #27272a', alignItems: 'center', fontSize: '14px' }}>
-                    <span style={{ fontWeight: '600', color: '#fff' }}>{t.type === 'coins' ? 'Coin Bundle' : 'Chapter Unlock'}</span>
-                    <span style={{ color: '#f59e0b', fontWeight: '700' }}>+{t.coins_awarded} ©</span>
-                    <span style={{ color: t.status === 'success' ? '#22c55e' : '#ef4444', textTransform: 'capitalize', fontWeight: '600' }}>{t.status}</span>
-                    <span style={{ textAlign: 'right', color: '#71717a', fontSize: '13px' }}>
-                      {new Date(t.createdAt).toLocaleDateString()}
-                    </span>
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
+                <div style={{ overflowX: 'auto' }}>
+                  <div style={{ minWidth: '500px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr', padding: '14px 20px', borderBottom: '1px solid var(--border)', background: 'var(--bg-secondary)', color: 'var(--text-muted)', fontSize: '11px', fontWeight: '800', letterSpacing: '0.05em' }}>
+                      <span>TYPE</span>
+                      <span>AMOUNT</span>
+                      <span>STATUS</span>
+                      <span style={{ textAlign: 'right' }}>DATE</span>
+                    </div>
+                    {transactions.map(t => (
+                      <div key={t._id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr', padding: '14px 20px', borderBottom: '1px solid var(--border)', alignItems: 'center', fontSize: '13px' }}>
+                        <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{t.type === 'coins' ? 'Coin Bundle' : 'Chapter Unlock'}</span>
+                        <span style={{ color: 'var(--gold)', fontWeight: '700' }}>+{t.coins_awarded} ©</span>
+                        <span style={{ color: t.status === 'success' ? '#10b981' : '#ef4444', textTransform: 'capitalize', fontWeight: '600', fontSize: '12px' }}>{t.status}</span>
+                        <span style={{ textAlign: 'right', color: 'var(--text-muted)', fontSize: '12px' }}>
+                          {new Date(t.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             )}
           </div>
@@ -399,7 +449,7 @@ function ProfileContent() {
 
 export default function ProfilePage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#71717a' }}>Loading profile...</div>}>
+    <Suspense fallback={<div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>Loading profile...</div>}>
       <ProfileContent />
     </Suspense>
   );
@@ -410,24 +460,19 @@ function TabButton({ active, onClick, label, icon }: { active: boolean; onClick:
     <button
       onClick={onClick}
       style={{
-        display: 'flex',
+        display: 'inline-flex',
         alignItems: 'center',
-        gap: '8px',
-        padding: '10px 18px',
+        gap: '6px',
+        padding: '8px 16px',
         borderRadius: '8px',
-        background: active ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-        border: '1px solid ' + (active ? '#3f3f46' : 'transparent'),
-        color: active ? '#fff' : '#a1a1aa',
-        fontSize: '14px',
-        fontWeight: active ? '700' : '500',
+        background: active ? 'var(--accent)' : 'transparent',
+        border: '1px solid ' + (active ? 'var(--accent)' : 'transparent'),
+        color: active ? '#ffffff' : 'var(--text-secondary)',
+        fontSize: '13px',
+        fontWeight: active ? '700' : '600',
         cursor: 'pointer',
-        transition: 'all 0.15s'
-      }}
-      onMouseEnter={e => {
-        if (!active) e.currentTarget.style.color = '#fff';
-      }}
-      onMouseLeave={e => {
-        if (!active) e.currentTarget.style.color = '#a1a1aa';
+        whiteSpace: 'nowrap',
+        transition: 'all 0.15s ease'
       }}
     >
       <span>{icon}</span>
@@ -439,34 +484,33 @@ function TabButton({ active, onClick, label, icon }: { active: boolean; onClick:
 function StatCard({ count, label, icon, color }: { count: number; label: string; icon: string; color: string }) {
   return (
     <div style={{
-      background: '#18181b',
-      border: '1px solid #27272a',
-      borderRadius: '16px',
-      padding: '24px',
+      background: 'var(--bg-card)',
+      border: '1px solid var(--border)',
+      borderRadius: '14px',
+      padding: '16px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      transition: 'border-color 0.2s'
+      boxShadow: 'var(--shadow-sm)'
     }}>
       <div>
-        <div style={{ fontSize: '28px', fontWeight: '800', color: '#fff', marginBottom: '4px' }}>
+        <div style={{ fontSize: 'clamp(20px, 3vw, 26px)', fontWeight: '900', color: 'var(--text-primary)', marginBottom: '2px', lineHeight: 1.1 }}>
           {count}
         </div>
-        <div style={{ fontSize: '13px', color: '#a1a1aa', fontWeight: '500' }}>
+        <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>
           {label}
         </div>
       </div>
       <div style={{ 
-        width: '42px', 
-        height: '42px', 
-        borderRadius: '12px', 
-        background: `${color}15`, 
+        width: '36px', 
+        height: '36px', 
+        borderRadius: '10px', 
+        background: 'var(--bg-secondary)', 
         color: color, 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
-        fontSize: '18px',
-        fontWeight: '700'
+        fontSize: '16px'
       }}>
         {icon}
       </div>
@@ -474,13 +518,14 @@ function StatCard({ count, label, icon, color }: { count: number; label: string;
   );
 }
 
-const inputFieldStyle = {
+const inputFieldStyle: React.CSSProperties = {
   width: '100%',
-  padding: '12px 14px',
-  background: '#121212',
-  border: '1px solid #27272a',
+  padding: '10px 14px',
+  background: 'var(--bg-secondary)',
+  border: '1px solid var(--border)',
   borderRadius: '8px',
-  color: '#fff',
-  fontSize: '14px',
-  outline: 'none'
+  color: 'var(--text-primary)',
+  fontSize: '13px',
+  outline: 'none',
+  transition: 'border-color 0.15s'
 };

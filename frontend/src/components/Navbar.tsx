@@ -9,10 +9,47 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('dark');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
+  // Sync theme on mount & listen to changes
+  useEffect(() => {
+    const saved = (localStorage.getItem('theme') as 'light' | 'dark' | 'system') || 'dark';
+    setTheme(saved);
+    applyTheme(saved);
+
+    const mql = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => {
+      const current = localStorage.getItem('theme');
+      if (current === 'system') applyTheme('system');
+    };
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, []);
+
+  const applyTheme = (t: 'light' | 'dark' | 'system') => {
+    let resolved = t;
+    if (t === 'system') {
+      resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+    if (resolved === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.add('light');
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
+  const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    applyTheme(newTheme);
+  };
+
+  // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -22,6 +59,11 @@ export default function Navbar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [router]);
 
   const getInitials = (name?: string) => {
     if (!name) return 'U';
@@ -39,109 +81,137 @@ export default function Navbar() {
       position: 'sticky',
       top: 0,
       zIndex: 100,
+      transition: 'background-color 0.2s, border-color 0.2s',
     }}>
       <div style={{
         maxWidth: '1240px',
         margin: '0 auto',
-        padding: '0 20px',
+        padding: '0 16px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         height: '64px',
       }}>
         {/* Left Side: Brand Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
           <Link href="/" style={{
-            fontSize: '22px',
-            fontWeight: '800',
-            color: 'var(--text-primary)',
-            textDecoration: 'none',
-            letterSpacing: '-0.5px',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            gap: '10px',
+            textDecoration: 'none',
           }}>
-            <span style={{ 
-              width: '28px', 
-              height: '28px', 
-              borderRadius: '50%', 
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
-              display: 'inline-flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              color: '#fff', 
-              fontSize: '14px',
-              fontWeight: '900'
-            }}>◎</span>
-            Novelverse
+            <img 
+              src="/images/logo-symbol.png" 
+              alt="SegyeNovels Icon" 
+              style={{ 
+                height: '38px', 
+                width: '38px', 
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 2px 8px rgba(182, 154, 207, 0.35))'
+              }} 
+            />
+            <img 
+              src="/images/logo-wordmark.png" 
+              alt="SegyeNovels" 
+              className="brand-wordmark hide-on-mobile"
+              style={{ 
+                height: '32px', 
+                width: 'auto', 
+                objectFit: 'contain',
+              }} 
+            />
           </Link>
 
-          {/* Navigation Links */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          {/* Desktop Navigation Links */}
+          <div className="desktop-only" style={{ alignItems: 'center', gap: '4px' }}>
             <NavLink href="/browse" label="Browse" />
             <NavLink href="/genres" label="Genres" />
             <NavLink href="/coins" label="Coins" />
-            {user && <NavLink href="/library" label="Library" />}
             {user?.role === 'admin' && <NavLink href="/admin/dashboard" label="Admin" highlight />}
           </div>
         </div>
 
-        {/* Right Side: Search, Coins, Theme, Profile */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {/* Search Bar */}
-          <Link href="/search" style={{
-            display: 'flex',
+        {/* Right Side: Search, Theme Toggle, Profile / Auth */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Desktop Search Bar */}
+          <Link href="/search" className="desktop-only" style={{
             alignItems: 'center',
             gap: '10px',
-            background: 'rgba(255, 255, 255, 0.03)',
+            background: 'var(--accent-soft)',
             border: '1px solid var(--border)',
             borderRadius: '100px',
             padding: '7px 16px',
             color: 'var(--text-muted)',
             textDecoration: 'none',
             fontSize: '13px',
-            minWidth: '200px',
-            transition: 'border-color 0.2s',
+            minWidth: '180px',
+            transition: 'border-color 0.2s, background-color 0.2s',
           }}
-            onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--text-muted)')}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
             onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
             </svg>
             <span style={{ flex: 1 }}>Search novels...</span>
-            <span style={{
-              fontSize: '10px',
-              fontWeight: '700',
-              background: 'rgba(255, 255, 255, 0.06)',
-              padding: '2px 6px',
-              borderRadius: '4px',
-              color: 'var(--text-muted)',
-              border: '1px solid var(--border)'
-            }}>Ctrl K</span>
           </Link>
 
-          {/* Get Coins Button */}
-          <Link href="/coins" style={{
-            display: 'inline-flex',
+          {/* Mobile Search Icon Button */}
+          <Link href="/search" className="mobile-only" style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
             alignItems: 'center',
-            gap: '6px',
-            background: '#eab308',
-            color: '#000',
-            padding: '6px 14px',
-            borderRadius: '100px',
-            fontSize: '13px',
-            fontWeight: '700',
+            justifyContent: 'center',
+            color: 'var(--text-primary)',
             textDecoration: 'none',
-            transition: 'transform 0.15s, opacity 0.15s',
-            boxShadow: '0 2px 8px rgba(234, 179, 8, 0.3)'
+            border: '1px solid var(--border)'
           }}
-          onMouseEnter={e => (e.currentTarget.style.opacity = '0.9')}
-          onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            aria-label="Search novels"
           >
-            <span style={{ fontWeight: '900', fontSize: '15px', lineHeight: 1 }}>©</span>
-            <span>Get coins</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+            </svg>
           </Link>
+
+          {/* Quick Theme Toggle Button (Light/Dark quick switch) */}
+          <button
+            onClick={() => handleThemeChange(theme === 'dark' ? 'light' : 'dark')}
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--border)',
+              borderRadius: '50%',
+              width: '36px',
+              height: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: 'var(--text-primary)',
+              transition: 'background 0.2s, border-color 0.2s, color 0.2s',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'var(--accent-soft)';
+              e.currentTarget.style.color = 'var(--accent)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--text-primary)';
+            }}
+          >
+            {theme === 'dark' ? (
+              // Sun Icon
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+              </svg>
+            ) : (
+              // Moon Icon
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+              </svg>
+            )}
+          </button>
 
           {user ? (
             <div style={{ position: 'relative' }} ref={dropdownRef}>
@@ -151,9 +221,9 @@ export default function Navbar() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
-                  background: profileOpen ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-                  border: '1px solid ' + (profileOpen ? 'var(--text-muted)' : 'transparent'),
+                  gap: '8px',
+                  background: profileOpen ? 'var(--accent-soft)' : 'transparent',
+                  border: '1px solid ' + (profileOpen ? 'var(--accent)' : 'var(--border)'),
                   borderRadius: '100px',
                   padding: '4px 10px 4px 4px',
                   cursor: 'pointer',
@@ -162,7 +232,7 @@ export default function Navbar() {
                   outline: 'none'
                 }}
                 onMouseEnter={e => {
-                  if (!profileOpen) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                  if (!profileOpen) e.currentTarget.style.background = 'var(--accent-soft)';
                 }}
                 onMouseLeave={e => {
                   if (!profileOpen) e.currentTarget.style.background = 'transparent';
@@ -172,18 +242,19 @@ export default function Navbar() {
                   width: '32px',
                   height: '32px',
                   borderRadius: '50%',
-                  background: 'rgba(255, 255, 255, 0.12)',
+                  background: 'var(--accent-gradient)',
                   color: '#fff',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontWeight: '700',
+                  fontWeight: '800',
                   fontSize: '12px',
-                  letterSpacing: '0.5px'
+                  letterSpacing: '0.5px',
+                  boxShadow: 'var(--shadow-sm)'
                 }}>
                   {getInitials(user.username)}
                 </div>
-                <span style={{ fontSize: '13px', fontWeight: '600', maxWidth: '110px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <span className="hidden sm:inline" style={{ fontSize: '13px', fontWeight: '600', maxWidth: '100px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {user.username}
                 </span>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: 'var(--text-muted)' }}>
@@ -191,33 +262,32 @@ export default function Navbar() {
                 </svg>
               </button>
 
-              {/* Profile Drawer / Dropdown Menu (Screenshot Accurate) */}
+              {/* Profile Dropdown Container */}
               {profileOpen && (
                 <div style={{
                   position: 'absolute',
                   top: '46px',
                   right: 0,
                   width: '260px',
-                  background: '#18181b',
-                  border: '1px solid #27272a',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border)',
                   borderRadius: '16px',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+                  boxShadow: 'var(--shadow-md)',
                   padding: '8px',
                   zIndex: 200,
                   animation: 'fadeIn 0.15s ease-out',
-                  fontFamily: 'Inter, system-ui, sans-serif'
                 }}>
                   {/* User Profile Header */}
-                  <div style={{ padding: '12px 14px 14px', borderBottom: '1px solid #27272a', marginBottom: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ padding: '12px 14px 14px', borderBottom: '1px solid var(--border)', marginBottom: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: '700', color: '#fafafa', marginBottom: '2px' }}>
+                      <div style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '2px' }}>
                         {user.username}
                       </div>
-                      <div style={{ fontSize: '12px', color: '#71717a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>
+                      <div style={{ fontSize: '12px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }}>
                         {user.email}
                       </div>
                     </div>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '3px 8px', borderRadius: '100px', fontSize: '12px', fontWeight: '700', color: '#f59e0b' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '3px 8px', borderRadius: '100px', fontSize: '12px', fontWeight: '700', color: 'var(--gold)' }}>
                       <span>{user.coins || 0}</span>
                       <span style={{ fontWeight: '800' }}>©</span>
                     </div>
@@ -225,6 +295,20 @@ export default function Navbar() {
 
                   {/* Menu Items */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    {user?.role === 'admin' && (
+                      <MenuItem 
+                        icon={
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                          </svg>
+                        } 
+                        label="Admin Dashboard" 
+                        href="/admin/dashboard" 
+                        highlight
+                        onClick={() => setProfileOpen(false)} 
+                      />
+                    )}
+
                     <MenuItem 
                       icon={
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -249,7 +333,7 @@ export default function Navbar() {
 
                     <MenuItem 
                       icon={
-                        <span style={{ color: '#fbbf24', fontWeight: '800', fontSize: '16px', lineHeight: 1 }}>©</span>
+                        <span style={{ color: 'var(--gold)', fontWeight: '800', fontSize: '16px', lineHeight: 1 }}>©</span>
                       } 
                       label="Buy Coins" 
                       href="/coins" 
@@ -268,18 +352,18 @@ export default function Navbar() {
                     />
                   </div>
 
-                  {/* Theme Selector Section */}
-                  <div style={{ borderTop: '1px solid #27272a', margin: '8px 0', paddingTop: '8px' }}>
-                    <div style={{ fontSize: '11px', fontWeight: '700', color: '#71717a', padding: '4px 14px 6px', letterSpacing: '0.05em' }}>
+                  {/* Fully Functional Theme Selector Section in Profile Dropdown */}
+                  <div style={{ borderTop: '1px solid var(--border)', margin: '8px 0', paddingTop: '8px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', padding: '4px 14px 6px', letterSpacing: '0.05em' }}>
                       THEME
                     </div>
-                    <ThemeOption label="Light" value="light" active={theme === 'light'} onClick={() => setTheme('light')} />
-                    <ThemeOption label="Dark" value="dark" active={theme === 'dark'} onClick={() => setTheme('dark')} />
-                    <ThemeOption label="System" value="system" active={theme === 'system'} onClick={() => setTheme('system')} />
+                    <ThemeOption label="Light Theme" value="light" active={theme === 'light'} onClick={() => handleThemeChange('light')} />
+                    <ThemeOption label="Dark Theme" value="dark" active={theme === 'dark'} onClick={() => handleThemeChange('dark')} />
+                    <ThemeOption label="System Auto" value="system" active={theme === 'system'} onClick={() => handleThemeChange('system')} />
                   </div>
 
                   {/* Sign Out */}
-                  <div style={{ borderTop: '1px solid #27272a', paddingTop: '6px' }}>
+                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: '6px' }}>
                     <button
                       onClick={() => {
                         setProfileOpen(false);
@@ -294,7 +378,7 @@ export default function Navbar() {
                         background: 'transparent',
                         border: 'none',
                         borderRadius: '8px',
-                        color: '#ef4444',
+                        color: 'var(--red)',
                         fontSize: '13px',
                         fontWeight: '600',
                         cursor: 'pointer',
@@ -314,24 +398,27 @@ export default function Navbar() {
               )}
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Link href="/login" style={{
                 color: 'var(--text-secondary)',
                 textDecoration: 'none',
                 fontSize: '14px',
                 fontWeight: '500',
-                padding: '8px 14px',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                transition: 'color 0.15s'
               }}>Sign In</Link>
 
               <Link href="/register" style={{
-                background: 'var(--accent)',
+                background: 'var(--accent-gradient)',
                 color: '#fff',
                 textDecoration: 'none',
                 fontSize: '13px',
                 fontWeight: '600',
-                padding: '8px 18px',
+                padding: '7px 16px',
                 borderRadius: '100px',
-                boxShadow: '0 4px 15px rgba(var(--accent-rgb), 0.3)',
+                boxShadow: 'var(--shadow-sm)',
+                transition: 'opacity 0.15s, transform 0.15s'
               }}>Sign Up</Link>
             </div>
           )}
@@ -350,17 +437,23 @@ function NavLink({ href, label, highlight }: { href: string; label: string; high
       fontWeight: highlight ? '700' : '500',
       padding: '6px 12px',
       borderRadius: '6px',
-      transition: 'color 0.15s',
+      transition: 'color 0.15s, background-color 0.15s',
     }}
-    onMouseEnter={e => (e.currentTarget.style.color = highlight ? 'var(--accent)' : 'var(--text-primary)')}
-    onMouseLeave={e => (e.currentTarget.style.color = highlight ? 'var(--accent)' : 'var(--text-secondary)')}
+    onMouseEnter={e => {
+      e.currentTarget.style.color = 'var(--text-primary)';
+      e.currentTarget.style.background = 'var(--accent-soft)';
+    }}
+    onMouseLeave={e => {
+      e.currentTarget.style.color = highlight ? 'var(--accent)' : 'var(--text-secondary)';
+      e.currentTarget.style.background = 'transparent';
+    }}
     >
       {label}
     </Link>
   );
 }
 
-function MenuItem({ icon, label, href, onClick }: { icon: React.ReactNode; label: string; href: string; onClick: () => void }) {
+function MenuItem({ icon, label, href, onClick, highlight }: { icon: React.ReactNode; label: string; href: string; onClick: () => void; highlight?: boolean }) {
   return (
     <Link href={href} onClick={onClick} style={{
       display: 'flex',
@@ -368,23 +461,29 @@ function MenuItem({ icon, label, href, onClick }: { icon: React.ReactNode; label
       gap: '12px',
       padding: '10px 14px',
       borderRadius: '8px',
-      color: '#d4d4d8',
+      color: highlight ? 'var(--accent)' : 'var(--text-primary)',
+      background: highlight ? 'var(--accent-soft)' : 'transparent',
       textDecoration: 'none',
       fontSize: '13px',
-      fontWeight: '500',
+      fontWeight: highlight ? '700' : '500',
       transition: 'background 0.15s, color 0.15s'
     }}
     onMouseEnter={e => {
-      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-      e.currentTarget.style.color = '#fff';
+      e.currentTarget.style.background = 'var(--accent-soft)';
+      e.currentTarget.style.color = 'var(--accent)';
     }}
     onMouseLeave={e => {
-      e.currentTarget.style.background = 'transparent';
-      e.currentTarget.style.color = '#d4d4d8';
+      e.currentTarget.style.background = highlight ? 'var(--accent-soft)' : 'transparent';
+      e.currentTarget.style.color = highlight ? 'var(--accent)' : 'var(--text-primary)';
     }}
     >
-      <span style={{ color: '#a1a1aa', display: 'flex', alignItems: 'center' }}>{icon}</span>
-      <span>{label}</span>
+      <span style={{ color: 'var(--accent)', display: 'flex', alignItems: 'center' }}>{icon}</span>
+      <span style={{ flex: 1 }}>{label}</span>
+      {highlight && (
+        <span style={{ fontSize: '10px', fontWeight: '800', background: 'var(--accent)', color: '#fff', padding: '2px 6px', borderRadius: '4px', letterSpacing: '0.04em' }}>
+          ADMIN
+        </span>
+      )}
     </Link>
   );
 }
@@ -399,17 +498,25 @@ function ThemeOption({ label, value, active, onClick }: { label: string; value: 
         justifyContent: 'space-between',
         padding: '8px 14px',
         borderRadius: '8px',
-        color: active ? '#fff' : '#a1a1aa',
+        color: active ? 'var(--accent)' : 'var(--text-secondary)',
+        background: active ? 'var(--accent-soft)' : 'transparent',
         fontSize: '13px',
+        fontWeight: active ? '600' : '400',
         cursor: 'pointer',
-        transition: 'background 0.15s'
+        transition: 'background 0.15s, color 0.15s'
       }}
-      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)')}
-      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+      onMouseEnter={e => {
+        if (!active) e.currentTarget.style.background = 'var(--accent-soft)';
+      }}
+      onMouseLeave={e => {
+        if (!active) e.currentTarget.style.background = 'transparent';
+      }}
     >
       <span>{label}</span>
       {active && (
-        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981' }}></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
       )}
     </div>
   );

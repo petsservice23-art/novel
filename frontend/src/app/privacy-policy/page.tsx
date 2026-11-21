@@ -1,40 +1,93 @@
-import React from 'react';
+'use client';
 
 export default function PrivacyPolicyPage() {
+  const sections = [
+    {
+      num: '1',
+      title: 'Information We Collect',
+      body: 'We collect account and usage information needed to run SegyeNovels, including your email address, username, authentication identifiers, and activity related to reading, purchases, and account security. Payment card data is not stored by SegyeNovels; payment providers process and store payment details under their own policies.'
+    },
+    {
+      num: '2',
+      title: 'How We Use Information',
+      body: 'We use collected information to provide and improve the service, authenticate users, prevent abuse, process coin purchases, maintain content access records, communicate account-related notices, and comply with legal obligations.'
+    },
+    {
+      num: '3',
+      title: 'Cookies and Similar Technologies',
+      body: 'SegyeNovels uses essential cookies and similar technologies for login sessions, security controls, and product functionality. Disabling essential cookies may prevent parts of the service from working.'
+    },
+    {
+      num: '4',
+      title: 'Data Sharing',
+      body: 'We share data only when necessary to operate SegyeNovels, such as with infrastructure providers, payment processors, analytics tools, and legal authorities when required by law. We do not sell personal information.'
+    },
+    {
+      num: '5',
+      title: 'Data Retention',
+      body: 'We retain personal data only as long as needed for operational, legal, accounting, and security purposes. Retention periods may vary by data type and legal requirements.'
+    },
+    {
+      num: '6',
+      title: 'Security',
+      body: 'We apply technical and organizational safeguards intended to protect your data. No internet-based service can guarantee absolute security, so users should also protect account credentials and report suspected unauthorized access promptly.'
+    },
+    {
+      num: '7',
+      title: 'Your Choices and Rights',
+      body: 'Depending on your location, you may have rights to access, correct, delete, or restrict processing of your personal data. You can also request account deletion by contacting support.'
+    },
+    {
+      num: '8',
+      title: "Children's Privacy",
+      body: 'SegyeNovels is not intended for children under the age required by applicable law in their jurisdiction. If we learn that personal data was collected from an ineligible user, we will take appropriate action to remove it.'
+    },
+    {
+      num: '9',
+      title: 'Changes to This Policy',
+      body: 'We may update this Privacy Policy from time to time. Material changes will be reflected by an updated effective date on this page.'
+    },
+    {
+      num: '10',
+      title: 'Contact',
+      body: 'For privacy-related requests, contact the SegyeNovels support channel used in your account settings or official support email at support@segyenovels.com.'
+    }
+  ];
+
   return (
-    <div style={{ background: '#09090b', color: '#fafafa', minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif', padding: '80px 20px' }}>
-      <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-        <header style={{ marginBottom: '60px' }}>
-          <h1 style={{ fontSize: '36px', fontWeight: '600', marginBottom: '16px', letterSpacing: '-0.02em' }}>Privacy Policy</h1>
-          <p style={{ color: '#a1a1aa', fontSize: '15px' }}>Last updated: September 23, 2026</p>
+    <div style={{
+      background: 'var(--bg-primary)',
+      color: 'var(--text-primary)',
+      minHeight: '100vh',
+      padding: '48px 16px 80px',
+      transition: 'background-color 0.2s, color 0.2s'
+    }}>
+      <div style={{ maxWidth: '820px', margin: '0 auto' }}>
+        
+        {/* Header Block (Matching Image 7) */}
+        <header style={{ marginBottom: '36px' }}>
+          <h1 style={{ fontSize: '38px', fontWeight: '800', marginBottom: '8px', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            Privacy Policy
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
+            Last updated: March 23, 2026
+          </p>
         </header>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', color: '#d4d4d8', fontSize: '15px', lineHeight: '1.7' }}>
-          <section>
-            <h2 style={{ fontSize: '20px', fontWeight: '500', color: '#fafafa', marginBottom: '12px' }}>1. Information We Collect</h2>
-            <p style={{ marginBottom: '12px' }}>We only collect information that is strictly necessary to provide our services:</p>
-            <ul style={{ listStyleType: 'disc', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <li><strong>Account Info:</strong> Email address, username, and encrypted passwords.</li>
-              <li><strong>Usage Data:</strong> Your reading history, bookmarks, and unlocked chapters to sync across your devices.</li>
-              <li><strong>Payment Info:</strong> We do not store your credit card numbers. All payments are securely processed by Razorpay, Stripe, or PayPal.</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 style={{ fontSize: '20px', fontWeight: '500', color: '#fafafa', marginBottom: '12px' }}>2. How We Use Your Data</h2>
-            <p>Your data is used to maintain your account, process transactions, and provide a personalized reading experience (like resuming where you left off). We never sell your personal information to third parties.</p>
-          </section>
-
-          <section>
-            <h2 style={{ fontSize: '20px', fontWeight: '500', color: '#fafafa', marginBottom: '12px' }}>3. Data Security</h2>
-            <p>We use industry-standard encryption protocols (SSL/TLS) to protect your data in transit. Your passwords are hashed using bcrypt. While we strive to use commercially acceptable means to protect your data, no method of transmission over the internet is 100% secure.</p>
-          </section>
-
-          <section>
-            <h2 style={{ fontSize: '20px', fontWeight: '500', color: '#fafafa', marginBottom: '12px' }}>4. Your Rights</h2>
-            <p>You have the right to request access to the data we hold about you, or ask for your account and associated data to be permanently deleted. Please use the Contact page for these requests.</p>
-          </section>
+        {/* 10 Sections (Matching Image 7) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          {sections.map(s => (
+            <section key={s.num}>
+              <h2 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '10px', color: 'var(--text-primary)' }}>
+                {s.num}. {s.title}
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.75' }}>
+                {s.body}
+              </p>
+            </section>
+          ))}
         </div>
+
       </div>
     </div>
   );

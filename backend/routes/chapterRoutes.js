@@ -5,7 +5,8 @@ const {
   getChapterById,
   addChapter,
   getChapterByNumber,
-  unlockChapter
+  unlockChapter,
+  unlockAllChapters
 } = require('../controllers/chapterController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
@@ -32,6 +33,7 @@ router.route('/')
   .post(protect, authorize('author', 'admin'), addChapter);
 
 router.get('/novel/:novelId', getChaptersByNovel);
+router.post('/novel/:novelId/unlock-all', protect, unlockAllChapters);
 router.get('/novel/:novelId/chapter/:chapterNumber', optionalAuth, getChapterByNumber);
 router.get('/:id', optionalAuth, getChapterById);
 router.post('/:id/unlock', protect, unlockChapter);

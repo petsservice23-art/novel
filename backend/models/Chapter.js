@@ -11,4 +11,6 @@ const chapterSchema = new mongoose.Schema({
   tier: { type: String, enum: ['free', 'coin', 'paid'], default: 'free' }
 }, { timestamps: true });
 
+chapterSchema.index({ novel_id: 1, chapter_number: 1 }, { unique: true });
+
 module.exports = mongoose.model('Chapter', chapterSchema);

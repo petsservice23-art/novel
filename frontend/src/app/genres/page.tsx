@@ -1,203 +1,362 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import axios from 'axios';
+import API_URL from '@/config';
 
-const allGenres = [
-  { name: "Romance", count: 100, letter: "R" },
-  { name: "Fantasy", count: 94, letter: "F" },
-  { name: "Drama", count: 76, letter: "D" },
-  { name: "Josei", count: 42, letter: "J" },
-  { name: "Comedy", count: 32, letter: "C" },
-  { name: "Mature", count: 23, letter: "M" },
-  { name: "Psychological", count: 15, letter: "P" },
-  { name: "Adult", count: 14, letter: "A" },
-  { name: "Smut", count: 12, letter: "S" },
-  { name: "Mystery", count: 11, letter: "M" },
-  { name: "Tragedy", count: 11, letter: "T" },
-  { name: "Slice of Life", count: 10, letter: "SO" },
-  { name: "Action", count: 8, letter: "A" },
-  { name: "Reverse Harem", count: 8, letter: "RH" },
-  { name: "Shoujo", count: 7, letter: "S" },
-  { name: "Isekai", count: 6, letter: "I" },
-  { name: "Revenge", count: 6, letter: "R" },
-  { name: "Romance Fantasy", count: 6, letter: "RF" },
-  { name: "Historical", count: 5, letter: "H" },
-  { name: "Reincarnation", count: 5, letter: "R" },
-  { name: "Adventure", count: 4, letter: "A" },
-  { name: "Royalty", count: 4, letter: "R" },
-  { name: "Contemporary", count: 3, letter: "C" },
-  { name: "Mature Romance", count: 3, letter: "MR" },
-  { name: "Supernatural", count: 3, letter: "S" },
-  { name: "Villainess", count: 3, letter: "V" },
-  { name: "Harem", count: 2, letter: "H" },
-  { name: "Marriage Contract", count: 2, letter: "MC" },
-  { name: "Possession", count: 2, letter: "P" },
-  { name: "Thriller", count: 2, letter: "T" },
-  { name: "Yandere", count: 2, letter: "Y" },
-  { name: "Adult Drama", count: 1, letter: "AD" },
-  { name: "Angst", count: 1, letter: "A" },
-  { name: "BL", count: 1, letter: "B" },
-  { name: "Contract Marriage", count: 1, letter: "CM" },
-  { name: "Dark Fantasy", count: 1, letter: "DF" },
-  { name: "Ecchi", count: 1, letter: "E" },
-  { name: "Fantasy Romance", count: 1, letter: "FR" },
-  { name: "Fluff", count: 1, letter: "F" },
-  { name: "Gender Bender", count: 1, letter: "GB" },
-  { name: "High Society", count: 1, letter: "HS" },
-  { name: "Horror", count: 1, letter: "H" },
-  { name: "Imperial Palace", count: 1, letter: "IP" },
-  { name: "Regression", count: 1, letter: "R" },
-  { name: "School Life", count: 1, letter: "SL" },
-  { name: "Seinen", count: 1, letter: "S" },
-  { name: "Transmigration", count: 1, letter: "T" },
-  { name: "Western Fantasy", count: 1, letter: "WF" },
-  { name: "Workplace", count: 1, letter: "W" }
-];
+interface GenreItem {
+  name: string;
+  count: number;
+  letter: string;
+}
 
 export default function GenresPage() {
+  const [genresList, setGenresList] = useState<GenreItem[]>([]);
+  const [totalAssignments, setTotalAssignments] = useState(1172);
+  const [totalNovels, setTotalNovels] = useState(250);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('Popular');
 
-  const filteredGenres = allGenres.filter(g => 
+  useEffect(() => {
+    const fetchGenreStats = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/novels`);
+        const novels: any[] = Array.isArray(res.data) ? res.data : (res.data.novels || []);
+        setTotalNovels(novels.length);
+
+        const counts: Record<string, number> = {};
+        let assignments = 0;
+
+        novels.forEach(n => {
+          (n.genres || []).forEach((g: string) => {
+            const clean = g.trim();
+            if (clean) {
+              counts[clean] = (counts[clean] || 0) + 1;
+              assignments++;
+            }
+          });
+        });
+
+        setTotalAssignments(assignments);
+
+        const list: GenreItem[] = Object.entries(counts).map(([name, count]) => {
+          const letter = name.slice(0, 2).toUpperCase();
+          return { name, count, letter: letter.length > 1 ? letter[0] : letter };
+        });
+
+        // Default sort by popularity
+        list.sort((a, b) => b.count - a.count);
+        setGenresList(list);
+      } catch (err) {
+        console.error('Failed to fetch real genres:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchGenreStats();
+  }, []);
+
+  let filtered = genresList.filter(g => 
     g.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  if (sortBy === 'A–Z') {
+    filtered = [...filtered].sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sortBy === 'Popular') {
+    filtered = [...filtered].sort((a, b) => b.count - a.count);
+  }
+
+  const topGenres = genresList.slice(0, 6);
+
   return (
-    <div style={{ padding: '60px 20px', maxWidth: '1200px', margin: '0 auto', minHeight: '100vh' }}>
-      <header style={{ marginBottom: '60px' }}>
-        <h1 style={{ fontSize: '42px', fontWeight: '800', marginBottom: '16px' }}>Genres</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '18px' }}>Explore by category and jump straight into novels you like.</p>
-      </header>
-
-      {/* Stats Bar */}
-      <div style={{ 
-        display: 'flex', 
-        gap: '40px', 
-        background: 'var(--bg-secondary)', 
-        padding: '24px 40px', 
-        borderRadius: '24px', 
-        border: '1px solid var(--border)',
-        marginBottom: '60px'
-      }}>
-        <div>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', marginBottom: '4px' }}>Matching Genres</p>
-          <h3 style={{ fontSize: '24px', fontWeight: '800' }}>{filteredGenres.length}</h3>
-        </div>
-        <div style={{ width: '1px', background: 'var(--border)' }}></div>
-        <div>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', marginBottom: '4px' }}>Total Genres</p>
-          <h3 style={{ fontSize: '24px', fontWeight: '800' }}>49</h3>
-        </div>
-        <div style={{ width: '1px', background: 'var(--border)' }}></div>
-        <div>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', marginBottom: '4px' }}>Genre Assignments</p>
-          <h3 style={{ fontSize: '24px', fontWeight: '800' }}>539</h3>
-        </div>
-      </div>
-
-      {/* Filters & Search */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          {['Popular', 'A–Z'].map(tab => (
-            <button 
-              key={tab}
-              onClick={() => setSortBy(tab)}
-              style={{
-                background: sortBy === tab ? 'var(--accent)' : 'var(--bg-secondary)',
-                color: '#fff',
-                padding: '8px 20px',
-                borderRadius: '10px',
-                border: 'none',
-                fontWeight: '700',
-                cursor: 'pointer'
-              }}
-            >{tab}</button>
-          ))}
-          <button style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)', padding: '8px 20px', borderRadius: '10px', border: '1px solid var(--border)', fontWeight: '700', cursor: 'pointer' }}>Show Empty</button>
-        </div>
+    <div style={{ 
+      background: 'var(--bg-primary)', 
+      color: 'var(--text-primary)', 
+      minHeight: '100vh', 
+      padding: '40px 16px 80px',
+      transition: 'background-color 0.2s, color 0.2s'
+    }}>
+      <div style={{ maxWidth: '1240px', margin: '0 auto' }}>
         
-        <div style={{ position: 'relative', width: '300px' }}>
-          <input 
-            type="text" 
-            placeholder="Search genres..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{
-              width: '100%',
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border)',
-              borderRadius: '100px',
-              padding: '10px 40px',
-              color: '#fff',
-              outline: 'none'
-            }}
-          />
-          <svg style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-          </svg>
-        </div>
-      </div>
+        {/* Header Block (Matching Image 2) */}
+        <header style={{ marginBottom: '24px' }}>
+          <h1 style={{ fontSize: '36px', fontWeight: '800', marginBottom: '8px', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            Novel Genres
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', maxWidth: '880px', lineHeight: '1.6' }}>
+            SegyeNovels hosts web novels across {genresList.length || 43} genres — from epic fantasy and slow-burn romance to fast-paced action, psychological thriller, and slice of life. Every genre has free chapters available so you can try before you commit.
+          </p>
+        </header>
 
-      {/* Top Genres Section */}
-      {!search && (
-        <section style={{ marginBottom: '80px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '32px' }}>Top Genres</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-            {allGenres.slice(0, 6).map((genre, idx) => (
-              <Link key={idx} href={`/browse?genre=${genre.name}`} style={{ textDecoration: 'none' }}>
-                <div style={{ 
-                  background: 'var(--bg-secondary)', 
-                  padding: '24px', 
-                  borderRadius: '20px', 
-                  border: '1px solid var(--border)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.transform = 'scale(1.02)'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'scale(1)'; }}
+        {/* 1. Genres Tag Cloud (Real counts from our novels!) */}
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '8px',
+          marginBottom: '32px'
+        }}>
+          {genresList.map((genre) => (
+            <Link key={genre.name} href={`/browse?genre=${genre.name}`} style={{ textDecoration: 'none' }}>
+              <span style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border)',
+                borderRadius: '100px',
+                padding: '6px 14px',
+                fontSize: '12px',
+                fontWeight: '600',
+                color: 'var(--text-primary)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                boxShadow: 'var(--shadow-sm)',
+                transition: 'all 0.15s ease'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = 'var(--accent)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.transform = 'none';
+              }}
+              >
+                <span>{genre.name}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>({genre.count})</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+
+        {/* 2. Filter Tabs & Search Box & Live Stats */}
+        <div style={{
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: '16px',
+          padding: '24px',
+          marginBottom: '40px',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          {/* Tabs & Search */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', marginBottom: '20px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {['Popular', 'A–Z', 'Show Empty'].map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setSortBy(tab)}
+                  style={{
+                    background: sortBy === tab ? 'var(--text-primary)' : 'var(--bg-secondary)',
+                    color: sortBy === tab ? '#fff' : 'var(--text-primary)',
+                    border: '1px solid ' + (sortBy === tab ? 'var(--text-primary)' : 'var(--border)'),
+                    padding: '8px 18px',
+                    borderRadius: '100px',
+                    fontSize: '13px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s'
+                  }}
                 >
-                  <div>
-                    <h4 style={{ fontSize: '20px', fontWeight: '800', color: '#fff', marginBottom: '4px' }}>{genre.name}</h4>
-                    <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '600' }}>{genre.count} novels</p>
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ position: 'relative', width: '100%', maxWidth: '320px' }}>
+              <input
+                type="text"
+                placeholder="Search genres..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                style={{
+                  width: '100%',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '100px',
+                  padding: '9px 18px 9px 40px',
+                  fontSize: '14px',
+                  color: 'var(--text-primary)',
+                  outline: 'none'
+                }}
+              />
+              <div style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Bar (Live calculated from our 250 novels) */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: '16px',
+            borderTop: '1px solid var(--border)',
+            paddingTop: '20px'
+          }}>
+            <div>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Matching Genres</p>
+              <h3 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)' }}>{filtered.length}</h3>
+            </div>
+            <div>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Total Genres</p>
+              <h3 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)' }}>{genresList.length || 43}</h3>
+            </div>
+            <div>
+              <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Genre Assignments</p>
+              <h3 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)' }}>{totalAssignments.toLocaleString()}</h3>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. Top Genres Section (Top 6 real genres from our database) */}
+        {!search && (
+          <section style={{ marginBottom: '48px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '18px', letterSpacing: '-0.01em' }}>
+              Top Genres
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+              {topGenres.map((genre) => (
+                <Link key={genre.name} href={`/browse?genre=${genre.name}`} style={{ textDecoration: 'none' }}>
+                  <div style={{
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '16px',
+                    padding: '22px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    boxShadow: 'var(--shadow-sm)',
+                    transition: 'all 0.2s ease',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.borderColor = 'var(--accent)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                    e.currentTarget.style.transform = 'none';
+                  }}
+                  >
+                    <div>
+                      <h3 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px' }}>
+                        {genre.name}
+                      </h3>
+                      <p style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: '500' }}>
+                        {genre.count} novels
+                      </p>
+                    </div>
+                    <div style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '12px',
+                      background: 'var(--bg-secondary)',
+                      border: '1px solid var(--border)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '18px',
+                      fontWeight: '800',
+                      color: 'var(--accent)'
+                    }}>
+                      {genre.letter}
+                    </div>
                   </div>
-                  <div style={{ width: '48px', height: '48px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: '900', color: 'var(--accent)' }}>{genre.letter}</div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 4. All Genres Section (4-column card grid with arrow, matching Image 2) */}
+        <section style={{ marginBottom: '48px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '18px', letterSpacing: '-0.01em' }}>
+            All Genres
+          </h2>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+            gap: '12px'
+          }}>
+            {filtered.map((genre) => (
+              <Link key={genre.name} href={`/browse?genre=${genre.name}`} style={{ textDecoration: 'none' }}>
+                <div style={{
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '12px',
+                  padding: '14px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '14px',
+                  boxShadow: 'var(--shadow-sm)',
+                  transition: 'all 0.15s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = 'var(--accent)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'none';
+                }}
+                >
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '8px',
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--border)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    fontWeight: '800',
+                    color: 'var(--accent)',
+                    flexShrink: 0
+                  }}>
+                    {genre.letter}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {genre.name}
+                    </h4>
+                    <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                      {genre.count} novels
+                    </p>
+                  </div>
+                  <div style={{ color: 'var(--text-muted)' }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 18 6-6-6-6"/></svg>
+                  </div>
                 </div>
               </Link>
             ))}
           </div>
         </section>
-      )}
 
-      {/* All Genres List */}
-      <section>
-        <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '32px' }}>All Genres</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-          {filteredGenres.map((genre, idx) => (
-            <Link key={idx} href={`/browse?genre=${genre.name}`} style={{ textDecoration: 'none' }}>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '16px',
-                padding: '12px 0',
-                borderBottom: '1px solid var(--border)',
-                transition: 'padding-left 0.2s'
-              }}
-              onMouseEnter={e => e.currentTarget.style.paddingLeft = '8px'}
-              onMouseLeave={e => e.currentTarget.style.paddingLeft = '0'}
-              >
-                <div style={{ width: '32px', height: '32px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: '900', color: 'var(--text-muted)', flexShrink: 0 }}>{genre.letter}</div>
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>{genre.name}</h4>
-                  <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{genre.count} novels</p>
-                </div>
-              </div>
-            </Link>
-          ))}
+        {/* View All Novels Button */}
+        <div style={{ textAlign: 'center', marginTop: '32px' }}>
+          <Link href="/browse" style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            padding: '12px 28px',
+            borderRadius: '100px',
+            color: 'var(--text-primary)',
+            fontWeight: '700',
+            fontSize: '14px',
+            textDecoration: 'none',
+            boxShadow: 'var(--shadow-sm)',
+            transition: 'background 0.15s'
+          }}>
+            <span>View all novels</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </Link>
         </div>
-      </section>
+
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'react-hot-toast';
@@ -8,6 +9,7 @@ import { toast } from 'react-hot-toast';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function SupportChatWidget() {
+  const pathname = usePathname();
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -20,12 +22,15 @@ export default function SupportChatWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Keep chat widget only on home, browse, and coins page; completely removed on others
+  const isAllowedPage = pathname === '/' || pathname === '/browse' || pathname.startsWith('/browse/') || pathname === '/coins';
+
   // Initialize unique session ID for guest readers
   useEffect(() => {
-    let storedSession = localStorage.getItem('novelverse_support_session');
+    let storedSession = localStorage.getItem('segyenovels_support_session') || localStorage.getItem('novelverse_support_session');
     if (!storedSession) {
       storedSession = 'sess_' + Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
-      localStorage.setItem('novelverse_support_session', storedSession);
+      localStorage.setItem('segyenovels_support_session', storedSession);
     }
     setSessionId(storedSession);
   }, []);
@@ -145,18 +150,39 @@ export default function SupportChatWidget() {
     }
   };
 
+  // Only render on allowed pages (Home, Browse, Coins) - called AFTER all hooks
+  if (!isAllowedPage) {
+    return null;
+  }
+
   return (
     <>
-      {/* 1. Floating Pill Button (Bottom Right) */}
+      <style>{`
+        .chat-widget-btn {
+          bottom: 24px;
+          right: 24px;
+          display: flex;
+        }
+        @media (max-width: 768px) {
+          .chat-widget-btn,
+          .hide-on-mobile {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+          }
+        }
+      `}</style>
+
+      {/* 1. Floating Pill Button (Desktop only on allowed pages) */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
+          className="chat-widget-btn hide-on-mobile hidden md:flex"
           style={{
             position: 'fixed',
             bottom: '24px',
             right: '24px',
             zIndex: 999,
-            display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
             background: '#1d2621',
@@ -192,11 +218,12 @@ export default function SupportChatWidget() {
       {/* 2. Open Support Chat Modal */}
       {isOpen && (
         <div
+          className={isFullScreen ? '' : 'chat-widget-modal'}
           style={{
             position: 'fixed',
-            bottom: isFullScreen ? '4vh' : '24px',
-            right: isFullScreen ? '4vw' : '24px',
-            width: isFullScreen ? '92vw' : '420px',
+            bottom: isFullScreen ? '4vh' : undefined,
+            right: isFullScreen ? '4vw' : undefined,
+            width: isFullScreen ? '92vw' : undefined,
             maxWidth: isFullScreen ? '900px' : 'calc(100vw - 32px)',
             height: isFullScreen ? '88vh' : '560px',
             maxHeight: 'calc(100vh - 48px)',
@@ -239,7 +266,7 @@ export default function SupportChatWidget() {
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '15px', fontWeight: '700', color: '#fafafa' }}>Novelverse Support</span>
+                  <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>SegyeNovels Support</span>
                   <span style={{
                     width: '7px',
                     height: '7px',
@@ -376,8 +403,8 @@ export default function SupportChatWidget() {
                     }}
                   >
                     {!isUser && (
-                      <span style={{ fontSize: '11px', fontWeight: '700', color: '#22c55e', marginBottom: '4px' }}>
-                        Novelverse Team
+                      <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--accent)', marginBottom: '4px' }}>
+                        SegyeNovels Team
                       </span>
                     )}
                     <div style={{

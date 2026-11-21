@@ -3,119 +3,123 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
-interface FAQItem {
-  question: string;
-  answer: string;
-}
-
-const faqs: FAQItem[] = [
-  {
-    question: 'What is Novelverse?',
-    answer: 'Novelverse is a premier web novel reading platform where you can read captivating fantasy, romance, historical, and drama novels online. Enjoy a clean reading experience, customizable font themes, and audio narration.'
-  },
-  {
-    question: 'Are all chapters free to read?',
-    answer: 'Every novel features dozens to hundreds of completely free chapters. Advanced or completed chapters can be unlocked using © Coins or accessed with VIP privileges.'
-  },
-  {
-    question: 'How do I get coins?',
-    answer: 'You can get © coins easily by visiting the Coins page to purchase coin bundles, or by claiming daily reading streaks when logged in to your account.'
-  },
-  {
-    question: 'Can I read on my phone?',
-    answer: 'Yes! Novelverse is designed to be fully mobile-first and responsive. You can read smoothly across iPhones, Android devices, tablets, and desktop computers.'
-  },
-  {
-    question: 'How do I track my reading progress?',
-    answer: 'Sign in to your account and bookmark novels to your Library. Your last-read chapter and reading progress are synchronized automatically in real time.'
-  },
-  {
-    question: 'How do I change my account settings?',
-    answer: 'Open the profile drawer from the top right avatar menu and navigate to Settings. You can modify your display name, avatar, account details, and password.'
-  },
-  {
-    question: 'What genres are available?',
-    answer: 'We host a rich selection of genres including Romance, Fantasy, Josei, Historical, Mature, Drama, Action, and Supernatural. Visit the Genres tab to browse by tag.'
-  },
-  {
-    question: 'How do I contact support?',
-    answer: 'If you have any questions, encounter a bug, or need account help, feel free to contact us through our Contact page or email support@novelverse.com.'
-  }
-];
-
 export default function HelpCenterPage() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const toggleIndex = (index: number) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
+  const faqs = [
+    {
+      q: 'What is SegyeNovels?',
+      a: 'SegyeNovels is a free web novel reading platform where you can read thousands of fantasy, romance, drama, and other genre novels online. New chapters are updated daily.'
+    },
+    {
+      q: 'Are all chapters free to read?',
+      a: 'Most novels offer free chapters. Some novels have premium chapters that can be unlocked using coins. You can earn coins through daily check ins or purchase them directly.'
+    },
+    {
+      q: 'How do I get coins?',
+      a: 'You can earn free coins through daily check ins, completing tasks, or purchase coin packages from the Coins page. Coins can be used to unlock premium chapters.'
+    },
+    {
+      q: 'Can I read on my phone?',
+      a: 'Yes! SegyeNovels is fully responsive and works great on mobile browsers. You can add it to your home screen for an app-like experience.'
+    },
+    {
+      q: 'How do I track my reading progress?',
+      a: 'Your reading progress is automatically saved. Visit your Library or Dashboard to see your continue reading list and reading history.'
+    },
+    {
+      q: 'How do I change my account settings?',
+      a: 'Go to Settings from the navigation menu. You can update your profile, change your password, and manage security settings.'
+    },
+    {
+      q: 'What genres are available?',
+      a: 'SegyeNovels offers a wide range of genres including Fantasy, Romance, Drama, Comedy, Action, Reincarnation, Villainess, and many more. Browse the Genres page to explore all categories.'
+    },
+    {
+      q: 'How do I contact support?',
+      a: 'You can chat with our support team in real time via the Support Chat page or the chat button in the bottom corner. You can ask queries, attach screenshots, and share links.'
+    }
+  ];
 
   return (
-    <div style={{ minHeight: '85vh', background: 'var(--bg-primary)', color: 'var(--text-primary)', padding: '60px 20px 100px' }}>
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+    <div style={{
+      background: 'var(--bg-primary)',
+      color: 'var(--text-primary)',
+      minHeight: '100vh',
+      padding: '48px 16px 80px',
+      transition: 'background-color 0.2s, color 0.2s'
+    }}>
+      <div style={{ maxWidth: '860px', margin: '0 auto' }}>
         
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <h1 style={{ fontSize: '36px', fontWeight: '800', marginBottom: '12px', letterSpacing: '-0.02em', color: '#fff' }}>
+        {/* Header Block (Matching Image 6) */}
+        <header style={{ marginBottom: '36px' }}>
+          <h1 style={{ fontSize: '36px', fontWeight: '800', marginBottom: '8px', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             Help Center
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '16px' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '15px' }}>
             Frequently Asked Questions
           </p>
-        </div>
+        </header>
 
-        {/* FAQ Accordion */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '60px' }}>
-          {faqs.map((faq, index) => {
-            const isOpen = openIndex === index;
+        {/* FAQ Accordion List (Matching Image 6) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '48px' }}>
+          {faqs.map((faq, idx) => {
+            const isOpen = openFaq === idx;
             return (
-              <div 
-                key={faq.question}
+              <div
+                key={idx}
                 style={{
-                  background: 'var(--bg-secondary)',
+                  background: 'var(--bg-card)',
                   border: '1px solid var(--border)',
                   borderRadius: '12px',
                   overflow: 'hidden',
-                  transition: 'border-color 0.2s',
-                  borderColor: isOpen ? 'var(--accent)' : 'var(--border)'
+                  boxShadow: 'var(--shadow-sm)'
                 }}
               >
                 <button
-                  onClick={() => toggleIndex(index)}
+                  onClick={() => setOpenFaq(isOpen ? null : idx)}
                   style={{
                     width: '100%',
-                    padding: '20px 24px',
+                    padding: '18px 22px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     background: 'transparent',
                     border: 'none',
-                    color: '#fff',
+                    color: 'var(--text-primary)',
                     fontSize: '15px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    textAlign: 'left'
+                    fontWeight: '700',
+                    textAlign: 'left',
+                    cursor: 'pointer'
                   }}
                 >
-                  <span>{faq.question}</span>
-                  <span style={{ 
-                    transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', 
-                    transition: 'transform 0.2s',
-                    color: isOpen ? 'var(--accent)' : 'var(--text-muted)'
-                  }}>
-                    ▲
-                  </span>
+                  <span>{faq.q}</span>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    style={{
+                      transform: isOpen ? 'rotate(180deg)' : 'none',
+                      transition: 'transform 0.2s ease',
+                      color: 'var(--text-muted)'
+                    }}
+                  >
+                    <path d="m6 9 6 6 6-6"/>
+                  </svg>
                 </button>
                 {isOpen && (
                   <div style={{
-                    padding: '0 24px 20px',
+                    padding: '0 22px 18px',
                     color: 'var(--text-secondary)',
                     fontSize: '14px',
-                    lineHeight: '1.7',
-                    borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-                    paddingTop: '16px'
+                    lineHeight: '1.65',
+                    borderTop: '1px solid var(--border-subtle)',
+                    paddingTop: '12px'
                   }}>
-                    {faq.answer}
+                    {faq.a}
                   </div>
                 )}
               </div>
@@ -123,31 +127,31 @@ export default function HelpCenterPage() {
           })}
         </div>
 
-        {/* Contact Support Card */}
+        {/* Support & Queries Box (Matching Image 6) */}
         <div style={{
-          background: 'var(--bg-secondary)',
+          background: 'var(--bg-card)',
           border: '1px solid var(--border)',
           borderRadius: '16px',
-          padding: '32px',
-          textAlign: 'center',
-          boxShadow: '0 8px 30px rgba(0,0,0,0.2)'
+          padding: '24px 28px',
+          boxShadow: 'var(--shadow-sm)'
         }}>
-          <h3 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '8px', color: '#fff' }}>
-            Contact Support
+          <h3 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
+            Support & Queries
           </h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '20px', maxWidth: '480px', margin: '0 auto 20px' }}>
-            If you can’t find the answer you’re looking for, our friendly support team is always ready to assist you.
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '14px', lineHeight: '1.6' }}>
+            If you can't find the answer you're looking for, chat directly with our support team.
           </p>
-          <Link href="/contact" style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
+          <Link href="/support" style={{
             color: 'var(--accent)',
             fontSize: '14px',
-            fontWeight: '600',
-            textDecoration: 'none'
+            fontWeight: '700',
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
           }}>
-            Go to Contact Page &rarr;
+            <span>Open Live Support Chat</span>
+            <span>→</span>
           </Link>
         </div>
 

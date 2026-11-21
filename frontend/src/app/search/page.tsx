@@ -68,12 +68,12 @@ function SearchContent() {
               border: '2px solid var(--border)',
               borderRadius: '20px',
               padding: '24px 32px 24px 70px',
-              color: '#fff',
+              color: 'var(--text-primary)',
               fontSize: '20px',
               fontWeight: '600',
               outline: 'none',
               transition: 'all 0.3s',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+              boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
             }}
             onFocus={e => e.currentTarget.style.borderColor = 'var(--accent)'}
             onBlur={e => e.currentTarget.style.borderColor = 'var(--border)'}
@@ -110,11 +110,11 @@ function SearchContent() {
 
       {/* Results */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '100px' }}>Searching for the best stories...</div>
+        <div style={{ textAlign: 'center', padding: '100px', color: 'var(--text-secondary)' }}>Searching for the best stories...</div>
       ) : results.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '100px', color: 'var(--text-muted)' }}>
           <div style={{ fontSize: '64px', marginBottom: '20px' }}>🔍</div>
-          <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#fff' }}>No novels found</h2>
+          <h2 style={{ fontSize: '24px', fontWeight: '800', color: 'var(--text-primary)' }}>No novels found</h2>
           <p>Try different keywords or filters</p>
         </div>
       ) : (
@@ -144,15 +144,15 @@ function SearchContent() {
                   aspectRatio: '2/3', 
                   background: `url(${novel.cover_image}) center/cover`, 
                   borderRadius: '16px',
-                  boxShadow: '0 8px 20px rgba(0,0,0,0.3)'
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.2)'
                 }} />
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                     {novel.genres?.map(g => (
-                      <span key={g} style={{ fontSize: '11px', fontWeight: '800', background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', padding: '4px 10px', borderRadius: '6px' }}>{g}</span>
+                      <span key={g} style={{ fontSize: '11px', fontWeight: '800', background: 'var(--bg-card)', color: 'var(--text-secondary)', padding: '4px 10px', borderRadius: '6px', border: '1px solid var(--border)' }}>{g}</span>
                     ))}
                   </div>
-                  <h2 style={{ fontSize: '24px', fontWeight: '900', color: '#fff', marginBottom: '8px' }}>{novel.title}</h2>
+                  <h2 style={{ fontSize: '24px', fontWeight: '900', color: 'var(--text-primary)', marginBottom: '8px' }}>{novel.title}</h2>
                   <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '15px' }}>by <span style={{ color: 'var(--accent)', fontWeight: '700' }}>{novel.author}</span></p>
                   <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
                     <span style={{ color: '#FFD700', fontWeight: '800' }}>⭐ {novel.rating}</span>

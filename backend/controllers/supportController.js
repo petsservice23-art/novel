@@ -6,10 +6,15 @@ const User = require('../models/User');
 // @access  Public / Optional Auth
 const sendMessage = async (req, res) => {
   try {
-    const { session_id, content, attachment, category, sender_name, sender_email } = req.body;
+    const session_id = req.body.session_id || req.body.sessionId;
+    const content = req.body.content || req.body.text;
+    const attachment = req.body.attachment || req.body.image_url;
+    const category = req.body.category;
+    const sender_name = req.body.sender_name || req.body.senderName;
+    const sender_email = req.body.sender_email || req.body.senderEmail;
 
-    if (!session_id || !content) {
-      return res.status(400).json({ message: 'Session ID and message content are required' });
+    if (!session_id || (!content && !attachment)) {
+      return res.status(400).json({ message: 'Session ID and message content or attachment are required' });
     }
 
     let userId = null;

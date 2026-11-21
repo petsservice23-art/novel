@@ -45,7 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       }}>
         <div style={{ marginBottom: '40px', padding: '0 12px' }}>
           <h2 style={{ fontSize: '24px', fontWeight: '900', color: 'var(--accent)' }}>Admin Panel</h2>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>Novelverse Management</p>
+          <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>SegyeNovels Management</p>
         </div>
 
         <nav style={{ display: 'grid', gap: '8px' }}>

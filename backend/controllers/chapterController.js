@@ -80,7 +80,7 @@ const getChaptersByNovel = async (req, res) => {
 // Helper: Check if user has access to a chapter
 const checkUserAccess = async (user, chapter, tier) => {
   if (!user) return false;
-  if (user.is_vip) return true;
+  if (user.role === 'admin' || user.role === 'superadmin' || user.is_admin || user.is_vip) return true;
 
   const chapterId = chapter._id.toString();
   const unlockedById = (user.unlocked_chapters || []).map(id => id.toString());
@@ -314,11 +314,68 @@ const addChapter = async (req, res) => {
   res.status(201).json(chapter);
 };
 
+// @desc    Unlock all locked chapters for a novel
+// @route   POST /api/chapters/novel/:novelId/unlock-all
+// @access  Private
+const unlockAllChapters = async (req, res) => {
+  try {
+    const novelId = req.params.novelId;
+    const novel = await Novel.findById(novelId);
+    if (!novel) return res.status(404).json({ message: 'Novel not found' });
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(401).json({ message: 'User not found' });
+
+    // Find all paid/locked chapters for this novel
+    const paidChapters = await Chapter.find({
+      novel_id: novelId,
+      $or: [{ tier: 'coin' }, { tier: 'paid' }, { is_locked: true }]
+    }).select('_id chapter_number price');
+
+    const unlockedStrSet = new Set((user.unlocked_chapters || []).map(id => id.toString()));
+    const remainingToUnlock = paidChapters.filter(ch => !unlockedStrSet.has(ch._id.toString()));
+
+    if (remainingToUnlock.length === 0) {
+      return res.status(400).json({ message: 'All chapters for this novel are already unlocked!' });
+    }
+
+    const pricePerChapter = 10;
+    const totalPrice = remainingToUnlock.length * pricePerChapter;
+
+    if (user.coins < totalPrice) {
+      return res.status(400).json({
+        message: `Insufficient coins. Need ${totalPrice} coins to unlock all ${remainingToUnlock.length} remaining chapters (you have ${user.coins}).`,
+        coins: user.coins,
+        requiredCoins: totalPrice,
+        needed: totalPrice - user.coins,
+        remainingCount: remainingToUnlock.length
+      });
+    }
+
+    user.coins -= totalPrice;
+    for (const ch of remainingToUnlock) {
+      user.unlocked_chapters.push(ch._id);
+    }
+    await user.save();
+
+    res.json({
+      message: `Successfully unlocked all ${remainingToUnlock.length} chapters!`,
+      coins: user.coins,
+      unlockedCount: remainingToUnlock.length,
+      unlockedChapters: remainingToUnlock.map(c => c._id)
+    });
+  } catch (error) {
+    console.error('Error unlocking all chapters:', error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
 module.exports = {
   getChaptersByNovel,
   getChapterById,
   addChapter,
   getChapterByNumber,
   unlockChapter,
+  unlockAllChapters,
   getChapterTier
 };

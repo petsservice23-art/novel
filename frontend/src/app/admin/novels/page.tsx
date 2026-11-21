@@ -8,9 +8,10 @@ export default function ManageNovels() {
   const [novels, setNovels] = useState<any[]>([]);
   const [chapters, setChapters] = useState<any[]>([]);
   const [selectedNovel, setSelectedNovel] = useState<string>('');
+  const [novelSearch, setNovelSearch] = useState<string>('');
 
   // Novel Metadata State
-  const [novelMeta, setNovelMeta] = useState<any>({ author: '', alternative_titles: '', published_year: '', publishing_status: 'ongoing', description: '' });
+  const [novelMeta, setNovelMeta] = useState<any>({ title: '', author: '', alternative_titles: '', published_year: '', publishing_status: 'ongoing', description: '' });
   const [isSavingMeta, setIsSavingMeta] = useState(false);
 
   // Editor Modal State
@@ -50,6 +51,7 @@ export default function ManageNovels() {
     const n = novels.find(x => x._id === novelId);
     if (n) {
       setNovelMeta({
+        title: n.title || '',
         author: n.author || '',
         alternative_titles: n.alternative_titles || '',
         published_year: n.published_year || '',
@@ -197,20 +199,73 @@ export default function ManageNovels() {
     }
   };
 
+  const filteredNovels = novels.filter(n =>
+    n.title.toLowerCase().includes(novelSearch.toLowerCase()) ||
+    (n.alternative_titles && n.alternative_titles.toLowerCase().includes(novelSearch.toLowerCase())) ||
+    (n.author && n.author.toLowerCase().includes(novelSearch.toLowerCase()))
+  );
+
   return (
     <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
       <h1 style={{ fontSize: '28px', fontWeight: '600', marginBottom: '8px', color: '#fff' }}>Novel & Chapter Manager</h1>
       <p style={{ color: '#a1a1aa', fontSize: '14px', marginBottom: '32px' }}>Adjust locking rules, metadata, and manually fix broken chapters.</p>
       
       <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '12px', padding: '24px', marginBottom: '32px' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#71717a', marginBottom: '12px' }}>SELECT NOVEL TO MANAGE</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#71717a' }}>SELECT NOVEL TO MANAGE</h3>
+          <span style={{ fontSize: '12px', color: '#a1a1aa' }}>
+            {filteredNovels.length} of {novels.length} novels
+          </span>
+        </div>
+
+        {/* Search Bar for Novels */}
+        <div style={{ position: 'relative', marginBottom: '14px' }}>
+          <input
+            type="text"
+            placeholder="🔍 Search novel by title, alternative name, or author (e.g. Forgotten Field, Stigma)..."
+            value={novelSearch}
+            onChange={(e) => setNovelSearch(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              paddingRight: '36px',
+              borderRadius: '8px',
+              background: 'var(--bg-primary)',
+              color: '#fafafa',
+              border: '1px solid var(--border)',
+              fontSize: '14px',
+              outline: 'none',
+              boxSizing: 'border-box'
+            }}
+          />
+          {novelSearch && (
+            <button
+              onClick={() => setNovelSearch('')}
+              style={{
+                position: 'absolute',
+                right: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'transparent',
+                border: 'none',
+                color: '#71717a',
+                cursor: 'pointer',
+                fontSize: '14px',
+                padding: '4px'
+              }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
         <select 
           value={selectedNovel}
           onChange={(e) => loadChapters(e.target.value)}
           style={{ width: '100%', padding: '14px', borderRadius: '8px', background: 'var(--bg-primary)', color: '#fafafa', border: '1px solid var(--border)', fontSize: '15px', outline: 'none' }}
         >
-          <option value="">-- Choose a Novel --</option>
-          {novels.map(n => (
+          <option value="">-- Choose a Novel ({filteredNovels.length}) --</option>
+          {filteredNovels.map(n => (
             <option key={n._id} value={n._id}>{n.title}</option>
           ))}
         </select>
@@ -230,6 +285,16 @@ export default function ManageNovels() {
           </div>
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div style={{ gridColumn: 'span 2' }}>
+              <label style={{ display: 'block', fontSize: '12px', color: '#a1a1aa', marginBottom: '8px', fontWeight: '600' }}>Novel Title</label>
+              <input 
+                type="text"
+                value={novelMeta.title}
+                onChange={e => setNovelMeta({...novelMeta, title: e.target.value})}
+                style={{ ...inputStyle, fontWeight: '600', fontSize: '15px' }}
+                placeholder="Enter novel title"
+              />
+            </div>
             <div>
               <label style={{ display: 'block', fontSize: '12px', color: '#a1a1aa', marginBottom: '8px' }}>Author Name</label>
               <input 
