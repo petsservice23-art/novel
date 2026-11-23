@@ -1,13 +1,17 @@
 const Stripe = require('stripe');
 const Razorpay = require('razorpay');
+const crypto = require('crypto');
 const Transaction = require('../models/Transaction');
 const User = require('../models/User');
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder_key_novelverse');
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+
+const getRazorpayInstance = () => {
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_U3bdzqR64EwPV4',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || 'qqA86zTQYcx5VMojaTOq9khc',
+  });
+};
 
 // Exact Package Pricing Mapping
 const packages = {
@@ -96,19 +100,36 @@ const capturePayPalOrder = async (orderId) => {
 };
 
 // @desc    Create a payment intent/order for selected payment provider
-// @route   POST /api/payments/create
-// @access  Private
+// @route   POST /api/payments/create OR /api/create-order
+// @access  Private / Public (supports both authenticated coin purchases and standard direct orders)
 const createPayment = async (req, res) => {
-  const { packageName, paymentMethod, currency } = req.body;
+  const { packageName, paymentMethod = 'razorpay', currency = 'INR', amount: directAmountPaise, receipt } = req.body;
   const user = req.user;
 
-  const pkg = packages[packageName];
-  if (!pkg) {
-    return res.status(400).json({ message: 'Invalid package name' });
+  let amountPaise;
+  let amountStandard;
+  let coinsToAward = 0;
+  let resolvedCurrency = (currency || 'INR').toUpperCase();
+
+  if (packageName) {
+    const pkg = packages[packageName];
+    if (!pkg) {
+      return res.status(400).json({ message: 'Invalid package name' });
+    }
+    coinsToAward = pkg.coins + pkg.bonus;
+    amountStandard = resolvedCurrency === 'INR' ? pkg.priceINR : pkg.priceUSD;
+    amountPaise = Math.round(amountStandard * 100);
+  } else if (directAmountPaise !== undefined) {
+    amountPaise = Math.round(Number(directAmountPaise));
+    amountStandard = amountPaise / 100;
+  } else {
+    return res.status(400).json({ message: 'Either packageName or amount is required' });
   }
 
-  const coinsToAward = pkg.coins + pkg.bonus;
-  const amount = currency === 'INR' ? pkg.priceINR : pkg.priceUSD;
+  // Validate minimum amount (Razorpay minimum is 100 paise = ₹1.00)
+  if (!amountPaise || amountPaise < 100) {
+    return res.status(400).json({ message: 'Amount must be at least 100 paise (1 INR or USD equivalent)' });
+  }
 
   try {
     let paymentData = {};
@@ -116,49 +137,60 @@ const createPayment = async (req, res) => {
 
     if (paymentMethod === 'stripe') {
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount * 100),
-        currency: currency.toLowerCase(),
-        metadata: { userId: user._id.toString(), packageName, coins: coinsToAward },
+        amount: amountPaise,
+        currency: resolvedCurrency.toLowerCase(),
+        metadata: { userId: user ? user._id.toString() : 'guest', packageName: packageName || 'Custom', coins: coinsToAward },
       });
       paymentData.clientSecret = paymentIntent.client_secret;
       payment_id = paymentIntent.id;
     } else if (paymentMethod === 'razorpay') {
       const options = {
-        amount: Math.round(amount * 100), // Amount in paise/cents
-        currency: currency,
-        receipt: `receipt_${user._id}_${Date.now()}`,
-        notes: { userId: user._id.toString(), packageName, coins: coinsToAward }
+        amount: amountPaise,
+        currency: resolvedCurrency,
+        receipt: receipt || `receipt_${user ? user._id : 'guest'}_${Date.now()}`,
+        notes: { 
+          userId: user ? user._id.toString() : 'guest', 
+          packageName: packageName || 'Custom', 
+          coins: coinsToAward 
+        }
       };
-      const order = await razorpay.orders.create(options);
+      const rzpInstance = getRazorpayInstance();
+      const order = await rzpInstance.orders.create(options);
       paymentData.orderId = order.id;
+      paymentData.amount = order.amount;
+      paymentData.currency = order.currency;
       payment_id = order.id;
     } else if (paymentMethod === 'paypal') {
-      const order = await createPayPalOrder(amount, currency, `${packageName} Coins Package - ${pkg.coins} + ${pkg.bonus} Bonus Coins`);
+      const order = await createPayPalOrder(amountStandard, resolvedCurrency, `${packageName || 'Coins'} Package`);
       paymentData.orderId = order.id;
       payment_id = order.id;
     } else {
       return res.status(400).json({ message: 'Invalid payment method' });
     }
 
-    // Record pending transaction
-    const transaction = await Transaction.create({
-      user_id: user._id,
-      amount,
-      coins_awarded: coinsToAward,
-      type: 'coins',
-      payment_provider: paymentMethod,
-      currency,
-      status: 'pending',
-      payment_id
-    });
+    // Record pending transaction if user is authenticated
+    let transaction = null;
+    if (user) {
+      transaction = await Transaction.create({
+        user_id: user._id,
+        amount: amountStandard,
+        coins_awarded: coinsToAward,
+        type: 'coins',
+        payment_provider: paymentMethod,
+        currency: resolvedCurrency,
+        status: 'pending',
+        payment_id
+      });
+    }
 
     res.json({ 
+      order_id: paymentData.orderId || payment_id,
+      amount: paymentData.amount || amountPaise,
+      currency: resolvedCurrency,
       provider: paymentMethod, 
-      currency, 
-      amount, 
       paymentData, 
-      transactionId: transaction._id,
-      razorpayKeyId: paymentMethod === 'razorpay' ? process.env.RAZORPAY_KEY_ID : undefined,
+      transactionId: transaction ? transaction._id : null,
+      razorpayKeyId: paymentMethod === 'razorpay' ? (process.env.RAZORPAY_KEY_ID || 'rzp_test_U3bdzqR64EwPV4') : undefined,
       paypalClientId: paymentMethod === 'paypal' ? process.env.PAYPAL_CLIENT_ID : undefined
     });
 
@@ -169,35 +201,74 @@ const createPayment = async (req, res) => {
 };
 
 // @desc    Verify Razorpay Payment
-// @route   POST /api/payments/verify-razorpay
-// @access  Private
+// @route   POST /api/payments/verify-razorpay OR /api/verify-payment
+// @access  Public / Private
 const verifyRazorpay = async (req, res) => {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature, transactionId } = req.body;
 
-  const crypto = require('crypto');
-  const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
-  hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
-  const generatedSignature = hmac.digest('hex');
+  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Missing required fields: razorpay_order_id, razorpay_payment_id, and razorpay_signature are required' 
+    });
+  }
 
-  if (generatedSignature === razorpay_signature) {
-    const transaction = await Transaction.findById(transactionId);
-    if (transaction && transaction.status === 'pending') {
-      transaction.status = 'success';
-      await transaction.save();
+  try {
+    const secret = process.env.RAZORPAY_KEY_SECRET || 'qqA86zTQYcx5VMojaTOq9khc';
+    const hmac = crypto.createHmac('sha256', secret);
+    hmac.update(`${razorpay_order_id}|${razorpay_payment_id}`);
+    const generatedSignature = hmac.digest('hex');
 
-      // Award coins
-      const user = await User.findById(transaction.user_id);
-      user.coins = (user.coins || 0) + transaction.coins_awarded;
-      await user.save();
-
-      res.json({ success: true, message: 'Payment verified and coins awarded', coins: user.coins });
-    } else {
-      res.status(400).json({ success: false, message: 'Invalid transaction state' });
+    if (generatedSignature !== razorpay_signature) {
+      if (transactionId) {
+        await Transaction.findByIdAndUpdate(transactionId, { status: 'failed' });
+      } else {
+        await Transaction.findOneAndUpdate({ payment_id: razorpay_order_id }, { status: 'failed' });
+      }
+      return res.status(400).json({ success: false, message: 'Invalid payment signature. Payment verification failed.' });
     }
-  } else {
-    // Transaction failed
-    await Transaction.findByIdAndUpdate(transactionId, { status: 'failed' });
-    res.status(400).json({ success: false, message: 'Invalid signature' });
+
+    // Signatures match!
+    let transaction = null;
+    if (transactionId) {
+      transaction = await Transaction.findById(transactionId);
+    } else {
+      transaction = await Transaction.findOne({ payment_id: razorpay_order_id });
+    }
+
+    if (transaction) {
+      if (transaction.status === 'pending') {
+        transaction.status = 'success';
+        await transaction.save();
+
+        if (transaction.user_id) {
+          const user = await User.findById(transaction.user_id);
+          if (user) {
+            user.coins = (user.coins || 0) + transaction.coins_awarded;
+            await user.save();
+            return res.json({ 
+              success: true, 
+              message: 'Payment verified and coins awarded', 
+              coins: user.coins,
+              transactionId: transaction._id 
+            });
+          }
+        }
+      }
+      return res.json({ 
+        success: true, 
+        message: 'Payment verified and transaction confirmed', 
+        transactionId: transaction._id 
+      });
+    }
+
+    return res.json({ 
+      success: true, 
+      message: 'Payment verified successfully' 
+    });
+  } catch (error) {
+    console.error('Razorpay verification error:', error);
+    res.status(500).json({ success: false, message: 'Server error during signature verification', error: error.message });
   }
 };
 

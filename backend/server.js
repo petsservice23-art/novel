@@ -43,6 +43,14 @@ app.use(cookieParser());
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/novels', require('./routes/novelRoutes'));
 app.use('/api/payments', require('./routes/paymentRoutes'));
+// Standalone Razorpay Standard Checkout route aliases
+app.post('/api/create-order', (req, res, next) => {
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    return require('./middleware/authMiddleware').protect(req, res, next);
+  }
+  next();
+}, require('./controllers/paymentController').createPayment);
+app.post('/api/verify-payment', require('./controllers/paymentController').verifyRazorpay);
 app.use('/api/chapters', require('./routes/chapterRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/gamification', require('./routes/gamificationRoutes'));

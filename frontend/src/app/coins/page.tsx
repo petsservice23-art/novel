@@ -78,12 +78,12 @@ export default function CoinsPage() {
         }
 
         const options = {
-          key: razorpayKeyId || 'rzp_test_SqRcPth7rs9HHL',
-          amount: paymentData.amount,
+          key: razorpayKeyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_U3bdzqR64EwPV4',
+          amount: paymentData?.amount,
           currency: currency,
           name: 'SegyeNovels',
           description: `Unlock premium chapters with ${pkgName} package`,
-          order_id: paymentData.orderId,
+          order_id: paymentData?.orderId || res.data?.order_id,
           handler: async (response: any) => {
             setBuying(pkgName);
             try {
@@ -98,10 +98,11 @@ export default function CoinsPage() {
                 toast.success('Successfully purchased coins!');
                 await fetchUser();
               } else {
-                toast.error('Verification failed. Please contact support.');
+                toast.error(verifyRes.data.message || 'Verification failed. Please contact support.');
               }
-            } catch (err) {
-              toast.error('Error verifying payment.');
+            } catch (err: any) {
+              console.error('Verification error:', err);
+              toast.error(err.response?.data?.message || 'Error verifying payment.');
             } finally {
               setBuying(null);
             }
@@ -111,16 +112,22 @@ export default function CoinsPage() {
             email: user.email
           },
           theme: {
-            color: '#111111'
+            color: '#8e6baf'
           },
           modal: {
             ondismiss: () => {
               setBuying(null);
+              toast('Payment cancelled', { icon: 'ℹ️' });
             }
           }
         };
 
         const rzp = new (window as any).Razorpay(options);
+        rzp.on('payment.failed', function (response: any) {
+          console.error('Razorpay payment failed:', response.error);
+          toast.error(response.error?.description || 'Payment was declined or failed. Please try again.');
+          setBuying(null);
+        });
         rzp.open();
 
       } else if (provider === 'paypal') {
