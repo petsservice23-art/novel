@@ -64,7 +64,8 @@ export default function CoinsPage() {
       const res = await axios.post('/api/payments/create', {
         packageName: pkgName,
         paymentMethod: payment.toLowerCase(),
-        currency: currency
+        currency: currency,
+        userId: user?._id
       });
 
       const { provider, paymentData, transactionId, razorpayKeyId } = res.data;
@@ -78,7 +79,7 @@ export default function CoinsPage() {
         }
 
         const options = {
-          key: razorpayKeyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_U3d7RjFggggKkK',
+          key: razorpayKeyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_live_U3dZ2Mzy6PUfg7',
           amount: paymentData?.amount,
           currency: currency,
           name: 'SegyeNovels',
@@ -91,7 +92,8 @@ export default function CoinsPage() {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
-                transactionId: transactionId
+                transactionId: transactionId,
+                userId: user?._id
               });
 
               if (verifyRes.data.success) {

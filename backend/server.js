@@ -44,13 +44,23 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/novels', require('./routes/novelRoutes'));
 app.use('/api/payments', require('./routes/paymentRoutes'));
 // Standalone Razorpay Standard Checkout route aliases
-app.post('/api/create-order', (req, res, next) => {
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    return require('./middleware/authMiddleware').protect(req, res, next);
+const optionalAuth = async (req, res, next) => {
+  let token = req.cookies?.jwt;
+  if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+  if (token) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const User = require('./models/User');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await User.findById(decoded.userId).select('-password');
+    } catch (e) {}
   }
   next();
-}, require('./controllers/paymentController').createPayment);
-app.post('/api/verify-payment', require('./controllers/paymentController').verifyRazorpay);
+};
+app.post('/api/create-order', optionalAuth, require('./controllers/paymentController').createPayment);
+app.post('/api/verify-payment', optionalAuth, require('./controllers/paymentController').verifyRazorpay);
 app.use('/api/chapters', require('./routes/chapterRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/gamification', require('./routes/gamificationRoutes'));
