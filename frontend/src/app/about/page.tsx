@@ -192,7 +192,7 @@ export default function AboutPage() {
               Support & Queries
             </h4>
             <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-              Have a question, feedback, or need assistance? <Link href="/support" style={{ color: 'var(--accent)', fontWeight: '700', textDecoration: 'none' }}>Chat with our team live</Link> or email us directly at <strong>support@segyenovels.com</strong>.
+              Have a question, feedback, or need assistance? <Link href="/support" style={{ color: 'var(--accent)', fontWeight: '700', textDecoration: 'none' }}>Chat with our team live</Link> or email us directly at <strong>segyenovels@gmail.com</strong>.
             </p>
           </div>
         </div>

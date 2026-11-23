@@ -82,7 +82,14 @@ const createPayPalOrder = async (amount, currencyCode, description) => {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
+    const errorData = await response.json().catch(() => ({}));
+    const isRestricted = JSON.stringify(errorData).includes('PAYEE_ACCOUNT_RESTRICTED');
+    if (isRestricted) {
+      const customErr = new Error('PAYEE_ACCOUNT_RESTRICTED');
+      customErr.userMessage = 'PayPal live payments are temporarily restricted while bank account verification completes. Please use Razorpay (Cards / UPI / NetBanking) for instant purchase.';
+      customErr.code = 'PAYEE_ACCOUNT_RESTRICTED';
+      throw customErr;
+    }
     throw new Error(`PayPal Order creation failed: ${JSON.stringify(errorData)}`);
   }
 
@@ -217,7 +224,10 @@ const createPayment = async (req, res) => {
 
   } catch (error) {
     console.error('Payment creation error:', error);
-    res.status(500).json({ message: 'Payment provider error', error: error.message });
+    if (error.userMessage) {
+      return res.status(400).json({ message: error.userMessage, code: error.code });
+    }
+    res.status(500).json({ message: 'Payment provider error: ' + error.message, error: error.message });
   }
 };
 

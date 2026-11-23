@@ -50,7 +50,7 @@ export default function TermsOfServicePage() {
     {
       num: '10',
       title: 'Contact',
-      body: 'For questions about these Terms, contact SegyeNovels support through the official support channel listed in your account or on the site at support@segyenovels.com.'
+      body: 'For questions about these Terms, contact SegyeNovels support through the official support channel listed in your account or directly via email at segyenovels@gmail.com.'
     }
   ];
 

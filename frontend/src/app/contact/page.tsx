@@ -25,7 +25,12 @@ export default function ContactPage() {
       <div style={{ maxWidth: '600px', margin: '0 auto' }}>
         <header style={{ textAlign: 'center', marginBottom: '48px' }}>
           <h1 style={{ fontSize: '32px', fontWeight: '600', marginBottom: '12px', letterSpacing: '-0.02em' }}>Contact Support</h1>
-          <p style={{ color: '#a1a1aa', fontSize: '15px', lineHeight: '1.6' }}>Have an issue with your account, coins, or reading experience? We're here to help.</p>
+          <p style={{ color: '#a1a1aa', fontSize: '15px', lineHeight: '1.6' }}>
+            Have an issue with your account, coins, or reading experience? We're here to help. You can also email us directly at{' '}
+            <a href="mailto:segyenovels@gmail.com" style={{ color: 'var(--accent)', fontWeight: '600', textDecoration: 'none' }}>
+              segyenovels@gmail.com
+            </a>.
+          </p>
         </header>
 
         {submitted ? (

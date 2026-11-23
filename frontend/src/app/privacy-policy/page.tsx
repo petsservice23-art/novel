@@ -50,7 +50,7 @@ export default function PrivacyPolicyPage() {
     {
       num: '10',
       title: 'Contact',
-      body: 'For privacy-related requests, contact the SegyeNovels support channel used in your account settings or official support email at support@segyenovels.space.'
+      body: 'For privacy-related requests, contact the SegyeNovels support team at segyenovels@gmail.com.'
     },
     {
       num: '11',

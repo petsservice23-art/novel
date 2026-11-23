@@ -143,7 +143,12 @@ export default function CoinsPage() {
       }
     } catch (err: any) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Failed to initialize payment');
+      const msg = err.response?.data?.message || 'Failed to initialize payment';
+      toast.error(msg, { duration: 6000 });
+      if (err.response?.data?.code === 'PAYEE_ACCOUNT_RESTRICTED') {
+        setPayment('Razorpay');
+        setCurrency('INR');
+      }
       setBuying(null);
     }
   };
