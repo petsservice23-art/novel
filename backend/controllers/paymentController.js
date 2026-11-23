@@ -26,6 +26,12 @@ const packages = {
 };
 
 // PayPal Helpers
+const getPayPalBaseUrl = () => {
+  return (process.env.PAYPAL_MODE === 'sandbox')
+    ? 'https://api-m.sandbox.paypal.com'
+    : 'https://api-m.paypal.com';
+};
+
 const getPayPalAccessToken = async () => {
   const clientId = process.env.PAYPAL_CLIENT_ID;
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
@@ -34,8 +40,9 @@ const getPayPalAccessToken = async () => {
     throw new Error('PayPal credentials are not configured');
   }
 
-  const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-  const response = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
+  const auth = Buffer.from(`${clientId.trim()}:${clientSecret.trim()}`).toString('base64');
+  const baseUrl = getPayPalBaseUrl();
+  const response = await fetch(`${baseUrl}/v1/oauth2/token`, {
     method: 'POST',
     headers: {
       'Authorization': `Basic ${auth}`,
@@ -55,7 +62,8 @@ const getPayPalAccessToken = async () => {
 
 const createPayPalOrder = async (amount, currencyCode, description) => {
   const accessToken = await getPayPalAccessToken();
-  const response = await fetch('https://api-m.sandbox.paypal.com/v2/checkout/orders', {
+  const baseUrl = getPayPalBaseUrl();
+  const response = await fetch(`${baseUrl}/v2/checkout/orders`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -83,7 +91,8 @@ const createPayPalOrder = async (amount, currencyCode, description) => {
 
 const capturePayPalOrder = async (orderId) => {
   const accessToken = await getPayPalAccessToken();
-  const response = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}/capture`, {
+  const baseUrl = getPayPalBaseUrl();
+  const response = await fetch(`${baseUrl}/v2/checkout/orders/${orderId}/capture`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -173,6 +182,8 @@ const createPayment = async (req, res) => {
     } else if (paymentMethod === 'paypal') {
       const order = await createPayPalOrder(amountStandard, resolvedCurrency, `${packageName || 'Coins'} Package`);
       paymentData.orderId = order.id;
+      const approveLink = order.links && order.links.find(l => l.rel === 'approve');
+      paymentData.approvalUrl = approveLink ? approveLink.href : `https://www.paypal.com/checkoutnow?token=${order.id}`;
       payment_id = order.id;
     } else {
       return res.status(400).json({ message: 'Invalid payment method' });

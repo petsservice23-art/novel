@@ -133,7 +133,7 @@ export default function CoinsPage() {
         rzp.open();
 
       } else if (provider === 'paypal') {
-        const approvalUrl = `https://www.sandbox.paypal.com/checkoutnow?token=${paymentData.orderId}`;
+        const approvalUrl = paymentData.approvalUrl || `https://www.paypal.com/checkoutnow?token=${paymentData.orderId}`;
         window.open(approvalUrl, 'PayPal Payment', 'width=580,height=700,status=no,toolbar=no,menubar=no');
         toast.success('PayPal checkout opened in new window');
         setBuying(null);
