@@ -175,6 +175,35 @@ export default function ReadingPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', color: 'var(--text-primary)', fontFamily: 'Merriweather, Georgia, serif', paddingBottom: '100px', transition: 'background-color 0.3s, color 0.3s' }}>
       
+      {/* Schema.org Article JSON-LD for Chapter SEO */}
+      {chapter && novel && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Article",
+              "headline": `${novel.title} - ${chapter.title || `Chapter ${chapterNum}`}`,
+              "articleSection": novel.genres?.[0] || "Web Novel",
+              "author": {
+                "@type": "Person",
+                "name": novel.author || "SegyeNovels"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "SegyeNovels",
+                "url": "https://segyenovels.space"
+              },
+              "isPartOf": {
+                "@type": "Book",
+                "name": novel.title,
+                "url": `https://segyenovels.space/novel/${id}`
+              }
+            })
+          }}
+        />
+      )}
+      
       {/* Top Navbar */}
       <nav style={{ 
         position: 'sticky', top: 0, background: 'var(--bg-card)', backdropFilter: 'blur(10px)',

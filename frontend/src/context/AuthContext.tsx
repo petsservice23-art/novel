@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation';
 
 // Configure axios globally to always send cookies
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = 'http://localhost:5000';
+const BACKEND_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+axios.defaults.baseURL = BACKEND_BASE;
 
 interface User {
   _id: string;
