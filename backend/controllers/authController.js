@@ -128,6 +128,101 @@ const toggleLibrary = async (req, res) => {
   res.json({ message: isAdded ? 'Added to library' : 'Removed from library', isAdded });
 };
 
+// @desc    Authenticate with Google (Access Token, ID Token, or UserInfo)
+// @route   POST /api/auth/google
+// @access  Public
+const googleAuth = async (req, res) => {
+  const { credential, accessToken, email: clientEmail, name: clientName, picture: clientPicture, sub: clientSub } = req.body;
+  const clientId = process.env.GOOGLE_CLIENT_ID || '656237342191-m887mlvosfiojh461l1ke5f3a3up07k6.apps.googleusercontent.com';
+
+  try {
+    let email, name, picture, googleId;
+
+    if (accessToken) {
+      // Verify via Google UserInfo API using access token
+      const googleRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      if (!googleRes.ok) {
+        return res.status(401).json({ message: 'Invalid or expired Google access token' });
+      }
+      const data = await googleRes.json();
+      email = data.email;
+      name = data.name || data.given_name || 'Reader';
+      picture = data.picture || '';
+      googleId = data.sub;
+    } else if (credential) {
+      // Verify Google ID token (JWT)
+      const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+      if (!googleRes.ok) {
+        return res.status(401).json({ message: 'Invalid Google credential token' });
+      }
+      const data = await googleRes.json();
+      email = data.email;
+      name = data.name || data.given_name || 'Reader';
+      picture = data.picture || '';
+      googleId = data.sub;
+    } else if (clientEmail && clientSub) {
+      email = clientEmail;
+      name = clientName || 'Reader';
+      picture = clientPicture || '';
+      googleId = clientSub;
+    } else {
+      return res.status(400).json({ message: 'Google authentication token is required' });
+    }
+
+    if (!email) {
+      return res.status(400).json({ message: 'Could not retrieve email from Google' });
+    }
+
+    // Check if user already exists
+    let user = await User.findOne({ email });
+
+    if (user) {
+      if (!user.avatar && picture) {
+        user.avatar = picture;
+        await user.save();
+      }
+    } else {
+      // Create new user with 100 welcome coins
+      const crypto = require('crypto');
+      const randomPassword = crypto.randomBytes(24).toString('hex');
+      const baseUsername = name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 14) || 'reader';
+      let uniqueUsername = baseUsername;
+      let counter = 1;
+      while (await User.findOne({ username: uniqueUsername })) {
+        uniqueUsername = `${baseUsername}${Math.floor(100 + Math.random() * 900)}`;
+        counter++;
+        if (counter > 20) break;
+      }
+
+      user = await User.create({
+        username: uniqueUsername,
+        email,
+        password: randomPassword,
+        avatar: picture,
+        coins: 100 // Welcome coins
+      });
+    }
+
+    // Set HTTP-only JWT Cookie
+    generateToken(res, user._id);
+
+    return res.json({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar,
+      coins: user.coins
+    });
+
+  } catch (error) {
+    console.error('Google auth error:', error);
+    return res.status(500).json({ message: 'Google authentication failed', error: error.message });
+  }
+};
+
 module.exports = {
   loginUser,
   registerUser,
@@ -135,4 +230,5 @@ module.exports = {
   getUserProfile,
   updateUserProfile,
   toggleLibrary,
+  googleAuth
 };

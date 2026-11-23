@@ -9,7 +9,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const { login, loginWithGoogle } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +27,55 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    toast.success('Google Login configured! Client ID required.');
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '656237342191-m887mlvosfiojh461l1ke5f3a3up07k6.apps.googleusercontent.com';
+
+    setGoogleLoading(true);
+
+    const initClient = () => {
+      try {
+        const client = (window as any).google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'email profile openid',
+          callback: async (tokenResponse: any) => {
+            if (tokenResponse && tokenResponse.access_token) {
+              try {
+                await loginWithGoogle({ accessToken: tokenResponse.access_token });
+              } catch (err) {
+                console.error(err);
+              } finally {
+                setGoogleLoading(false);
+              }
+            } else {
+              setGoogleLoading(false);
+            }
+          },
+          error_callback: (err: any) => {
+            console.error('Google OAuth error:', err);
+            setGoogleLoading(false);
+          }
+        });
+        client.requestAccessToken();
+      } catch (err) {
+        console.error(err);
+        toast.error('Could not initialize Google sign-in');
+        setGoogleLoading(false);
+      }
+    };
+
+    if (typeof window !== 'undefined' && (window as any).google?.accounts?.oauth2) {
+      initClient();
+    } else {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => initClient();
+      script.onerror = () => {
+        toast.error('Failed to load Google sign-in service');
+        setGoogleLoading(false);
+      };
+      document.body.appendChild(script);
+    }
   };
 
   return (
@@ -51,6 +100,7 @@ export default function LoginPage() {
 
         <button 
           onClick={handleGoogleLogin}
+          disabled={googleLoading}
           style={{
             width: '100%',
             display: 'flex',
@@ -64,11 +114,12 @@ export default function LoginPage() {
             fontSize: '14px',
             fontWeight: '500',
             border: '1px solid #27272a',
-            cursor: 'pointer',
+            cursor: googleLoading ? 'not-allowed' : 'pointer',
+            opacity: googleLoading ? 0.7 : 1,
             marginBottom: '24px',
             transition: 'background 0.2s',
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = '#18181b'}
+          onMouseEnter={(e) => !googleLoading && (e.currentTarget.style.background = '#18181b')}
           onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
         >
           <svg width="18" height="18" viewBox="0 0 48 48">
@@ -77,7 +128,7 @@ export default function LoginPage() {
             <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
             <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
           </svg>
-          Google
+          {googleLoading ? 'Connecting to Google...' : 'Continue with Google'}
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>

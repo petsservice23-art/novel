@@ -31,6 +31,7 @@ interface AuthContextType {
   register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
+  loginWithGoogle: (data: { accessToken?: string; credential?: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -90,8 +91,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const loginWithGoogle = async (data: { accessToken?: string; credential?: string }) => {
+    try {
+      const res = await axios.post('/api/auth/google', data);
+      setUser(res.data);
+      toast.success(`Welcome, ${res.data.username}!`);
+      router.push('/');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Google sign-in failed');
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, fetchUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, fetchUser, loginWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );
