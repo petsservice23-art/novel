@@ -341,30 +341,73 @@ const verifyRazorpay = async (req, res) => {
 
 // @desc    Verify/Capture PayPal Payment
 // @route   POST /api/payments/verify-paypal
-// @access  Private
+// @access  Public / Private
 const verifyPayPal = async (req, res) => {
-  const { orderId, transactionId } = req.body;
+  const { orderId, transactionId, userId: clientUserId } = req.body;
+
+  if (!orderId) {
+    return res.status(400).json({ success: false, message: 'PayPal orderId is required' });
+  }
 
   try {
     const captureData = await capturePayPalOrder(orderId);
     
     if (captureData.status === 'COMPLETED') {
-      const transaction = await Transaction.findById(transactionId);
-      if (transaction && transaction.status === 'pending') {
+      let transaction = null;
+      if (transactionId) {
+        transaction = await Transaction.findById(transactionId);
+      }
+      if (!transaction) {
+        transaction = await Transaction.findOne({ payment_id: orderId });
+      }
+
+      const targetUserId = transaction?.user_id || req.user?._id || clientUserId;
+      let coinsToAward = transaction?.coins_awarded || 1050; // default Starter
+
+      let updatedCoins = 0;
+      if (targetUserId) {
+        const user = await User.findById(targetUserId);
+        if (user) {
+          user.coins = (user.coins || 0) + coinsToAward;
+          await user.save();
+          updatedCoins = user.coins;
+
+          if (!transaction) {
+            transaction = await Transaction.create({
+              user_id: user._id,
+              amount: captureData.purchase_units?.[0]?.amount?.value || 9.99,
+              coins_awarded: coinsToAward,
+              type: 'coins',
+              payment_provider: 'paypal',
+              currency: captureData.purchase_units?.[0]?.amount?.currency_code || 'USD',
+              status: 'success',
+              payment_id: orderId
+            });
+          } else {
+            transaction.status = 'success';
+            await transaction.save();
+          }
+
+          return res.json({ 
+            success: true, 
+            message: 'PayPal payment captured and coins awarded successfully!', 
+            coins: updatedCoins,
+            transactionId: transaction._id 
+          });
+        }
+      }
+
+      if (transaction) {
         transaction.status = 'success';
         await transaction.save();
-
-        const user = await User.findById(transaction.user_id);
-        user.coins = (user.coins || 0) + transaction.coins_awarded;
-        await user.save();
-
-        res.json({ success: true, message: 'PayPal payment captured successfully', coins: user.coins });
-      } else {
-        res.status(400).json({ success: false, message: 'Transaction already processed or not found' });
       }
+
+      return res.json({ success: true, message: 'PayPal payment captured successfully', coins: updatedCoins });
     } else {
-      await Transaction.findByIdAndUpdate(transactionId, { status: 'failed' });
-      res.status(400).json({ success: false, message: 'PayPal payment was not completed' });
+      if (transactionId) {
+        await Transaction.findByIdAndUpdate(transactionId, { status: 'failed' });
+      }
+      return res.status(400).json({ success: false, message: 'PayPal payment was not completed' });
     }
   } catch (error) {
     console.error('PayPal Capture Error:', error);

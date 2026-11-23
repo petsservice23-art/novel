@@ -1,16 +1,28 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 
-// @desc    Auth user & get token
+// @desc    Auth user & get token (supports Email OR Username)
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
+  const { email, username, identifier: loginInput, password, rememberMe = true } = req.body;
+  const identifier = (loginInput || email || username || '').trim();
+
+  if (!identifier || !password) {
+    return res.status(400).json({ message: 'Email/username and password are required' });
+  }
+
+  // Find user by either email or username (case-insensitive)
+  const user = await User.findOne({
+    $or: [
+      { email: identifier.toLowerCase() },
+      { username: { $regex: new RegExp(`^${identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } }
+    ]
+  });
 
   if (user && (await user.matchPassword(password))) {
-    generateToken(res, user._id);
-    res.json({
+    generateToken(res, user._id, rememberMe);
+    return res.json({
       _id: user._id,
       username: user.username,
       email: user.email,
@@ -19,7 +31,7 @@ const loginUser = async (req, res) => {
       coins: user.coins
     });
   } else {
-    res.status(401).json({ message: 'Invalid email or password' });
+    return res.status(401).json({ message: 'Invalid email/username or password' });
   }
 };
 
@@ -28,16 +40,42 @@ const loginUser = async (req, res) => {
 // @access  Public
 const registerUser = async (req, res) => {
   const { username, email, password } = req.body;
-  const userExists = await User.findOne({ email });
 
-  if (userExists) {
-    return res.status(400).json({ message: 'User already exists' });
+  if (!username || !email || !password) {
+    return res.status(400).json({ message: 'Please provide all required fields' });
   }
 
-  const user = await User.create({ username, email, password });
+  if (password.length < 8) {
+    return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+  }
+
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanUsername = username.trim();
+
+  const userExists = await User.findOne({
+    $or: [
+      { email: cleanEmail },
+      { username: { $regex: new RegExp(`^${cleanUsername.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } }
+    ]
+  });
+
+  if (userExists) {
+    if (userExists.email === cleanEmail) {
+      return res.status(400).json({ message: 'Email is already registered' });
+    }
+    return res.status(400).json({ message: 'Username is already taken' });
+  }
+
+  const user = await User.create({ 
+    username: cleanUsername, 
+    email: cleanEmail, 
+    password,
+    coins: 100 // Welcome coins
+  });
+
   if (user) {
     generateToken(res, user._id);
-    res.status(201).json({
+    return res.status(201).json({
       _id: user._id,
       username: user.username,
       email: user.email,
@@ -46,7 +84,7 @@ const registerUser = async (req, res) => {
       coins: user.coins
     });
   } else {
-    res.status(400).json({ message: 'Invalid user data' });
+    return res.status(400).json({ message: 'Invalid user data' });
   }
 };
 
