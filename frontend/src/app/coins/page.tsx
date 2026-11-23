@@ -78,7 +78,7 @@ export default function CoinsPage() {
         }
 
         const options = {
-          key: razorpayKeyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_U3bdzqR64EwPV4',
+          key: razorpayKeyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_U3d7RjFggggKkK',
           amount: paymentData?.amount,
           currency: currency,
           name: 'SegyeNovels',

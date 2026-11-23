@@ -8,8 +8,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder_
 
 const getRazorpayInstance = () => {
   return new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_U3bdzqR64EwPV4',
-    key_secret: process.env.RAZORPAY_KEY_SECRET || 'qqA86zTQYcx5VMojaTOq9khc',
+    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_U3d7RjFggggKkK',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || 'OtjfabDvI9ApKIOn37zg83oZ',
   });
 };
 
@@ -190,7 +190,7 @@ const createPayment = async (req, res) => {
       provider: paymentMethod, 
       paymentData, 
       transactionId: transaction ? transaction._id : null,
-      razorpayKeyId: paymentMethod === 'razorpay' ? (process.env.RAZORPAY_KEY_ID || 'rzp_test_U3bdzqR64EwPV4') : undefined,
+      razorpayKeyId: paymentMethod === 'razorpay' ? (process.env.RAZORPAY_KEY_ID || 'rzp_test_U3d7RjFggggKkK') : undefined,
       paypalClientId: paymentMethod === 'paypal' ? process.env.PAYPAL_CLIENT_ID : undefined
     });
 
@@ -214,7 +214,7 @@ const verifyRazorpay = async (req, res) => {
   }
 
   try {
-    const secret = process.env.RAZORPAY_KEY_SECRET || 'qqA86zTQYcx5VMojaTOq9khc';
+    const secret = process.env.RAZORPAY_KEY_SECRET || 'OtjfabDvI9ApKIOn37zg83oZ';
     const hmac = crypto.createHmac('sha256', secret);
     hmac.update(`${razorpay_order_id}|${razorpay_payment_id}`);
     const generatedSignature = hmac.digest('hex');
