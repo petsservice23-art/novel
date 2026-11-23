@@ -50,7 +50,12 @@ export default function PrivacyPolicyPage() {
     {
       num: '10',
       title: 'Contact',
-      body: 'For privacy-related requests, contact the SegyeNovels support channel used in your account settings or official support email at support@segyenovels.com.'
+      body: 'For privacy-related requests, contact the SegyeNovels support channel used in your account settings or official support email at support@segyenovels.space.'
+    },
+    {
+      num: '11',
+      title: 'DMCA Compliance',
+      body: 'We respect intellectual property rights and comply with the provisions of the Digital Millennium Copyright Act (DMCA). Content available on this platform, including text and images, is based on the contributions of community members and third-party sources; the website owner is not responsible for content posted by members. If you are the owner of copyrighted content that is being improperly used without your permission, you may request that the content be removed under the DMCA. To make such a request or to resolve questions before filing a formal claim, please contact our designated agent directly at segyenovels@gmail.com. We also recognize that not every takedown notice is valid or submitted in good faith; for guidance on counter-notifications or improperly filed notices, you may consult statutory DMCA resources.'
     }
   ];
 

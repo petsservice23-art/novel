@@ -1,6 +1,7 @@
 const Novel = require('../models/Novel');
 const Chapter = require('../models/Chapter');
 const User = require('../models/User');
+const Transaction = require('../models/Transaction');
 
 // @desc    Get admin dashboard stats
 // @route   GET /api/admin/stats
@@ -117,6 +118,85 @@ exports.bulkImportChapters = async (req, res) => {
       message: `Successfully imported ${createdChapters.length} chapters`,
       count: createdChapters.length 
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get single user details with stats & transactions
+// @route   GET /api/admin/users/:id
+exports.getUserDetails = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select('-password')
+      .populate('library', 'title cover_image author');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const transactions = await Transaction.find({ user_id: user._id }).sort({ createdAt: -1 }).limit(20);
+    const totalSpent = transactions
+      .filter(t => t.status === 'success')
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
+
+    res.json({
+      user,
+      transactions,
+      stats: {
+        libraryCount: user.library?.length || 0,
+        unlockedCount: user.unlocked_chapters?.length || 0,
+        readingHistoryCount: user.reading_history?.length || 0,
+        transactionsCount: transactions.length,
+        totalSpent: totalSpent.toFixed(2)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Update user details (role, coins, is_vip, email, username)
+// @route   PUT /api/admin/users/:id
+exports.updateUser = async (req, res) => {
+  try {
+    const { username, email, role, coins, is_vip, unlock_tickets } = req.body;
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (username !== undefined && username.trim()) user.username = username.trim();
+    if (email !== undefined && email.trim()) user.email = email.trim().toLowerCase();
+    if (role !== undefined && ['user', 'author', 'admin'].includes(role)) user.role = role;
+    if (coins !== undefined && !isNaN(Number(coins))) user.coins = Number(coins);
+    if (is_vip !== undefined) user.is_vip = Boolean(is_vip);
+    if (unlock_tickets !== undefined && !isNaN(Number(unlock_tickets))) user.unlock_tickets = Number(unlock_tickets);
+
+    await user.save();
+    res.json({ message: 'User updated successfully', user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Delete user
+// @route   DELETE /api/admin/users/:id
+exports.deleteUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (req.user && req.user._id && req.user._id.toString() === userId) {
+      return res.status(400).json({ message: 'You cannot delete your own admin account' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    await User.findByIdAndDelete(userId);
+    res.json({ message: 'User deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
