@@ -41,10 +41,14 @@ export const metadata: Metadata = {
   publisher: "SegyeNovels",
   icons: {
     icon: [
-      { url: "/favicon.png", sizes: "any" },
-      { url: "/favicon.ico", sizes: "any" }
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/favicon-192x192.png", sizes: "192x192", type: "image/png" },
     ],
-    apple: "/favicon.png",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
   openGraph: {
     title: "SegyeNovels — Read Korean & Asian Web Novels Online",
@@ -89,9 +93,58 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+        <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  "@id": "https://segyenovels.space/#organization",
+                  "name": "SegyeNovels",
+                  "url": "https://segyenovels.space",
+                  "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://segyenovels.space/favicon-192x192.png",
+                    "width": 192,
+                    "height": 192
+                  },
+                  "description": "SegyeNovels is a leading digital platform for reading Korean web novels, fantasy, romance, martial arts, and translated Asian light novels online.",
+                  "email": "segyenovels@gmail.com",
+                  "sameAs": [
+                    "https://twitter.com/segyenovels",
+                    "https://www.instagram.com/segyenovels",
+                    "https://www.youtube.com/@segyenovels"
+                  ]
+                },
+                {
+                  "@type": "WebSite",
+                  "@id": "https://segyenovels.space/#website",
+                  "url": "https://segyenovels.space",
+                  "name": "SegyeNovels",
+                  "description": "Read thousands of completed and ongoing Korean web novels online for free.",
+                  "publisher": {
+                    "@id": "https://segyenovels.space/#organization"
+                  },
+                  "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": "https://segyenovels.space/search?q={search_term_string}",
+                    "query-input": "required name=search_term_string"
+                  }
+                }
+              ]
+            })
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `

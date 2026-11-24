@@ -63,7 +63,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  let novelRoutes: MetadataRoute.Sitemap = [];
+  let dynamicRoutes: MetadataRoute.Sitemap = [];
 
   try {
     const res = await fetch(`${apiUrl}/novels`, { next: { revalidate: 3600 } });
@@ -71,16 +71,39 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const data = await res.json();
       const novels = Array.isArray(data) ? data : (data.novels || []);
 
-      novelRoutes = novels.map((n: any) => ({
-        url: `${baseUrl}/novel/${n._id}`,
-        lastModified: n.updatedAt ? new Date(n.updatedAt) : new Date(n.createdAt || Date.now()),
-        changeFrequency: n.publishing_status === 'completed' ? 'weekly' : 'daily',
-        priority: 0.85,
-      }));
+      dynamicRoutes = novels.flatMap((n: any) => {
+        const lastMod = n.updatedAt ? new Date(n.updatedAt) : new Date(n.createdAt || Date.now());
+        const routes: MetadataRoute.Sitemap = [
+          {
+            url: `${baseUrl}/novel/${n._id}`,
+            lastModified: lastMod,
+            changeFrequency: (n.publishing_status === 'completed' ? 'weekly' : 'daily') as any,
+            priority: 0.85,
+          }
+        ];
+
+        // Also index entry chapters (first 3 free chapters and latest chapter) for Google discovery
+        const total = n.total_chapters || 0;
+        const chaptersToIndex = new Set([1, 2, 3]);
+        if (total > 3) chaptersToIndex.add(total);
+
+        chaptersToIndex.forEach(chNum => {
+          if (chNum <= total) {
+            routes.push({
+              url: `${baseUrl}/novel/${n._id}/chapter/${chNum}`,
+              lastModified: lastMod,
+              changeFrequency: 'weekly' as any,
+              priority: 0.75,
+            });
+          }
+        });
+
+        return routes;
+      });
     }
   } catch (error) {
     console.error('Failed to fetch novels for dynamic sitemap:', error);
   }
 
-  return [...staticRoutes, ...novelRoutes];
+  return [...staticRoutes, ...dynamicRoutes];
 }
