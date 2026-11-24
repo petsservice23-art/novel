@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       const rawImage = novel.cover_image || '';
       const imageUrl = rawImage.startsWith('http') 
         ? rawImage 
-        : `https://segyenovels.space${rawImage.startsWith('/') ? '' : '/'}${rawImage || 'images/logo-wordmark.png'}`;
+        : `https://www.segyenovels.space${rawImage.startsWith('/') ? '' : '/'}${rawImage || 'images/logo-wordmark.png'}`;
 
       return {
         title,

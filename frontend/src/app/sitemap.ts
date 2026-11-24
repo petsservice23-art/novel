@@ -3,7 +3,7 @@ import { MetadataRoute } from 'next';
 export const revalidate = 3600; // Revalidate sitemap every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://segyenovels.space';
+  const baseUrl = 'https://www.segyenovels.space';
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://novel-production-a7e3b704.up.railway.app/api';
 
   const staticRoutes: MetadataRoute.Sitemap = [

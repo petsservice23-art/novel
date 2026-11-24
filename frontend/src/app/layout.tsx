@@ -18,7 +18,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://segyenovels.space"),
+  metadataBase: new URL("https://www.segyenovels.space"),
   title: {
     default: "SegyeNovels — Read Korean & Asian Web Novels Online",
     template: "%s | SegyeNovels",
