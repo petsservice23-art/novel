@@ -47,6 +47,7 @@ router.put('/chapter/:id', async (req, res) => {
     }
     
     await chapter.save();
+    await Novel.findByIdAndUpdate(chapter.novel_id, { updatedAt: new Date() });
     res.json({ message: 'Chapter updated successfully', chapter });
   } catch (error) {
     console.error("Error updating chapter:", error);

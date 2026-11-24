@@ -110,8 +110,9 @@ exports.bulkImportChapters = async (req, res) => {
 
     const createdChapters = await Chapter.insertMany(chaptersToCreate);
     
-    // Update novel total chapters
+    // Update novel total chapters & touch updatedAt
     novel.total_chapters = await Chapter.countDocuments({ novel_id });
+    novel.updatedAt = new Date();
     await novel.save();
 
     res.json({ 

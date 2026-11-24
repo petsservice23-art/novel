@@ -306,9 +306,10 @@ const addChapter = async (req, res) => {
     price
   });
 
-  // Re-calculate total chapters
+  // Re-calculate total chapters and touch updatedAt
   const total = await Chapter.countDocuments({ novel_id });
   novel.total_chapters = total;
+  novel.updatedAt = new Date();
   await novel.save();
 
   res.status(201).json(chapter);
