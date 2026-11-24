@@ -20,6 +20,11 @@ const NovelCard = ({ novel, badge }: { novel: any; badge?: string }) => {
   const isCompleted = (novel.publishing_status || 'completed').toLowerCase() === 'completed';
   const authorName = getCleanAuthor(novel.author);
 
+  // Safeguard: Ensure the displayed timeline is always recent (never older than novel creation date)
+  const displayDate = (novel.updatedAt && novel.createdAt && new Date(novel.updatedAt).getTime() < new Date(novel.createdAt).getTime())
+    ? novel.createdAt
+    : (novel.updatedAt || novel.createdAt);
+
   return (
     <Link href={`/novel/${novel._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
       <div 
@@ -116,7 +121,7 @@ const NovelCard = ({ novel, badge }: { novel: any; badge?: string }) => {
               {authorName}
             </span>
             <span style={{ color: 'var(--text-muted)', fontSize: '11px', fontWeight: '500' }}>
-              {novel.total_chapters || 0} chapters · {formatTimeAgo(novel.updatedAt)}
+              {novel.total_chapters || 0} chapters · {formatTimeAgo(displayDate)}
             </span>
           </div>
         </div>

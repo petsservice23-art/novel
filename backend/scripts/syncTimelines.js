@@ -59,6 +59,11 @@ async function syncTimelines() {
       targetDate = new Date(novel.createdAt || now);
     }
 
+    // Safeguard: updatedAt can NEVER be older than novel.createdAt
+    if (novel.createdAt && targetDate.getTime() < new Date(novel.createdAt).getTime()) {
+      targetDate = new Date(novel.createdAt);
+    }
+
     // Update in DB with timestamps: false so Mongoose does not override our target date with now
     await Novel.updateOne(
       { _id: novel._id },

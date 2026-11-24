@@ -15,6 +15,7 @@ interface Novel {
   genres: string[];
   total_chapters?: number;
   updatedAt?: string;
+  createdAt?: string;
 }
 
 const getCleanAuthor = (author?: string) => {
@@ -300,6 +301,9 @@ export default function BrowsePage() {
             {paginatedNovels.map((novel) => {
               const isCompleted = (novel.publishing_status || 'completed').toLowerCase() === 'completed';
               const authorName = getCleanAuthor(novel.author);
+              const displayDate = (novel.updatedAt && novel.createdAt && new Date(novel.updatedAt).getTime() < new Date(novel.createdAt).getTime())
+                ? novel.createdAt
+                : (novel.updatedAt || novel.createdAt);
 
               return (
                 <Link key={novel._id} href={`/novel/${novel._id}`} style={{ textDecoration: 'none' }}>
@@ -390,7 +394,7 @@ export default function BrowsePage() {
                           {authorName}
                         </span>
                         <span style={{ color: 'var(--text-muted)', fontSize: '11px', fontWeight: '500' }}>
-                          {novel.total_chapters || 0} chapters · {formatTimeAgo(novel.updatedAt)}
+                          {novel.total_chapters || 0} chapters · {formatTimeAgo(displayDate)}
                         </span>
                       </div>
                     </div>
