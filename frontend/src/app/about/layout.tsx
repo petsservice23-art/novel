@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'About Us - Discover Your Next Favourite Story',
-  description: 'Learn about SegyeNovels, our mission to bring Korean and Asian web novels to English readers with a fast, modern reading platform.',
+  title: 'About Us - Read Web Novels Online',
+  description: 'Learn about SegyeNovels, our mission to bring popular web novels to readers worldwide with a fast, modern reading platform and daily free chapters.',
   alternates: {
     canonical: '/about',
   },

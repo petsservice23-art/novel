@@ -20,19 +20,22 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.segyenovels.space"),
   title: {
-    default: "SegyeNovels — Read Korean & Asian Web Novels Online",
+    default: "SegyeNovels — Read Web Novels Online",
     template: "%s | SegyeNovels",
   },
-  description: "Immerse yourself in SegyeNovels: read completed and ongoing Korean web novels, fantasy, romance, martial arts, and reincarnation stories with a clean, aesthetic reading experience.",
+  description: "Discover and read thousands of web novels online across fantasy, romance, action, sci-fi, and reincarnation. Free chapters updated daily with a clean, aesthetic reading experience.",
   keywords: [
     "SegyeNovels",
-    "Korean web novels",
     "read web novels online",
+    "read online web novels",
+    "web novels online",
+    "read web novels",
     "translated web novels",
-    "fantasy novels",
+    "fantasy web novels",
     "romance web novels",
-    "korean fantasy",
+    "free web novels",
     "light novels",
+    "martial arts novels",
     "wuxia",
     "xianxia"
   ],
@@ -51,8 +54,8 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "SegyeNovels — Read Korean & Asian Web Novels Online",
-    description: "Read thousands of completed Korean web novels, fantasy, romance, and reincarnation stories with an aesthetic, minimalist reading experience.",
+    title: "SegyeNovels — Read Web Novels Online",
+    description: "Discover and read thousands of web novels online across fantasy, romance, action, sci-fi, and reincarnation. Free chapters updated daily with an aesthetic, minimalist reading experience.",
     url: "/",
     siteName: "SegyeNovels",
     images: [
@@ -68,8 +71,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "SegyeNovels — Read Korean & Asian Web Novels Online",
-    description: "Read thousands of completed Korean web novels, fantasy, romance, and reincarnation stories with an aesthetic, minimalist reading experience.",
+    title: "SegyeNovels — Read Web Novels Online",
+    description: "Discover and read thousands of web novels online across fantasy, romance, action, sci-fi, and reincarnation. Free chapters updated daily with an aesthetic, minimalist reading experience.",
     images: ["/images/logo-wordmark.png"],
   },
   robots: {
@@ -118,7 +121,7 @@ export default function RootLayout({
                     "width": 192,
                     "height": 192
                   },
-                  "description": "SegyeNovels is a leading digital platform for reading Korean web novels, fantasy, romance, martial arts, and translated Asian light novels online.",
+                  "description": "SegyeNovels is an online web novel reading platform offering stories across genres like fantasy, romance, action, and sci-fi with daily free chapter updates.",
                   "email": "segyenovels@gmail.com",
                   "sameAs": [
                     "https://twitter.com/segyenovels",
@@ -131,7 +134,7 @@ export default function RootLayout({
                   "@id": "https://segyenovels.space/#website",
                   "url": "https://segyenovels.space",
                   "name": "SegyeNovels",
-                  "description": "Read thousands of completed and ongoing Korean web novels online for free.",
+                  "description": "Discover and read thousands of web novels online across fantasy, romance, action, sci-fi, and more. Free chapters updated daily.",
                   "publisher": {
                     "@id": "https://segyenovels.space/#organization"
                   },
