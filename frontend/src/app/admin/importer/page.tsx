@@ -129,7 +129,10 @@ export default function BulkImporter() {
         chapters: parsedBook.chapters
       };
 
-      const res = await axios.post(`${API_URL}/admin/save-parsed-book`, payload);
+      const res = await axios.post(`${API_URL}/admin/save-parsed-book`, payload, {
+        timeout: 120000,
+        headers: { 'Content-Type': 'application/json' }
+      });
 
       toast.success(`Success! Created "${parsedBook.title}" with ${res.data.chaptersCount} chapters live!`, { id: 'save-book' });
       setUploadSuccess({

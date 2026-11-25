@@ -16,9 +16,6 @@ connectDB();
 
 const app = express();
 
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 // CORS Setup
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
   .split(',')
@@ -33,10 +30,31 @@ const corsOptions = {
       callback(null, true);
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
 };
 
 app.use(cors(corsOptions));
+
+// Explicit CORS headers safeguard for preflights and error states
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && (origin.includes('segyenovels.space') || origin.includes('vercel.app') || origin.includes('localhost'))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  }
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// Large payload support (up to 100MB for book imports and base64 artwork)
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(cookieParser());
 
 // Define routes
@@ -70,6 +88,19 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/support', require('./routes/supportRoutes'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', message: 'API is running' }));
+
+// Global error handler with CORS guarantees
+app.use((err, req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && (origin.includes('segyenovels.space') || origin.includes('vercel.app') || origin.includes('localhost'))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+  console.error('API Error:', err);
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error'
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 

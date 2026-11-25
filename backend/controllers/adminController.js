@@ -3,7 +3,7 @@ const Chapter = require('../models/Chapter');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 const { parseEpub, parsePdf } = require('../utils/bookParser');
-const { uploadChapterContent } = require('../utils/r2Service');
+const { uploadChapterContent, uploadImage } = require('../utils/r2Service');
 
 // @desc    Get admin dashboard stats
 // @route   GET /api/admin/stats
@@ -262,36 +262,63 @@ exports.saveParsedBook = async (req, res) => {
       ratings_count: 1
     });
 
+    // If cover is base64, upload to Cloudflare R2 for fast CDN delivery
+    if (novel.cover_image && novel.cover_image.startsWith('data:image/')) {
+      try {
+        const matches = novel.cover_image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+        if (matches && matches.length === 3) {
+          const contentType = matches[1];
+          const buffer = Buffer.from(matches[2], 'base64');
+          const ext = contentType.includes('png') ? 'png' : 'jpg';
+          const coverKey = `novels/${novel._id}/cover_${Date.now()}.${ext}`;
+          const cdnUrl = await uploadImage(coverKey, buffer, contentType);
+          if (cdnUrl) novel.cover_image = cdnUrl;
+        }
+      } catch (covErr) {
+        console.warn('Cover R2 upload failed, keeping base64:', covErr.message);
+      }
+    }
+
     await novel.save();
 
-    // 2. Insert Chapters (50 free, rest coin)
-    const chaptersToInsert = [];
-    for (let i = 0; i < chaptersData.length; i++) {
-      const ch = chaptersData[i];
-      const chNum = ch.chapter_number || (i + 1);
+    // 2. Parallel upload chapters to R2 in chunks of 15 (fast & prevents timeouts)
+    const concurrency = 15;
+    const r2Keys = new Array(chaptersData.length).fill(null);
+
+    for (let i = 0; i < chaptersData.length; i += concurrency) {
+      const slice = chaptersData.slice(i, i + concurrency);
+      await Promise.all(
+        slice.map(async (ch, indexInSlice) => {
+          const globalIdx = i + indexInSlice;
+          const chNum = ch.chapter_number || (globalIdx + 1);
+          if (ch.content) {
+            try {
+              r2Keys[globalIdx] = await uploadChapterContent(novel._id.toString(), chNum, ch.content);
+            } catch (err) {
+              // Fallback: keep content in Mongo if R2 upload fails
+            }
+          }
+        })
+      );
+    }
+
+    // 3. Insert Chapter records (first 50 free, rest coin)
+    const chaptersToInsert = chaptersData.map((ch, idx) => {
+      const chNum = ch.chapter_number || (idx + 1);
       const isFree = chNum <= 50;
+      const r2Key = r2Keys[idx];
 
-      // Try R2 upload if configured
-      let r2Key = null;
-      try {
-        if (ch.content) {
-          r2Key = await uploadChapterContent(novel._id.toString(), chNum, ch.content);
-        }
-      } catch (r2Err) {
-        // Fallback: keep content in Mongo
-      }
-
-      chaptersToInsert.push({
+      return {
         novel_id: novel._id,
         chapter_number: chNum,
         title: ch.title ? ch.title.trim() : `Chapter ${chNum}`,
-        content: ch.content,
+        content: r2Key ? null : ch.content,
         r2_key: r2Key,
         tier: isFree ? 'free' : 'coin',
         is_locked: !isFree,
         price: isFree ? 0 : 10
-      });
-    }
+      };
+    });
 
     await Chapter.insertMany(chaptersToInsert);
 
