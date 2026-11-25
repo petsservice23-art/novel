@@ -77,34 +77,26 @@ export default function AdminSupportPage() {
     <div style={{ maxWidth: '1200px', margin: '0 auto', color: '#000000', paddingBottom: '60px' }}>
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
+      {/* Top Bar with Responsive Filter Tabs */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 style={{ fontSize: '30px', fontWeight: '900', color: '#000000', letterSpacing: '-0.02em', marginBottom: '6px' }}>
+          <h1 className="text-2xl sm:text-3xl font-black text-[#000000] tracking-tight mb-1">
             Support Inbox 💬
           </h1>
-          <p style={{ color: '#374151', fontSize: '15px', margin: 0 }}>
+          <p className="text-slate-600 text-xs sm:text-sm m-0">
             Manage user inquiries, novel requests, chapter bug reports, and coin questions.
           </p>
         </div>
 
-        {/* Filter Tabs */}
-        <div style={{ display: 'flex', gap: '8px', background: '#ffffff', padding: '6px', borderRadius: '10px', border: '1.5px solid #cbd5e1' }}>
+        {/* Filter Tabs (Horizontal Scrollable) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar bg-white p-1.5 rounded-xl border border-slate-300 max-w-full shrink-0">
           {['all', 'open', 'in_progress', 'resolved'].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '8px',
-                background: filter === f ? '#6366f1' : 'transparent',
-                color: filter === f ? '#ffffff' : '#000000',
-                border: 'none',
-                fontSize: '13px',
-                fontWeight: '800',
-                cursor: 'pointer',
-                textTransform: 'capitalize',
-                transition: 'all 0.15s'
-              }}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold cursor-pointer capitalize whitespace-nowrap transition-all border-0 ${
+                filter === f ? 'bg-[#6366f1] text-white shadow-xs' : 'bg-transparent text-[#000000] hover:bg-slate-100'
+              }`}
             >
               {f.replace('_', ' ')}
             </button>
@@ -112,13 +104,14 @@ export default function AdminSupportPage() {
         </div>
       </div>
 
-      {/* Main Split Layout: Ticket List & Conversation View */}
-      <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: '24px', minHeight: '650px' }}>
+      {/* Main Responsive Split Layout: Ticket List & Conversation View */}
+      <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-4 sm:gap-6 min-h-[600px]">
         
-        {/* Left Column: Tickets List */}
-        <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1.5px solid #cbd5e1', fontWeight: '800', fontSize: '14px', color: '#000000', background: '#f8fafc' }}>
-            CONVERSATIONS ({tickets.length})
+        {/* Left Column: Tickets List (hidden on mobile when ticket is open) */}
+        <div className={`${selectedTicket ? 'hidden lg:flex' : 'flex'} bg-white border border-slate-300 rounded-2xl overflow-hidden flex-col shadow-xs`}>
+          <div className="p-3.5 sm:p-4 border-b border-slate-200 font-extrabold text-xs sm:text-sm text-[#000000] bg-slate-50 flex justify-between items-center">
+            <span>CONVERSATIONS ({tickets.length})</span>
+            <span className="text-[11px] text-slate-500 font-bold uppercase">{filter}</span>
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto' }}>
@@ -178,13 +171,19 @@ export default function AdminSupportPage() {
           </div>
         </div>
 
-        {/* Right Column: Chat History & Reply */}
-        <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '16px', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }}>
+        {/* Right Column: Chat History & Reply (hidden on mobile if no ticket is selected) */}
+        <div className={`${selectedTicket ? 'flex' : 'hidden lg:flex'} bg-white border border-slate-300 rounded-2xl flex-col overflow-hidden shadow-xs min-h-[480px]`}>
           {selectedTicket ? (
             <>
               {/* Ticket Details Bar */}
-              <div style={{ padding: '16px 24px', borderBottom: '1.5px solid #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+              <div className="p-3.5 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50">
                 <div>
+                  <button
+                    onClick={() => setSelectedTicket(null)}
+                    className="lg:hidden text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 px-2.5 py-1 rounded-md border border-slate-300 mb-2 flex items-center gap-1 cursor-pointer"
+                  >
+                    ← Back to Conversations
+                  </button>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontWeight: '800', fontSize: '16px', color: '#000000' }}>
                       {selectedTicket.user_id?.username || selectedTicket.sender_name || 'Guest Reader'}
@@ -203,16 +202,7 @@ export default function AdminSupportPage() {
                 {selectedTicket.status !== 'resolved' && (
                   <button
                     onClick={() => handleResolveTicket(selectedTicket._id)}
-                    style={{
-                      background: '#ecfdf5',
-                      border: '1.5px solid #10b981',
-                      color: '#065f46',
-                      padding: '8px 16px',
-                      borderRadius: '8px',
-                      fontSize: '12px',
-                      fontWeight: '800',
-                      cursor: 'pointer'
-                    }}
+                    className="w-full sm:w-auto bg-emerald-50 hover:bg-emerald-100 border border-emerald-400 text-emerald-900 py-2 px-4 rounded-lg text-xs font-bold cursor-pointer transition-colors shrink-0 text-center"
                   >
                     ✓ Mark as Resolved
                   </button>
@@ -264,8 +254,8 @@ export default function AdminSupportPage() {
               </div>
 
               {/* Reply Box */}
-              <div style={{ padding: '16px 24px', borderTop: '1.5px solid #cbd5e1', background: '#f8fafc' }}>
-                <div style={{ display: 'flex', gap: '12px' }}>
+              <div className="p-3 sm:p-4 border-t border-slate-300 bg-slate-50">
+                <div className="flex flex-col sm:flex-row gap-2.5">
                   <textarea
                     value={replyText}
                     onChange={e => setReplyText(e.target.value)}
@@ -293,17 +283,7 @@ export default function AdminSupportPage() {
                   <button
                     onClick={handleSendReply}
                     disabled={!replyText.trim() || sendingReply}
-                    style={{
-                      background: '#6366f1',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '0 24px',
-                      fontWeight: '800',
-                      fontSize: '14px',
-                      cursor: replyText.trim() ? 'pointer' : 'not-allowed',
-                      opacity: replyText.trim() ? 1 : 0.5
-                    }}
+                    className="w-full sm:w-auto bg-[#6366f1] hover:bg-indigo-600 text-white border-0 rounded-lg py-2.5 px-6 font-extrabold text-xs sm:text-sm cursor-pointer disabled:opacity-50 transition-colors shrink-0"
                   >
                     {sendingReply ? 'Sending...' : 'Send Reply'}
                   </button>

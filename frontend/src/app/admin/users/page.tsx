@@ -278,7 +278,7 @@ export default function ManageUsers() {
       ) : (
         <div style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #cbd5e1', overflow: 'hidden', boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }}>
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <table style={{ width: '100%', minWidth: '640px', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid #cbd5e1', background: '#f8fafc' }}>
                   <th style={thStyle}>User</th>
@@ -430,32 +430,8 @@ export default function ManageUsers() {
 
       {/* DETAILED USER VIEW / EDIT MODAL */}
       {selectedUserId && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.75)',
-          backdropFilter: 'blur(6px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '16px'
-        }}>
-          <div style={{
-            background: '#ffffff',
-            border: '2px solid #cbd5e1',
-            borderRadius: '20px',
-            width: '100%',
-            maxWidth: '720px',
-            maxHeight: '90vh',
-            overflowY: 'auto',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.25)',
-            padding: '28px',
-            color: '#000000'
-          }}>
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center z-50 p-2.5 sm:p-4">
+          <div className="bg-white border-2 border-slate-300 rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl p-4 sm:p-7 text-[#000000]">
             {/* Modal Header */}
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
               <div>

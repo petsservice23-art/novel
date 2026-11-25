@@ -293,13 +293,13 @@ export default function ManageNovels() {
       </div>
 
       {/* QUICK NOVEL DIRECTORY TABLE & SEARCH */}
-      <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '16px', padding: '24px', marginBottom: '32px', boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }}>
+      <div className="bg-white border border-slate-300 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-xs">
         
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#000000', margin: 0 }}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5 mb-4">
+          <h3 className="text-sm sm:text-base font-extrabold text-[#000000] m-0">
             ALL NOVELS ({filteredNovels.length} of {novels.length})
           </h3>
-          <span style={{ fontSize: '13px', color: '#475569', fontWeight: '600' }}>
+          <span className="text-xs text-slate-600 font-semibold">
             Click "Edit & Chapters" to configure or use quick actions
           </span>
         </div>
@@ -345,9 +345,9 @@ export default function ManageNovels() {
           )}
         </div>
 
-        {/* Novels Table (Quick Actions) */}
-        <div style={{ maxHeight: '340px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '10px' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+        {/* Novels Table (Quick Actions with Horizontal Scroll) */}
+        <div className="max-h-[340px] overflow-y-auto overflow-x-auto border border-slate-200 rounded-xl">
+          <table className="w-full min-w-[620px] border-collapse text-left text-xs sm:text-sm">
             <thead>
               <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1', color: '#000000' }}>
                 <th style={{ padding: '12px 14px', fontWeight: '800' }}>NOVEL</th>
@@ -473,34 +473,24 @@ export default function ManageNovels() {
 
       {/* SELECTED NOVEL ACTIVE MANAGEMENT PANEL */}
       {selectedNovel && currentNovel && (
-        <div style={{ marginBottom: '32px' }}>
+        <div className="mb-6 sm:mb-8">
           
           {/* Header Bar of Selected Novel */}
-          <div style={{
-            background: '#ffffff',
-            border: '2px solid #6366f1',
-            borderRadius: '16px',
-            padding: '24px',
-            marginBottom: '24px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            boxShadow: '0 6px 18px rgba(99, 102, 241, 0.08)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div className="bg-white border-2 border-indigo-500 rounded-2xl p-4 sm:p-6 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xs">
+            <div className="flex items-start sm:items-center gap-3.5 sm:gap-4">
               <img
                 src={currentNovel.cover_image}
                 alt={currentNovel.title}
-                style={{ width: '56px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '1.5px solid #cbd5e1' }}
+                className="w-12 h-16 sm:w-14 sm:h-20 object-cover rounded-lg border border-slate-300 shrink-0"
               />
               <div>
-                <span style={{ fontSize: '11px', fontWeight: '800', color: '#6366f1', textTransform: 'uppercase' }}>
+                <span className="text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider block">
                   Currently Editing
                 </span>
-                <h2 style={{ fontSize: '22px', fontWeight: '900', color: '#000000', margin: '2px 0 4px' }}>
+                <h2 className="text-lg sm:text-xl font-black text-[#000000] m-0 mt-0.5 leading-tight">
                   {currentNovel.title}
                 </h2>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '13px', color: '#334155' }}>
+                <div className="flex flex-wrap gap-2 items-center text-xs text-slate-700 mt-1">
                   <span>By <strong>{currentNovel.author || 'Korean Author'}</strong></span>
                   <span>•</span>
                   <span><strong>{chapters.length}</strong> chapters</span>
@@ -520,45 +510,32 @@ export default function ManageNovels() {
             </div>
 
             {/* Quick Novel Actions */}
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div className="flex flex-wrap gap-2.5 w-full md:w-auto">
               <button
                 onClick={() => handleToggleVisibility(selectedNovel)}
+                className="flex-1 sm:flex-none text-center px-4 py-2.5 rounded-lg font-extrabold text-xs cursor-pointer transition-colors"
                 style={{
                   background: currentNovel.is_hidden ? '#dcfce7' : '#fef3c7',
                   color: currentNovel.is_hidden ? '#166534' : '#92400e',
-                  border: currentNovel.is_hidden ? '1.5px solid #86efac' : '1.5px solid #fde68a',
-                  padding: '10px 18px',
-                  borderRadius: '8px',
-                  fontWeight: '800',
-                  fontSize: '13px',
-                  cursor: 'pointer'
+                  border: currentNovel.is_hidden ? '1.5px solid #86efac' : '1.5px solid #fde68a'
                 }}
               >
-                {currentNovel.is_hidden ? '👁️ Unhide Novel (Show on Site)' : '🙈 Hide Novel (Remove from Site)'}
+                {currentNovel.is_hidden ? '👁️ Unhide Novel' : '🙈 Hide Novel'}
               </button>
 
               <button
                 onClick={() => setNovelToDelete(currentNovel)}
-                style={{
-                  background: '#fee2e2',
-                  color: '#991b1b',
-                  border: '1.5px solid #f87171',
-                  padding: '10px 18px',
-                  borderRadius: '8px',
-                  fontWeight: '800',
-                  fontSize: '13px',
-                  cursor: 'pointer'
-                }}
+                className="flex-1 sm:flex-none text-center bg-red-50 hover:bg-red-100 text-red-800 border border-red-300 px-4 py-2.5 rounded-lg font-extrabold text-xs cursor-pointer transition-colors"
               >
-                🗑️ Delete Whole Novel
+                🗑️ Delete Novel
               </button>
             </div>
           </div>
 
           {/* NOVEL METADATA FORM */}
-          <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#000000', margin: 0 }}>
+          <div className="bg-white border border-slate-300 rounded-2xl p-4 sm:p-6 mb-6 shadow-xs">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-sm sm:text-base font-extrabold text-[#000000] m-0">
                 NOVEL METADATA
               </h3>
               <button
@@ -580,8 +557,8 @@ export default function ManageNovels() {
               </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div style={{ gridColumn: 'span 2' }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+              <div className="sm:col-span-2">
                 <label style={labelStyle}>Novel Title</label>
                 <input
                   type="text"
@@ -647,66 +624,54 @@ export default function ManageNovels() {
           </div>
 
           {/* BULK CHAPTER LOCKING RULES */}
-          <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+          <div className="bg-white border border-slate-300 rounded-2xl p-4 sm:p-6 mb-6 shadow-xs">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: '800', color: '#000000', marginBottom: '4px' }}>
+                <h3 className="text-sm sm:text-base font-extrabold text-[#000000] m-0 mb-1">
                   ⚡ BULK CHAPTER LOCKING RULES
                 </h3>
-                <p style={{ color: '#334155', fontSize: '13px', margin: 0 }}>
+                <p className="text-slate-600 text-xs sm:text-sm m-0">
                   Specify how many chapters are free. All chapters after that threshold are coin-locked (10 Coins).
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <span style={{ fontSize: '12px', fontWeight: '800', color: '#047857', background: '#dcfce7', padding: '6px 12px', borderRadius: '6px' }}>
+              <div className="flex flex-wrap gap-2">
+                <span className="text-xs font-extrabold text-emerald-800 bg-emerald-100 px-3 py-1.5 rounded-md">
                   🔓 {chapters.filter(c => c.tier === 'free').length} Free
                 </span>
-                <span style={{ fontSize: '12px', fontWeight: '800', color: '#b45309', background: '#fef3c7', padding: '6px 12px', borderRadius: '6px' }}>
+                <span className="text-xs font-extrabold text-amber-800 bg-amber-100 px-3 py-1.5 rounded-md">
                   🟡 {chapters.filter(c => c.tier !== 'free').length} Locked (10 Coins)
                 </span>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', background: '#f8fafc', padding: '16px 20px', borderRadius: '10px', border: '1px solid #cbd5e1' }}>
-              <span style={{ fontSize: '14px', color: '#000000' }}>
-                Keep chapters <strong>1</strong> to
-              </span>
-              <input
-                type="number"
-                min="0"
-                max={chapters.length || 1000}
-                value={bulkFreeUntil}
-                onChange={(e) => setBulkFreeUntil(Math.max(0, parseInt(e.target.value) || 0))}
-                style={{ ...inputStyle, width: '90px', textAlign: 'center', fontWeight: '800', fontSize: '15px' }}
-              />
-              <span style={{ fontSize: '14px', color: '#000000' }}>
-                <strong>FREE</strong>, and lock all chapters from <strong>{bulkFreeUntil + 1}</strong> onwards with <strong>10 Coins</strong>.
-              </span>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-slate-50 border border-slate-300 rounded-xl">
+              <div className="flex items-center gap-2 flex-wrap text-sm text-[#000000]">
+                <span>Keep chapters <strong>1</strong> to</span>
+                <input
+                  type="number"
+                  min="0"
+                  max={chapters.length || 1000}
+                  value={bulkFreeUntil}
+                  onChange={(e) => setBulkFreeUntil(Math.max(0, parseInt(e.target.value) || 0))}
+                  style={{ ...inputStyle, width: '80px', textAlign: 'center', fontWeight: '800', fontSize: '14px', padding: '6px 8px' }}
+                />
+                <span><strong>FREE</strong>, rest <strong>10 Coins</strong>.</span>
+              </div>
               <button
                 onClick={handleBulkLock}
                 disabled={isApplyingBulk}
-                style={{
-                  background: '#6366f1',
-                  color: '#ffffff',
-                  border: 'none',
-                  padding: '10px 22px',
-                  borderRadius: '8px',
-                  fontWeight: '800',
-                  fontSize: '13px',
-                  cursor: isApplyingBulk ? 'not-allowed' : 'pointer',
-                  marginLeft: 'auto'
-                }}
+                className="w-full sm:w-auto sm:ml-auto bg-[#6366f1] hover:bg-indigo-600 text-white border-0 py-2.5 px-5 rounded-lg font-extrabold text-xs cursor-pointer shadow-xs disabled:opacity-50 transition-colors"
               >
-                {isApplyingBulk ? 'Applying Rule...' : 'Apply Locking Rule'}
+                {isApplyingBulk ? 'Applying...' : 'Apply Locking Rule'}
               </button>
             </div>
           </div>
 
-          {/* CHAPTER LIST */}
-          <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '16px', overflow: 'hidden' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid #cbd5e1', background: '#f8fafc' }}>
-              <h3 style={{ fontSize: '15px', fontWeight: '800', color: '#000000', margin: 0 }}>
+          {/* CHAPTER LIST (With Responsive Overflow) */}
+          <div className="bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-xs">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-4 sm:p-5 border-b border-slate-200 bg-slate-50">
+              <h3 className="text-sm sm:text-base font-extrabold text-[#000000] m-0">
                 CHAPTER LIST ({chapters.length})
               </h3>
               <button
@@ -716,33 +681,26 @@ export default function ManageNovels() {
                   setEnglishText('');
                   setRawText('');
                 }}
-                style={{ background: '#6366f1', color: '#ffffff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: '800', cursor: 'pointer' }}
+                className="bg-[#6366f1] hover:bg-indigo-600 text-white border-0 py-2 px-4 rounded-lg text-xs font-bold cursor-pointer transition-colors"
               >
                 + Add New Chapter
               </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 200px 120px', gap: '16px', padding: '14px 24px', borderBottom: '1px solid #e2e8f0', background: '#f1f5f9', color: '#000000', fontSize: '12px', fontWeight: '800' }}>
-              <span>CHAPTER</span>
-              <span>TITLE</span>
-              <span>TIER</span>
-              <span style={{ textAlign: 'right' }}>ACTIONS</span>
-            </div>
+            <div className="overflow-x-auto">
+              <div className="grid grid-cols-[80px_1fr_180px_110px] min-w-[560px] gap-4 p-3.5 px-5 border-b border-slate-200 bg-slate-100 text-[#000000] text-xs font-black">
+                <span>CHAPTER</span>
+                <span>TITLE</span>
+                <span>TIER</span>
+                <span className="text-right">ACTIONS</span>
+              </div>
 
-            <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
-              {chapters.map(c => (
-                <div
-                  key={c._id}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '100px 1fr 200px 120px',
-                    gap: '16px',
-                    padding: '14px 24px',
-                    borderBottom: '1px solid #e2e8f0',
-                    alignItems: 'center',
-                    background: '#ffffff'
-                  }}
-                >
+              <div className="max-h-[600px] overflow-y-auto">
+                {chapters.map(c => (
+                  <div
+                    key={c._id}
+                    className="grid grid-cols-[80px_1fr_180px_110px] min-w-[560px] gap-4 p-3.5 px-5 border-b border-slate-200 items-center bg-white hover:bg-slate-50 text-xs sm:text-sm"
+                  >
                   <span style={{ color: '#334155', fontWeight: '700', fontSize: '14px' }}>
                     Ch. {c.chapter_number}
                   </span>
@@ -827,6 +785,7 @@ export default function ManageNovels() {
                   </div>
                 </div>
               ))}
+            </div>
             </div>
           </div>
 
@@ -924,48 +883,29 @@ export default function ManageNovels() {
 
       {/* CHAPTER CONTENT EDITOR MODAL */}
       {editingChapter && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.65)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          padding: '20px'
-        }}>
-          <div style={{
-            background: '#ffffff',
-            borderRadius: '20px',
-            maxWidth: '850px',
-            width: '100%',
-            maxHeight: '90vh',
-            display: 'flex',
-            flexDirection: 'column',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.25)',
-            border: '2px solid #cbd5e1'
-          }}>
-            <div style={{ padding: '18px 24px', borderBottom: '1.5px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="fixed inset-0 bg-black/65 flex items-center justify-center z-50 p-2.5 sm:p-5">
+          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl border-2 border-slate-300">
+            <div className="p-3.5 sm:p-5 border-b border-slate-200 flex justify-between items-center">
               <div>
-                <span style={{ fontSize: '11px', fontWeight: '800', color: '#6366f1', textTransform: 'uppercase' }}>
+                <span className="text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider block">
                   Chapter Content Editor
                 </span>
-                <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#000000', margin: '2px 0 0' }}>
+                <h3 className="text-base sm:text-lg font-black text-[#000000] m-0 mt-0.5">
                   {editingChapter.title}
                 </h3>
               </div>
               <button
                 onClick={() => setEditingChapter(null)}
-                style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', fontWeight: '700', color: '#000000' }}
+                className="bg-slate-100 hover:bg-slate-200 border-0 rounded-full w-8 h-8 cursor-pointer font-bold text-black flex items-center justify-center transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
+            <div className="p-3.5 sm:p-6 overflow-y-auto flex-1 text-xs sm:text-sm">
               <div style={{ marginBottom: '16px' }}>
                 <label style={labelStyle}>AI Translation Assistant (Optional - Paste Raw Korean/Foreign Text)</label>
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div className="flex flex-col sm:flex-row gap-2.5">
                   <textarea
                     rows={3}
                     value={rawText}
@@ -976,17 +916,7 @@ export default function ManageNovels() {
                   <button
                     onClick={handleTranslate}
                     disabled={isTranslating}
-                    style={{
-                      background: '#6366f1',
-                      color: '#fff',
-                      border: 'none',
-                      padding: '0 18px',
-                      borderRadius: '8px',
-                      fontWeight: '800',
-                      fontSize: '13px',
-                      cursor: isTranslating ? 'not-allowed' : 'pointer',
-                      whiteSpace: 'nowrap'
-                    }}
+                    className="w-full sm:w-auto bg-[#6366f1] hover:bg-indigo-600 text-white border-0 py-2.5 px-5 rounded-lg font-extrabold text-xs cursor-pointer shadow-xs whitespace-nowrap transition-colors shrink-0"
                   >
                     {isTranslating ? 'Translating...' : '🤖 Translate'}
                   </button>
@@ -996,7 +926,7 @@ export default function ManageNovels() {
               <div>
                 <label style={labelStyle}>English Story Content (Live Reader Text)</label>
                 <textarea
-                  rows={14}
+                  rows={12}
                   value={englishText}
                   onChange={e => setEnglishText(e.target.value)}
                   style={{ ...inputStyle, resize: 'vertical', lineHeight: '1.7', fontSize: '14px' }}
@@ -1004,17 +934,17 @@ export default function ManageNovels() {
               </div>
             </div>
 
-            <div style={{ padding: '16px 24px', borderTop: '1.5px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <div className="p-3.5 sm:p-5 border-t border-slate-200 flex flex-col-reverse sm:flex-row justify-end gap-2.5">
               <button
                 onClick={() => setEditingChapter(null)}
-                style={{ background: '#f1f5f9', color: '#000000', border: '1px solid #cbd5e1', padding: '10px 18px', borderRadius: '8px', fontWeight: '700', cursor: 'pointer' }}
+                className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-[#000000] border border-slate-300 py-2.5 px-5 rounded-lg font-bold text-xs cursor-pointer transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={saveContent}
                 disabled={isSaving}
-                style={{ background: '#10b981', color: '#ffffff', border: 'none', padding: '10px 24px', borderRadius: '8px', fontWeight: '800', cursor: isSaving ? 'not-allowed' : 'pointer' }}
+                className="w-full sm:w-auto bg-[#10b981] hover:bg-emerald-600 text-white border-0 py-2.5 px-6 rounded-lg font-black text-xs cursor-pointer shadow-xs disabled:opacity-50 transition-colors"
               >
                 {isSaving ? 'Saving...' : '💾 Save Chapter Content'}
               </button>
