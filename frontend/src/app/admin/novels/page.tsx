@@ -265,41 +265,44 @@ export default function ManageNovels() {
 
   const currentNovel = novels.find(n => n._id === selectedNovel);
 
-  // Strictly black styling
-  const labelStyle: React.CSSProperties = { display: 'block', fontSize: '12px', color: '#000000', marginBottom: '6px', fontWeight: '800' };
+  // Dynamic theme-adaptive styling
+  const labelStyle: React.CSSProperties = { display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '6px', fontWeight: '700' };
   const inputStyle: React.CSSProperties = {
     width: '100%',
     padding: '10px 14px',
-    borderRadius: '8px',
-    background: '#ffffff',
-    color: '#000000',
-    border: '1.5px solid #cbd5e1',
+    borderRadius: '10px',
+    background: 'var(--bg-card)',
+    color: 'var(--text-primary)',
+    border: '1.5px solid var(--border)',
     fontSize: '14px',
     outline: 'none',
     boxSizing: 'border-box'
   };
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', color: '#000000', paddingBottom: '60px' }}>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', color: 'var(--text-primary)', paddingBottom: '60px' }}>
       
       {/* Page Title */}
       <div style={{ marginBottom: '28px' }}>
-        <h1 style={{ fontSize: '30px', fontWeight: '900', color: '#000000', letterSpacing: '-0.02em', marginBottom: '6px' }}>
+        <h1 style={{ fontSize: '30px', fontWeight: '900', color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: '6px' }}>
           Manage Novels & Chapters
         </h1>
-        <p style={{ color: '#1f2937', fontSize: '15px' }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '15px' }}>
           Inspect novels, hide/unhide titles from public view, edit chapter locking rules, or delete novels completely.
         </p>
       </div>
 
       {/* QUICK NOVEL DIRECTORY TABLE & SEARCH */}
-      <div className="bg-white border border-slate-300 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-xs">
+      <div
+        className="rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 shadow-xs border transition-colors duration-200"
+        style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border)' }}
+      >
         
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5 mb-4">
-          <h3 className="text-sm sm:text-base font-extrabold text-[#000000] m-0">
+          <h3 className="text-sm sm:text-base font-extrabold m-0" style={{ color: 'var(--text-primary)' }}>
             ALL NOVELS ({filteredNovels.length} of {novels.length})
           </h3>
-          <span className="text-xs text-slate-600 font-semibold">
+          <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
             Click "Edit & Chapters" to configure or use quick actions
           </span>
         </div>
@@ -316,9 +319,9 @@ export default function ManageNovels() {
               padding: '12px 16px',
               paddingRight: '36px',
               borderRadius: '10px',
-              background: '#ffffff',
-              color: '#000000',
-              border: '1.5px solid #94a3b8',
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              border: '1.5px solid var(--border)',
               fontSize: '14px',
               fontWeight: '600',
               outline: 'none',
@@ -335,7 +338,7 @@ export default function ManageNovels() {
                 transform: 'translateY(-50%)',
                 background: 'transparent',
                 border: 'none',
-                color: '#64748b',
+                color: 'var(--text-muted)',
                 cursor: 'pointer',
                 fontSize: '14px'
               }}
@@ -346,10 +349,10 @@ export default function ManageNovels() {
         </div>
 
         {/* Novels Table (Quick Actions with Horizontal Scroll) */}
-        <div className="max-h-[340px] overflow-y-auto overflow-x-auto border border-slate-200 rounded-xl">
+        <div className="max-h-[340px] overflow-y-auto overflow-x-auto rounded-xl border" style={{ borderColor: 'var(--border)' }}>
           <table className="w-full min-w-[620px] border-collapse text-left text-xs sm:text-sm">
             <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1', color: '#000000' }}>
+              <tr style={{ background: 'var(--bg-secondary)', borderBottom: '2px solid var(--border)', color: 'var(--text-secondary)' }}>
                 <th style={{ padding: '12px 14px', fontWeight: '800' }}>NOVEL</th>
                 <th style={{ padding: '12px 14px', fontWeight: '800' }}>AUTHOR</th>
                 <th style={{ padding: '12px 14px', fontWeight: '800' }}>CHAPTERS</th>
@@ -366,33 +369,33 @@ export default function ManageNovels() {
                   <tr
                     key={n._id}
                     style={{
-                      borderBottom: '1px solid #e2e8f0',
-                      background: isSelected ? '#f0fdf4' : '#ffffff',
+                      borderBottom: '1px solid var(--border-subtle)',
+                      background: isSelected ? 'var(--accent-soft)' : 'transparent',
                       transition: 'background 0.15s'
                     }}
                   >
-                    <td style={{ padding: '10px 14px', fontWeight: '700', color: '#000000' }}>
+                    <td style={{ padding: '10px 14px', fontWeight: '700', color: 'var(--text-primary)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <img
                           src={n.cover_image}
                           alt={n.title}
-                          style={{ width: '28px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #cbd5e1' }}
+                          style={{ width: '28px', height: '40px', objectFit: 'cover', borderRadius: '4px', border: '1px solid var(--border)' }}
                           onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${n._id}/100/150`; }}
                         />
                         <div>
-                          <div style={{ color: '#000000', fontWeight: '800' }}>{n.title}</div>
+                          <div style={{ color: 'var(--text-primary)', fontWeight: '800' }}>{n.title}</div>
                           {n.alternative_titles && (
-                            <div style={{ fontSize: '11px', color: '#64748b' }}>{n.alternative_titles.slice(0, 30)}</div>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{n.alternative_titles.slice(0, 30)}</div>
                           )}
                         </div>
                       </div>
                     </td>
 
-                    <td style={{ padding: '10px 14px', color: '#1e293b' }}>
+                    <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>
                       {n.author || 'Korean Author'}
                     </td>
 
-                    <td style={{ padding: '10px 14px', fontWeight: '700', color: '#000000' }}>
+                    <td style={{ padding: '10px 14px', fontWeight: '700', color: 'var(--text-primary)' }}>
                       {n.total_chapters || 0}
                     </td>
 
@@ -402,9 +405,9 @@ export default function ManageNovels() {
                         fontWeight: '800',
                         padding: '3px 8px',
                         borderRadius: '6px',
-                        background: isHidden ? '#fef3c7' : '#dcfce7',
-                        color: isHidden ? '#92400e' : '#166534',
-                        border: isHidden ? '1px solid #fde68a' : '1px solid #bbf7d0'
+                        background: isHidden ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                        color: isHidden ? '#f59e0b' : '#10b981',
+                        border: isHidden ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)'
                       }}>
                         {isHidden ? '👁️‍🗨️ Hidden' : '🟢 Visible'}
                       </span>
@@ -476,21 +479,28 @@ export default function ManageNovels() {
         <div className="mb-6 sm:mb-8">
           
           {/* Header Bar of Selected Novel */}
-          <div className="bg-white border-2 border-indigo-500 rounded-2xl p-4 sm:p-6 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xs">
+          <div
+            className="rounded-2xl p-4 sm:p-6 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xs border-2"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--accent)',
+            }}
+          >
             <div className="flex items-start sm:items-center gap-3.5 sm:gap-4">
               <img
                 src={currentNovel.cover_image}
                 alt={currentNovel.title}
-                className="w-12 h-16 sm:w-14 sm:h-20 object-cover rounded-lg border border-slate-300 shrink-0"
+                className="w-12 h-16 sm:w-14 sm:h-20 object-cover rounded-lg border shrink-0"
+                style={{ borderColor: 'var(--border)' }}
               />
               <div>
-                <span className="text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider block">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider block" style={{ color: 'var(--accent)' }}>
                   Currently Editing
                 </span>
-                <h2 className="text-lg sm:text-xl font-black text-[#000000] m-0 mt-0.5 leading-tight">
+                <h2 className="text-lg sm:text-xl font-black m-0 mt-0.5 leading-tight" style={{ color: 'var(--text-primary)' }}>
                   {currentNovel.title}
                 </h2>
-                <div className="flex flex-wrap gap-2 items-center text-xs text-slate-700 mt-1">
+                <div className="flex flex-wrap gap-2 items-center text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
                   <span>By <strong>{currentNovel.author || 'Korean Author'}</strong></span>
                   <span>•</span>
                   <span><strong>{chapters.length}</strong> chapters</span>
@@ -500,8 +510,8 @@ export default function ManageNovels() {
                     fontWeight: '800',
                     padding: '2px 8px',
                     borderRadius: '5px',
-                    background: currentNovel.is_hidden ? '#fef3c7' : '#dcfce7',
-                    color: currentNovel.is_hidden ? '#92400e' : '#166534'
+                    background: currentNovel.is_hidden ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                    color: currentNovel.is_hidden ? '#f59e0b' : '#10b981'
                   }}>
                     {currentNovel.is_hidden ? '👁️‍🗨️ Hidden' : '🟢 Live on Site'}
                   </span>
@@ -515,9 +525,9 @@ export default function ManageNovels() {
                 onClick={() => handleToggleVisibility(selectedNovel)}
                 className="flex-1 sm:flex-none text-center px-4 py-2.5 rounded-lg font-extrabold text-xs cursor-pointer transition-colors"
                 style={{
-                  background: currentNovel.is_hidden ? '#dcfce7' : '#fef3c7',
-                  color: currentNovel.is_hidden ? '#166534' : '#92400e',
-                  border: currentNovel.is_hidden ? '1.5px solid #86efac' : '1.5px solid #fde68a'
+                  background: currentNovel.is_hidden ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                  color: currentNovel.is_hidden ? '#10b981' : '#f59e0b',
+                  border: currentNovel.is_hidden ? '1.5px solid rgba(16, 185, 129, 0.3)' : '1.5px solid rgba(245, 158, 11, 0.3)'
                 }}
               >
                 {currentNovel.is_hidden ? '👁️ Unhide Novel' : '🙈 Hide Novel'}
@@ -525,7 +535,12 @@ export default function ManageNovels() {
 
               <button
                 onClick={() => setNovelToDelete(currentNovel)}
-                className="flex-1 sm:flex-none text-center bg-red-50 hover:bg-red-100 text-red-800 border border-red-300 px-4 py-2.5 rounded-lg font-extrabold text-xs cursor-pointer transition-colors"
+                className="flex-1 sm:flex-none text-center px-4 py-2.5 rounded-lg font-extrabold text-xs cursor-pointer transition-colors"
+                style={{
+                  background: 'rgba(239, 68, 68, 0.12)',
+                  color: '#ef4444',
+                  border: '1px solid rgba(239, 68, 68, 0.3)'
+                }}
               >
                 🗑️ Delete Novel
               </button>
@@ -533,24 +548,30 @@ export default function ManageNovels() {
           </div>
 
           {/* NOVEL METADATA FORM */}
-          <div className="bg-white border border-slate-300 rounded-2xl p-4 sm:p-6 mb-6 shadow-xs">
+          <div
+            className="rounded-2xl p-4 sm:p-6 mb-6 shadow-xs border"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border)'
+            }}
+          >
             <div className="flex justify-between items-center mb-5">
-              <h3 className="text-sm sm:text-base font-extrabold text-[#000000] m-0">
+              <h3 className="text-sm sm:text-base font-extrabold m-0" style={{ color: 'var(--text-primary)' }}>
                 NOVEL METADATA
               </h3>
               <button
                 onClick={saveNovelMeta}
                 disabled={isSavingMeta}
                 style={{
-                  background: '#10b981',
+                  background: 'var(--accent-gradient)',
                   color: '#ffffff',
                   border: 'none',
                   padding: '10px 20px',
-                  borderRadius: '8px',
+                  borderRadius: '10px',
                   fontWeight: '800',
                   fontSize: '13px',
                   cursor: isSavingMeta ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
+                  boxShadow: '0 2px 10px rgba(142, 107, 175, 0.35)'
                 }}
               >
                 {isSavingMeta ? 'Saving...' : '💾 Save Metadata'}
@@ -624,29 +645,55 @@ export default function ManageNovels() {
           </div>
 
           {/* BULK CHAPTER LOCKING RULES */}
-          <div className="bg-white border border-slate-300 rounded-2xl p-4 sm:p-6 mb-6 shadow-xs">
+          <div
+            className="rounded-2xl p-4 sm:p-6 mb-6 shadow-xs border"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border)'
+            }}
+          >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
               <div>
-                <h3 className="text-sm sm:text-base font-extrabold text-[#000000] m-0 mb-1">
+                <h3 className="text-sm sm:text-base font-extrabold m-0 mb-1" style={{ color: 'var(--text-primary)' }}>
                   ⚡ BULK CHAPTER LOCKING RULES
                 </h3>
-                <p className="text-slate-600 text-xs sm:text-sm m-0">
+                <p className="text-xs sm:text-sm m-0" style={{ color: 'var(--text-secondary)' }}>
                   Specify how many chapters are free. All chapters after that threshold are coin-locked (10 Coins).
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <span className="text-xs font-extrabold text-emerald-800 bg-emerald-100 px-3 py-1.5 rounded-md">
+                <span
+                  className="text-xs font-extrabold px-3 py-1.5 rounded-lg border"
+                  style={{
+                    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                    color: '#10b981',
+                    borderColor: 'rgba(16, 185, 129, 0.3)'
+                  }}
+                >
                   🔓 {chapters.filter(c => c.tier === 'free').length} Free
                 </span>
-                <span className="text-xs font-extrabold text-amber-800 bg-amber-100 px-3 py-1.5 rounded-md">
+                <span
+                  className="text-xs font-extrabold px-3 py-1.5 rounded-lg border"
+                  style={{
+                    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                    color: '#f59e0b',
+                    borderColor: 'rgba(245, 158, 11, 0.3)'
+                  }}
+                >
                   🟡 {chapters.filter(c => c.tier !== 'free').length} Locked (10 Coins)
                 </span>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-slate-50 border border-slate-300 rounded-xl">
-              <div className="flex items-center gap-2 flex-wrap text-sm text-[#000000]">
+            <div
+              className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 rounded-xl border"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                borderColor: 'var(--border)'
+              }}
+            >
+              <div className="flex items-center gap-2 flex-wrap text-sm" style={{ color: 'var(--text-primary)' }}>
                 <span>Keep chapters <strong>1</strong> to</span>
                 <input
                   type="number"
@@ -661,7 +708,10 @@ export default function ManageNovels() {
               <button
                 onClick={handleBulkLock}
                 disabled={isApplyingBulk}
-                className="w-full sm:w-auto sm:ml-auto bg-[#6366f1] hover:bg-indigo-600 text-white border-0 py-2.5 px-5 rounded-lg font-extrabold text-xs cursor-pointer shadow-xs disabled:opacity-50 transition-colors"
+                className="w-full sm:w-auto sm:ml-auto text-white border-0 py-2.5 px-5 rounded-lg font-extrabold text-xs cursor-pointer shadow-xs disabled:opacity-50 transition-colors"
+                style={{
+                  background: 'var(--accent-gradient)'
+                }}
               >
                 {isApplyingBulk ? 'Applying...' : 'Apply Locking Rule'}
               </button>
@@ -669,9 +719,21 @@ export default function ManageNovels() {
           </div>
 
           {/* CHAPTER LIST (With Responsive Overflow) */}
-          <div className="bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-xs">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-4 sm:p-5 border-b border-slate-200 bg-slate-50">
-              <h3 className="text-sm sm:text-base font-extrabold text-[#000000] m-0">
+          <div
+            className="rounded-2xl overflow-hidden shadow-xs border"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border)'
+            }}
+          >
+            <div
+              className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-4 sm:p-5 border-b"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                borderColor: 'var(--border)'
+              }}
+            >
+              <h3 className="text-sm sm:text-base font-extrabold m-0" style={{ color: 'var(--text-primary)' }}>
                 CHAPTER LIST ({chapters.length})
               </h3>
               <button
@@ -681,14 +743,24 @@ export default function ManageNovels() {
                   setEnglishText('');
                   setRawText('');
                 }}
-                className="bg-[#6366f1] hover:bg-indigo-600 text-white border-0 py-2 px-4 rounded-lg text-xs font-bold cursor-pointer transition-colors"
+                className="text-white border-0 py-2 px-4 rounded-lg text-xs font-bold cursor-pointer transition-colors"
+                style={{
+                  background: 'var(--accent-gradient)'
+                }}
               >
                 + Add New Chapter
               </button>
             </div>
 
             <div className="overflow-x-auto">
-              <div className="grid grid-cols-[80px_1fr_180px_110px] min-w-[560px] gap-4 p-3.5 px-5 border-b border-slate-200 bg-slate-100 text-[#000000] text-xs font-black">
+              <div
+                className="grid grid-cols-[80px_1fr_180px_110px] min-w-[560px] gap-4 p-3.5 px-5 border-b text-xs font-black"
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  borderColor: 'var(--border)',
+                  color: 'var(--text-secondary)'
+                }}
+              >
                 <span>CHAPTER</span>
                 <span>TITLE</span>
                 <span>TIER</span>
@@ -699,9 +771,13 @@ export default function ManageNovels() {
                 {chapters.map(c => (
                   <div
                     key={c._id}
-                    className="grid grid-cols-[80px_1fr_180px_110px] min-w-[560px] gap-4 p-3.5 px-5 border-b border-slate-200 items-center bg-white hover:bg-slate-50 text-xs sm:text-sm"
+                    className="grid grid-cols-[80px_1fr_180px_110px] min-w-[560px] gap-4 p-3.5 px-5 border-b items-center text-xs sm:text-sm transition-colors"
+                    style={{
+                      borderColor: 'var(--border-subtle)',
+                      color: 'var(--text-primary)'
+                    }}
                   >
-                  <span style={{ color: '#334155', fontWeight: '700', fontSize: '14px' }}>
+                  <span style={{ color: 'var(--text-muted)', fontWeight: '700', fontSize: '14px' }}>
                     Ch. {c.chapter_number}
                   </span>
 
@@ -727,20 +803,20 @@ export default function ManageNovels() {
                       </button>
                       <button
                         onClick={cancelEditTitle}
-                        style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', color: '#000000', padding: '6px 8px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}
+                        style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', padding: '6px 8px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}
                       >
                         ✕
                       </button>
                     </div>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                      <span style={{ fontSize: '14px', fontWeight: '700', color: '#000000', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {c.title}
                       </span>
                       <button
                         onClick={() => startEditTitle(c)}
                         title="Edit Chapter Title"
-                        style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px 4px' }}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '2px 4px' }}
                       >
                         ✏️
                       </button>
@@ -754,11 +830,12 @@ export default function ManageNovels() {
                       style={{
                         padding: '6px 10px',
                         borderRadius: '6px',
-                        background: c.tier === 'free' ? '#ecfdf5' : '#fef3c7',
-                        color: c.tier === 'free' ? '#065f46' : '#92400e',
-                        border: c.tier === 'free' ? '1px solid #a7f3d0' : '1px solid #fde68a',
+                        background: c.tier === 'free' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                        color: c.tier === 'free' ? '#10b981' : '#f59e0b',
+                        border: c.tier === 'free' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(245, 158, 11, 0.3)',
                         fontWeight: '800',
-                        fontSize: '12px'
+                        fontSize: '12px',
+                        outline: 'none'
                       }}
                     >
                       <option value="free">Free Chapter</option>
@@ -770,9 +847,9 @@ export default function ManageNovels() {
                     <button
                       onClick={() => openEditor(c)}
                       style={{
-                        background: '#f1f5f9',
-                        color: '#000000',
-                        border: '1.5px solid #cbd5e1',
+                        background: 'var(--bg-secondary)',
+                        color: 'var(--text-primary)',
+                        border: '1px solid var(--border)',
                         padding: '6px 12px',
                         borderRadius: '6px',
                         fontSize: '12px',
@@ -797,7 +874,8 @@ export default function ManageNovels() {
         <div style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(0,0,0,0.65)',
+          background: 'rgba(0,0,0,0.7)',
+          backdropFilter: 'blur(4px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -805,41 +883,42 @@ export default function ManageNovels() {
           padding: '20px'
         }}>
           <div style={{
-            background: '#ffffff',
+            background: 'var(--bg-card)',
+            color: 'var(--text-primary)',
             borderRadius: '20px',
             maxWidth: '520px',
             width: '100%',
             padding: '28px',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
             border: '2px solid #ef4444'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-              <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#fee2e2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>
                 ⚠️
               </div>
               <div>
-                <h3 style={{ fontSize: '18px', fontWeight: '900', color: '#991b1b', margin: 0 }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '900', color: '#ef4444', margin: 0 }}>
                   Permanently Delete Novel?
                 </h3>
-                <p style={{ color: '#475569', fontSize: '13px', margin: '2px 0 0' }}>
+                <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '2px 0 0' }}>
                   This action is irreversible.
                 </p>
               </div>
             </div>
 
-            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '14px', marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '12px', padding: '14px', marginBottom: '20px', display: 'flex', gap: '12px', alignItems: 'center' }}>
               <img
                 src={novelToDelete.cover_image}
                 alt={novelToDelete.title}
-                style={{ width: '40px', height: '56px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                style={{ width: '40px', height: '56px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border)' }}
               />
               <div>
-                <div style={{ fontWeight: '800', color: '#000000', fontSize: '14px' }}>{novelToDelete.title}</div>
-                <div style={{ color: '#475569', fontSize: '12px' }}>{novelToDelete.total_chapters || 0} chapters will be deleted from database and Cloudflare R2</div>
+                <div style={{ fontWeight: '800', color: 'var(--text-primary)', fontSize: '14px' }}>{novelToDelete.title}</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{novelToDelete.total_chapters || 0} chapters will be deleted from database and Cloudflare R2</div>
               </div>
             </div>
 
-            <p style={{ color: '#1f2937', fontSize: '14px', lineHeight: '1.5', marginBottom: '24px' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.5', marginBottom: '24px' }}>
               Are you sure you want to delete <strong>"{novelToDelete.title}"</strong>? All chapters, locking rules, and reader records will be permanently erased.
             </p>
 
@@ -847,9 +926,9 @@ export default function ManageNovels() {
               <button
                 onClick={() => setNovelToDelete(null)}
                 style={{
-                  background: '#f1f5f9',
-                  color: '#000000',
-                  border: '1px solid #cbd5e1',
+                  background: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)',
                   padding: '10px 20px',
                   borderRadius: '8px',
                   fontWeight: '700',
@@ -883,20 +962,32 @@ export default function ManageNovels() {
 
       {/* CHAPTER CONTENT EDITOR MODAL */}
       {editingChapter && (
-        <div className="fixed inset-0 bg-black/65 flex items-center justify-center z-50 p-2.5 sm:p-5">
-          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl border-2 border-slate-300">
-            <div className="p-3.5 sm:p-5 border-b border-slate-200 flex justify-between items-center">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center z-50 p-2.5 sm:p-5">
+          <div
+            className="rounded-2xl sm:rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl border-2"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border)',
+              color: 'var(--text-primary)'
+            }}
+          >
+            <div className="p-3.5 sm:p-5 border-b flex justify-between items-center" style={{ borderColor: 'var(--border)' }}>
               <div>
-                <span className="text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider block">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider block" style={{ color: 'var(--accent)' }}>
                   Chapter Content Editor
                 </span>
-                <h3 className="text-base sm:text-lg font-black text-[#000000] m-0 mt-0.5">
+                <h3 className="text-base sm:text-lg font-black m-0 mt-0.5" style={{ color: 'var(--text-primary)' }}>
                   {editingChapter.title}
                 </h3>
               </div>
               <button
                 onClick={() => setEditingChapter(null)}
-                className="bg-slate-100 hover:bg-slate-200 border-0 rounded-full w-8 h-8 cursor-pointer font-bold text-black flex items-center justify-center transition-colors"
+                className="border-0 rounded-full w-8 h-8 cursor-pointer font-bold flex items-center justify-center transition-colors"
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)'
+                }}
               >
                 ✕
               </button>
@@ -916,7 +1007,8 @@ export default function ManageNovels() {
                   <button
                     onClick={handleTranslate}
                     disabled={isTranslating}
-                    className="w-full sm:w-auto bg-[#6366f1] hover:bg-indigo-600 text-white border-0 py-2.5 px-5 rounded-lg font-extrabold text-xs cursor-pointer shadow-xs whitespace-nowrap transition-colors shrink-0"
+                    className="w-full sm:w-auto text-white border-0 py-2.5 px-5 rounded-lg font-extrabold text-xs cursor-pointer shadow-xs whitespace-nowrap transition-colors shrink-0"
+                    style={{ background: 'var(--accent-gradient)' }}
                   >
                     {isTranslating ? 'Translating...' : '🤖 Translate'}
                   </button>
@@ -934,17 +1026,23 @@ export default function ManageNovels() {
               </div>
             </div>
 
-            <div className="p-3.5 sm:p-5 border-t border-slate-200 flex flex-col-reverse sm:flex-row justify-end gap-2.5">
+            <div className="p-3.5 sm:p-5 border-t flex flex-col-reverse sm:flex-row justify-end gap-2.5" style={{ borderColor: 'var(--border)' }}>
               <button
                 onClick={() => setEditingChapter(null)}
-                className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-[#000000] border border-slate-300 py-2.5 px-5 rounded-lg font-bold text-xs cursor-pointer transition-colors"
+                className="w-full sm:w-auto py-2.5 px-5 rounded-lg font-bold text-xs cursor-pointer transition-colors"
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)'
+                }}
               >
                 Cancel
               </button>
               <button
                 onClick={saveContent}
                 disabled={isSaving}
-                className="w-full sm:w-auto bg-[#10b981] hover:bg-emerald-600 text-white border-0 py-2.5 px-6 rounded-lg font-black text-xs cursor-pointer shadow-xs disabled:opacity-50 transition-colors"
+                className="w-full sm:w-auto text-white border-0 py-2.5 px-6 rounded-lg font-black text-xs cursor-pointer shadow-xs disabled:opacity-50 transition-colors"
+                style={{ background: 'var(--accent-gradient)' }}
               >
                 {isSaving ? 'Saving...' : '💾 Save Chapter Content'}
               </button>

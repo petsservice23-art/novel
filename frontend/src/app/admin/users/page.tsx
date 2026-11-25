@@ -205,21 +205,21 @@ export default function ManageUsers() {
       <header style={{ marginBottom: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h1 style={{ fontSize: '30px', fontWeight: '900', color: '#000000', letterSpacing: '-0.02em', margin: 0 }}>
+            <h1 style={{ fontSize: '30px', fontWeight: '900', color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
               User Management
             </h1>
-            <p style={{ color: '#374151', fontSize: '15px', marginTop: '4px' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '15px', marginTop: '4px' }}>
               Inspect, manage roles, adjust coins, and view detailed activity for all registered readers.
             </p>
           </div>
           <div style={{
-            background: '#eff6ff',
-            border: '1.5px solid #bfdbfe',
+            background: 'var(--accent-soft)',
+            border: '1.5px solid var(--accent)',
             padding: '8px 18px',
             borderRadius: '100px',
             fontSize: '13px',
             fontWeight: '800',
-            color: '#1d4ed8'
+            color: 'var(--accent)'
           }}>
             Total Users: {users.length}
           </div>
@@ -235,12 +235,12 @@ export default function ManageUsers() {
               onChange={(e) => setSearch(e.target.value)}
               style={{
                 width: '100%',
-                background: '#ffffff',
-                border: '1.5px solid #cbd5e1',
+                background: 'var(--bg-card)',
+                border: '1.5px solid var(--border)',
                 borderRadius: '10px',
                 padding: '10px 16px',
                 fontSize: '14px',
-                color: '#000000',
+                color: 'var(--text-primary)',
                 outline: 'none',
                 fontWeight: '600'
               }}
@@ -251,12 +251,12 @@ export default function ManageUsers() {
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
             style={{
-              background: '#ffffff',
-              border: '1.5px solid #cbd5e1',
+              background: 'var(--bg-card)',
+              border: '1.5px solid var(--border)',
               borderRadius: '10px',
               padding: '10px 16px',
               fontSize: '14px',
-              color: '#000000',
+              color: 'var(--text-primary)',
               fontWeight: '700',
               outline: 'none',
               cursor: 'pointer'
@@ -276,11 +276,11 @@ export default function ManageUsers() {
           Loading users...
         </div>
       ) : (
-        <div style={{ background: '#ffffff', borderRadius: '16px', border: '1.5px solid #cbd5e1', overflow: 'hidden', boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }}>
+        <div style={{ background: 'var(--bg-card)', borderRadius: '16px', border: '1.5px solid var(--border)', overflow: 'hidden', boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', minWidth: '640px', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
-                <tr style={{ borderBottom: '2px solid #cbd5e1', background: '#f8fafc' }}>
+                <tr style={{ borderBottom: '2px solid var(--border)', background: 'var(--bg-secondary)' }}>
                   <th style={thStyle}>User</th>
                   <th style={thStyle}>Email</th>
                   <th style={thStyle}>Role</th>
@@ -292,20 +292,20 @@ export default function ManageUsers() {
               <tbody>
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} style={{ padding: '40px', textAlign: 'center', color: '#64748b', fontWeight: '600' }}>
+                    <td colSpan={6} style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)', fontWeight: '600' }}>
                       No users match your search criteria.
                     </td>
                   </tr>
                 ) : (
                   filteredUsers.map((u) => (
-                    <tr key={u._id} style={{ borderBottom: '1px solid #e2e8f0', transition: 'background 0.15s' }}>
+                    <tr key={u._id} style={{ borderBottom: '1px solid var(--border-subtle)', transition: 'background 0.15s' }}>
                       <td style={tdStyle}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <div style={{
                             width: '36px',
                             height: '36px',
                             borderRadius: '50%',
-                            background: u.role === 'admin' ? '#6366f1' : '#10b981',
+                            background: u.role === 'admin' ? 'var(--accent)' : '#10b981',
                             color: '#ffffff',
                             display: 'flex',
                             alignItems: 'center',
@@ -316,16 +316,16 @@ export default function ManageUsers() {
                             {getInitials(u.username)}
                           </div>
                           <div>
-                            <div style={{ fontWeight: '800', color: '#000000', fontSize: '14px' }}>
+                            <div style={{ fontWeight: '800', color: 'var(--text-primary)', fontSize: '14px' }}>
                               {u.username}
                             </div>
-                            <div style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '500' }}>
                               Joined {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td style={tdStyle}>{u.email}</td>
+                      <td style={{ ...tdStyle, color: 'var(--text-secondary)' }}>{u.email}</td>
                       <td style={tdStyle}>
                         <span style={{
                           padding: '4px 10px',
@@ -335,29 +335,29 @@ export default function ManageUsers() {
                           letterSpacing: '0.04em',
                           textTransform: 'uppercase',
                           background: u.role === 'admin' 
-                            ? 'rgba(142, 107, 175, 0.25)' 
+                            ? 'var(--accent-soft)' 
                             : u.role === 'author' 
-                            ? 'rgba(245, 158, 11, 0.2)' 
-                            : 'rgba(255, 255, 255, 0.06)',
-                          color: u.role === 'admin' ? '#c4b5fd' : u.role === 'author' ? '#fbbf24' : '#94a3b8',
+                            ? 'rgba(245, 158, 11, 0.15)' 
+                            : 'var(--bg-secondary)',
+                          color: u.role === 'admin' ? 'var(--accent)' : u.role === 'author' ? '#f59e0b' : 'var(--text-secondary)',
                           border: u.role === 'admin' 
-                            ? '1px solid rgba(142, 107, 175, 0.4)' 
+                            ? '1px solid var(--accent)' 
                             : u.role === 'author' 
                             ? '1px solid rgba(245, 158, 11, 0.3)' 
-                            : '1px solid rgba(255, 255, 255, 0.1)'
+                            : '1px solid var(--border)'
                         }}>
                           {u.role}
                         </span>
                       </td>
                       <td style={tdStyle}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: '800', color: '#fbbf24' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontWeight: '800', color: '#f59e0b' }}>
                           <span>©</span>
                           <span>{u.coins ?? 0}</span>
                         </span>
                       </td>
                       <td style={tdStyle}>
                         {u.is_vip ? (
-                          <span style={{ background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.35)', color: '#fbbf24', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '800' }}>
+                          <span style={{ background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.35)', color: '#f59e0b', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '800' }}>
                             VIP
                           </span>
                         ) : (
@@ -372,7 +372,7 @@ export default function ManageUsers() {
                             style={{
                               background: 'var(--accent-soft)',
                               border: '1px solid var(--accent)',
-                              color: '#c4b5fd',
+                              color: 'var(--accent)',
                               padding: '6px 14px',
                               borderRadius: '6px',
                               fontSize: '12px',
@@ -388,9 +388,9 @@ export default function ManageUsers() {
                           <button
                             onClick={() => handleOpenView(u._id, 'edit')}
                             style={{
-                              background: 'rgba(255,255,255,0.05)',
-                              border: '1px solid rgba(255,255,255,0.1)',
-                              color: '#f8fafc',
+                              background: 'var(--bg-secondary)',
+                              border: '1px solid var(--border)',
+                              color: 'var(--text-primary)',
                               padding: '6px 12px',
                               borderRadius: '6px',
                               fontSize: '12px',
@@ -431,23 +431,30 @@ export default function ManageUsers() {
       {/* DETAILED USER VIEW / EDIT MODAL */}
       {selectedUserId && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center z-50 p-2.5 sm:p-4">
-          <div className="bg-white border-2 border-slate-300 rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl p-4 sm:p-7 text-[#000000]">
+          <div
+            className="rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[92vh] overflow-y-auto shadow-2xl p-4 sm:p-7 border-2"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border)',
+              color: 'var(--text-primary)'
+            }}
+          >
             {/* Modal Header */}
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
               <div>
-                <h2 style={{ fontSize: '22px', fontWeight: '900', color: '#000000', margin: 0 }}>
+                <h2 style={{ fontSize: '22px', fontWeight: '900', color: 'var(--text-primary)', margin: 0 }}>
                   User Details & Controls
                 </h2>
-                <p style={{ color: '#475569', fontSize: '13px', margin: '4px 0 0' }}>
-                  ID: <span style={{ fontFamily: 'monospace', color: '#000000', fontWeight: '700' }}>{selectedUserId}</span>
+                <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '4px 0 0' }}>
+                  ID: <span style={{ fontFamily: 'monospace', color: 'var(--text-primary)', fontWeight: '700' }}>{selectedUserId}</span>
                 </p>
               </div>
               <button
                 onClick={handleCloseModal}
                 style={{
-                  background: '#f1f5f9',
-                  border: 'none',
-                  color: '#000000',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-primary)',
                   width: '32px',
                   height: '32px',
                   borderRadius: '50%',
@@ -468,8 +475,8 @@ export default function ManageUsers() {
               <div>
                 {/* User Summary Card */}
                 <div style={{
-                  background: '#f8fafc',
-                  border: '1.5px solid #cbd5e1',
+                  background: 'var(--bg-secondary)',
+                  border: '1.5px solid var(--border)',
                   borderRadius: '14px',
                   padding: '18px',
                   display: 'flex',
@@ -481,7 +488,7 @@ export default function ManageUsers() {
                     width: '54px',
                     height: '54px',
                     borderRadius: '50%',
-                    background: userDetails.user.role === 'admin' ? '#6366f1' : '#10b981',
+                    background: userDetails.user.role === 'admin' ? 'var(--accent)' : '#10b981',
                     color: '#fff',
                     display: 'flex',
                     alignItems: 'center',
@@ -493,7 +500,7 @@ export default function ManageUsers() {
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '18px', fontWeight: '900', color: '#000000' }}>
+                      <span style={{ fontSize: '18px', fontWeight: '900', color: 'var(--text-primary)' }}>
                         {userDetails.user.username}
                       </span>
                       <span style={{
@@ -502,8 +509,8 @@ export default function ManageUsers() {
                         fontSize: '11px',
                         fontWeight: '800',
                         textTransform: 'uppercase',
-                        background: '#e0e7ff',
-                        color: '#4338ca'
+                        background: 'var(--accent-soft)',
+                        color: 'var(--accent)'
                       }}>
                         {userDetails.user.role}
                       </span>
@@ -513,20 +520,20 @@ export default function ManageUsers() {
                           borderRadius: '100px',
                           fontSize: '11px',
                           fontWeight: '800',
-                          background: '#fef3c7',
-                          color: '#b45309'
+                          background: 'rgba(245, 158, 11, 0.15)',
+                          color: '#f59e0b'
                         }}>
                           VIP
                         </span>
                       )}
                     </div>
-                    <div style={{ color: '#475569', fontSize: '13px', marginTop: '2px', fontWeight: '500' }}>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '2px', fontWeight: '500' }}>
                       {userDetails.user.email}
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '12px', color: '#64748b', fontWeight: '600' }}>Registered</div>
-                    <div style={{ fontSize: '13px', fontWeight: '800', color: '#000000' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>Registered</div>
+                    <div style={{ fontSize: '13px', fontWeight: '800', color: 'var(--text-primary)' }}>
                       {userDetails.user.createdAt ? new Date(userDetails.user.createdAt).toLocaleDateString() : 'N/A'}
                     </div>
                   </div>
@@ -535,26 +542,26 @@ export default function ManageUsers() {
                 {/* 4 Stat Cards */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '22px' }}>
                   <div style={statBoxStyle}>
-                    <div style={{ fontSize: '11px', color: '#475569', fontWeight: '800' }}>COIN BALANCE</div>
-                    <div style={{ fontSize: '20px', fontWeight: '900', color: '#b45309', marginTop: '4px' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '800' }}>COIN BALANCE</div>
+                    <div style={{ fontSize: '20px', fontWeight: '900', color: '#f59e0b', marginTop: '4px' }}>
                       © {userDetails.user.coins ?? 0}
                     </div>
                   </div>
                   <div style={statBoxStyle}>
-                    <div style={{ fontSize: '11px', color: '#475569', fontWeight: '800' }}>UNLOCKED CHAPTERS</div>
-                    <div style={{ fontSize: '20px', fontWeight: '900', color: '#4338ca', marginTop: '4px' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '800' }}>UNLOCKED CHAPTERS</div>
+                    <div style={{ fontSize: '20px', fontWeight: '900', color: 'var(--accent)', marginTop: '4px' }}>
                       {userDetails.stats?.unlockedCount ?? (userDetails.user.unlocked_chapters?.length || 0)}
                     </div>
                   </div>
                   <div style={statBoxStyle}>
-                    <div style={{ fontSize: '11px', color: '#475569', fontWeight: '800' }}>LIBRARY SAVED</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '800' }}>LIBRARY SAVED</div>
                     <div style={{ fontSize: '20px', fontWeight: '900', color: '#0284c7', marginTop: '4px' }}>
                       {userDetails.stats?.libraryCount ?? (userDetails.user.library?.length || 0)}
                     </div>
                   </div>
                   <div style={statBoxStyle}>
-                    <div style={{ fontSize: '11px', color: '#475569', fontWeight: '800' }}>TOTAL PURCHASES</div>
-                    <div style={{ fontSize: '20px', fontWeight: '900', color: '#059669', marginTop: '4px' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '800' }}>TOTAL PURCHASES</div>
+                    <div style={{ fontSize: '20px', fontWeight: '900', color: '#10b981', marginTop: '4px' }}>
                       {userDetails.stats?.transactionsCount ?? 0}
                     </div>
                   </div>
@@ -562,8 +569,8 @@ export default function ManageUsers() {
 
                 {/* Quick Coin Adjustment Toolbar */}
                 <div style={{
-                  background: '#fffbeb',
-                  border: '1.5px solid #fde68a',
+                  background: 'rgba(245, 158, 11, 0.12)',
+                  border: '1.5px solid rgba(245, 158, 11, 0.3)',
                   borderRadius: '12px',
                   padding: '12px 16px',
                   display: 'flex',
@@ -573,25 +580,25 @@ export default function ManageUsers() {
                   gap: '10px',
                   marginBottom: '22px'
                 }}>
-                  <span style={{ fontSize: '13px', fontWeight: '800', color: '#92400e' }}>
+                  <span style={{ fontSize: '13px', fontWeight: '800', color: '#f59e0b' }}>
                     Quick Coin Adjust:
                   </span>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <button onClick={() => handleQuickAddCoins(100)} style={coinBtnStyle}>+100</button>
                     <button onClick={() => handleQuickAddCoins(500)} style={coinBtnStyle}>+500</button>
                     <button onClick={() => handleQuickAddCoins(1000)} style={coinBtnStyle}>+1000</button>
-                    <button onClick={() => handleQuickAddCoins(-100)} style={{ ...coinBtnStyle, color: '#dc2626', borderColor: '#fca5a5', background: '#fee2e2' }}>-100</button>
+                    <button onClick={() => handleQuickAddCoins(-100)} style={{ ...coinBtnStyle, color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.4)', background: 'rgba(239, 68, 68, 0.15)' }}>-100</button>
                   </div>
                 </div>
 
                 {/* Modal Navigation Tabs */}
-                <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid #e2e8f0', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid var(--border)', marginBottom: '20px' }}>
                   <button
                     onClick={() => setActiveTab('info')}
                     style={{
                       ...tabStyle,
-                      borderBottom: activeTab === 'info' ? '2px solid #6366f1' : '2px solid transparent',
-                      color: activeTab === 'info' ? '#4338ca' : '#475569'
+                      borderBottom: activeTab === 'info' ? '2px solid var(--accent)' : '2px solid transparent',
+                      color: activeTab === 'info' ? 'var(--text-primary)' : 'var(--text-muted)'
                     }}
                   >
                     Account Info
@@ -600,8 +607,8 @@ export default function ManageUsers() {
                     onClick={() => setActiveTab('edit')}
                     style={{
                       ...tabStyle,
-                      borderBottom: activeTab === 'edit' ? '2px solid #6366f1' : '2px solid transparent',
-                      color: activeTab === 'edit' ? '#4338ca' : '#475569'
+                      borderBottom: activeTab === 'edit' ? '2px solid var(--accent)' : '2px solid transparent',
+                      color: activeTab === 'edit' ? 'var(--text-primary)' : 'var(--text-muted)'
                     }}
                   >
                     Edit User & Coins
@@ -610,8 +617,8 @@ export default function ManageUsers() {
                     onClick={() => setActiveTab('transactions')}
                     style={{
                       ...tabStyle,
-                      borderBottom: activeTab === 'transactions' ? '2px solid #6366f1' : '2px solid transparent',
-                      color: activeTab === 'transactions' ? '#4338ca' : '#475569'
+                      borderBottom: activeTab === 'transactions' ? '2px solid var(--accent)' : '2px solid transparent',
+                      color: activeTab === 'transactions' ? 'var(--text-primary)' : 'var(--text-muted)'
                     }}
                   >
                     Purchases ({userDetails.transactions?.length || 0})
@@ -622,34 +629,34 @@ export default function ManageUsers() {
                 {activeTab === 'info' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                     <div style={infoRowStyle}>
-                      <span style={{ color: '#475569', fontWeight: '700' }}>Username</span>
-                      <span style={{ fontWeight: '800', color: '#000000' }}>{userDetails.user.username}</span>
+                      <span style={{ color: 'var(--text-secondary)', fontWeight: '700' }}>Username</span>
+                      <span style={{ fontWeight: '800', color: 'var(--text-primary)' }}>{userDetails.user.username}</span>
                     </div>
                     <div style={infoRowStyle}>
-                      <span style={{ color: '#475569', fontWeight: '700' }}>Email</span>
-                      <span style={{ fontWeight: '800', color: '#000000' }}>{userDetails.user.email}</span>
+                      <span style={{ color: 'var(--text-secondary)', fontWeight: '700' }}>Email</span>
+                      <span style={{ fontWeight: '800', color: 'var(--text-primary)' }}>{userDetails.user.email}</span>
                     </div>
                     <div style={infoRowStyle}>
-                      <span style={{ color: '#475569', fontWeight: '700' }}>Role Permission</span>
-                      <span style={{ fontWeight: '800', textTransform: 'capitalize', color: '#4338ca' }}>
+                      <span style={{ color: 'var(--text-secondary)', fontWeight: '700' }}>Role Permission</span>
+                      <span style={{ fontWeight: '800', textTransform: 'capitalize', color: 'var(--accent)' }}>
                         {userDetails.user.role}
                       </span>
                     </div>
                     <div style={infoRowStyle}>
-                      <span style={{ color: '#475569', fontWeight: '700' }}>VIP Unlimited Reading</span>
-                      <span style={{ fontWeight: '800', color: userDetails.user.is_vip ? '#059669' : '#64748b' }}>
+                      <span style={{ color: 'var(--text-secondary)', fontWeight: '700' }}>VIP Unlimited Reading</span>
+                      <span style={{ fontWeight: '800', color: userDetails.user.is_vip ? '#10b981' : 'var(--text-muted)' }}>
                         {userDetails.user.is_vip ? 'Yes (Active)' : 'No (Standard)'}
                       </span>
                     </div>
                     <div style={infoRowStyle}>
-                      <span style={{ color: '#475569', fontWeight: '700' }}>Current Reading Streak</span>
-                      <span style={{ fontWeight: '800', color: '#000000' }}>
+                      <span style={{ color: 'var(--text-secondary)', fontWeight: '700' }}>Current Reading Streak</span>
+                      <span style={{ fontWeight: '800', color: 'var(--text-primary)' }}>
                         {userDetails.user.reading_streak?.current_streak ?? 0} days (Record: {userDetails.user.reading_streak?.longest_streak ?? 0} days)
                       </span>
                     </div>
                     <div style={infoRowStyle}>
-                      <span style={{ color: '#475569', fontWeight: '700' }}>Last Account Update</span>
-                      <span style={{ fontWeight: '800', color: '#000000' }}>
+                      <span style={{ color: 'var(--text-secondary)', fontWeight: '700' }}>Last Account Update</span>
+                      <span style={{ fontWeight: '800', color: 'var(--text-primary)' }}>
                         {userDetails.user.updatedAt ? new Date(userDetails.user.updatedAt).toLocaleString() : 'N/A'}
                       </span>
                     </div>
@@ -733,7 +740,7 @@ export default function ManageUsers() {
                         onChange={(e) => setEditForm({ ...editForm, is_vip: e.target.checked })}
                         style={{ width: '16px', height: '16px', accentColor: '#8e6baf', cursor: 'pointer' }}
                       />
-                      <label htmlFor="vip_toggle" style={{ fontSize: '13px', color: '#fff', cursor: 'pointer' }}>
+                      <label htmlFor="vip_toggle" style={{ fontSize: '13px', color: 'var(--text-primary)', cursor: 'pointer' }}>
                         Grant <strong>VIP Status</strong> (bypasses coin lock on all chapters)
                       </label>
                     </div>
@@ -803,7 +810,7 @@ export default function ManageUsers() {
                           <div
                             key={tx._id}
                             style={{
-                              background: 'rgba(255,255,255,0.02)',
+                              background: 'var(--bg-secondary)',
                               border: '1px solid var(--border)',
                               borderRadius: '8px',
                               padding: '12px 14px',
@@ -813,7 +820,7 @@ export default function ManageUsers() {
                             }}
                           >
                             <div>
-                              <div style={{ fontWeight: '700', color: '#fff', fontSize: '13px' }}>
+                              <div style={{ fontWeight: '700', color: 'var(--text-primary)', fontSize: '13px' }}>
                                 +{tx.coins_awarded} Coins
                               </div>
                               <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
@@ -851,7 +858,7 @@ const thStyle = {
   padding: '16px 20px',
   fontSize: '12px',
   fontWeight: '800',
-  color: '#000000',
+  color: 'var(--text-secondary)',
   textTransform: 'uppercase' as const,
   letterSpacing: '0.05em'
 };
@@ -859,16 +866,16 @@ const thStyle = {
 const tdStyle = {
   padding: '18px 20px',
   fontSize: '14px',
-  color: '#000000',
+  color: 'var(--text-primary)',
   fontWeight: '600'
 };
 
 const statBoxStyle = {
-  background: '#f8fafc',
-  border: '1.5px solid #cbd5e1',
+  background: 'var(--bg-secondary)',
+  border: '1.5px solid var(--border)',
   borderRadius: '12px',
   padding: '14px 16px',
-  color: '#000000'
+  color: 'var(--text-primary)'
 };
 
 const tabStyle = {
@@ -879,7 +886,7 @@ const tabStyle = {
   fontWeight: '800',
   cursor: 'pointer',
   transition: 'all 0.15s',
-  color: '#000000'
+  color: 'var(--text-secondary)'
 };
 
 const infoRowStyle = {
@@ -887,37 +894,37 @@ const infoRowStyle = {
   justifyContent: 'space-between',
   alignItems: 'center',
   padding: '10px 14px',
-  background: '#f8fafc',
-  border: '1px solid #e2e8f0',
+  background: 'var(--bg-secondary)',
+  border: '1px solid var(--border)',
   borderRadius: '8px',
   fontSize: '13px',
-  color: '#000000'
+  color: 'var(--text-primary)'
 };
 
 const labelStyle = {
   display: 'block',
   fontSize: '12px',
   fontWeight: '800',
-  color: '#000000',
+  color: 'var(--text-secondary)',
   marginBottom: '6px'
 };
 
 const inputStyle = {
   width: '100%',
-  background: '#ffffff',
-  border: '1.5px solid #cbd5e1',
+  background: 'var(--bg-card)',
+  border: '1.5px solid var(--border)',
   borderRadius: '8px',
   padding: '10px 12px',
   fontSize: '13px',
-  color: '#000000',
+  color: 'var(--text-primary)',
   outline: 'none',
   fontWeight: '600'
 };
 
 const coinBtnStyle = {
-  background: '#fef3c7',
-  border: '1.5px solid #f59e0b',
-  color: '#78350f',
+  background: 'rgba(245, 158, 11, 0.15)',
+  border: '1.5px solid rgba(245, 158, 11, 0.4)',
+  color: '#f59e0b',
   padding: '6px 12px',
   borderRadius: '6px',
   fontSize: '12px',

@@ -193,50 +193,50 @@ export default function BulkImporter() {
     }
   };
 
-  // Universal strictly black text styles
-  const textBlack = { color: '#000000' };
-  const labelStyle: React.CSSProperties = { display: 'block', fontSize: '13px', fontWeight: '700', color: '#000000', marginBottom: '6px' };
+  // Dynamic theme-adaptive styling
+  const labelStyle: React.CSSProperties = { display: 'block', fontSize: '13px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '6px' };
   const inputStyle: React.CSSProperties = {
     width: '100%',
     padding: '10px 14px',
-    borderRadius: '8px',
-    background: '#ffffff',
-    color: '#000000',
-    border: '1.5px solid #cbd5e1',
+    borderRadius: '10px',
+    background: 'var(--bg-card)',
+    color: 'var(--text-primary)',
+    border: '1.5px solid var(--border)',
     fontSize: '14px',
     outline: 'none',
     boxSizing: 'border-box'
   };
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', paddingBottom: '60px', color: '#000000' }}>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', paddingBottom: '60px', color: 'var(--text-primary)' }}>
       
       {/* Header */}
       <header style={{ marginBottom: '28px' }}>
-        <h1 style={{ fontSize: '30px', fontWeight: '900', color: '#000000', letterSpacing: '-0.02em', marginBottom: '6px' }}>
+        <h1 style={{ fontSize: '30px', fontWeight: '900', color: 'var(--text-primary)', letterSpacing: '-0.02em', marginBottom: '6px' }}>
           Novel & Chapter Importer
         </h1>
-        <p style={{ color: '#1f2937', fontSize: '15px' }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '15px' }}>
           Directly upload <strong>.epub</strong> or <strong>.pdf</strong> files. The system auto-scrapes book covers, titles, authors, synopsis, and extracts all chapters with <strong>50 chapters free</strong> and remaining locked at <strong>10 coins</strong>.
         </p>
       </header>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 border-b-2 border-slate-200 pb-2.5">
+      <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 border-b pb-2.5" style={{ borderColor: 'var(--border)' }}>
         <button
           onClick={() => setActiveTab('smart')}
           style={{
             padding: '10px 18px',
-            borderRadius: '8px',
-            border: 'none',
+            borderRadius: '10px',
+            border: activeTab === 'smart' ? 'none' : '1px solid var(--border)',
             fontWeight: '800',
             fontSize: '13px',
             cursor: 'pointer',
-            background: activeTab === 'smart' ? '#6366f1' : '#f1f5f9',
-            color: activeTab === 'smart' ? '#ffffff' : '#000000',
+            background: activeTab === 'smart' ? 'var(--accent-gradient)' : 'var(--bg-secondary)',
+            color: activeTab === 'smart' ? '#ffffff' : 'var(--text-primary)',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            gap: '8px',
+            boxShadow: activeTab === 'smart' ? '0 2px 10px rgba(142, 107, 175, 0.35)' : 'none'
           }}
         >
           <span>⚡</span> EPUB & PDF Auto-Importer
@@ -246,16 +246,17 @@ export default function BulkImporter() {
           onClick={() => setActiveTab('manual')}
           style={{
             padding: '10px 18px',
-            borderRadius: '8px',
-            border: 'none',
+            borderRadius: '10px',
+            border: activeTab === 'manual' ? 'none' : '1px solid var(--border)',
             fontWeight: '800',
             fontSize: '13px',
             cursor: 'pointer',
-            background: activeTab === 'manual' ? '#6366f1' : '#f1f5f9',
-            color: activeTab === 'manual' ? '#ffffff' : '#000000',
+            background: activeTab === 'manual' ? 'var(--accent-gradient)' : 'var(--bg-secondary)',
+            color: activeTab === 'manual' ? '#ffffff' : 'var(--text-primary)',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            gap: '8px',
+            boxShadow: activeTab === 'manual' ? '0 2px 10px rgba(142, 107, 175, 0.35)' : 'none'
           }}
         >
           <span>📝</span> Manual Text Paste Importer
@@ -264,12 +265,18 @@ export default function BulkImporter() {
 
       {/* SUCCESS BANNER */}
       {uploadSuccess && (
-        <div className="bg-[#ecfdf5] border-2 border-[#10b981] rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div
+          className="rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-2"
+          style={{
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            borderColor: '#10b981'
+          }}
+        >
           <div>
-            <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#065f46', marginBottom: '4px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#10b981', marginBottom: '4px' }}>
               🎉 Novel Successfully Published!
             </h3>
-            <p style={{ color: '#047857', fontSize: '14px', margin: 0 }}>
+            <p style={{ color: 'var(--text-primary)', fontSize: '14px', margin: 0 }}>
               <strong>{uploadSuccess.title}</strong> is now live on SegyeNovels with <strong>{uploadSuccess.count} chapters</strong> (50 Free, remainder 10 Coins).
             </p>
           </div>
@@ -294,8 +301,8 @@ export default function BulkImporter() {
             <Link
               href="/admin/novels"
               style={{
-                background: '#ffffff',
-                color: '#065f46',
+                background: 'var(--bg-card)',
+                color: 'var(--text-primary)',
                 border: '1.5px solid #10b981',
                 padding: '10px 18px',
                 borderRadius: '8px',
@@ -318,19 +325,19 @@ export default function BulkImporter() {
           {/* Upload Dropzone */}
           {!parsedBook && (
             <div style={{
-              background: '#ffffff',
-              border: '2px dashed #94a3b8',
+              background: 'var(--bg-card)',
+              border: '2px dashed var(--border)',
               borderRadius: '20px',
               padding: '48px 24px',
               textAlign: 'center',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.04)',
+              boxShadow: 'var(--shadow-sm)',
               marginBottom: '32px'
             }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>📖</div>
-              <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#000000', marginBottom: '8px' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
                 Select an EPUB or PDF Novel File
               </h2>
-              <p style={{ color: '#374151', fontSize: '14px', maxWidth: '520px', margin: '0 auto 24px' }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', maxWidth: '520px', margin: '0 auto 24px' }}>
                 The scraper will read the internal book structure, extract the official cover, title, author, release year, synopsis, and slice all chapters cleanly.
               </p>
 
@@ -343,11 +350,11 @@ export default function BulkImporter() {
                 id="book-upload-input"
               />
 
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <label
                   htmlFor="book-upload-input"
                   style={{
-                    background: '#6366f1',
+                    background: 'var(--accent-gradient)',
                     color: '#ffffff',
                     padding: '12px 28px',
                     borderRadius: '10px',
@@ -355,7 +362,7 @@ export default function BulkImporter() {
                     fontSize: '15px',
                     cursor: 'pointer',
                     display: 'inline-block',
-                    boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+                    boxShadow: '0 4px 12px rgba(142, 107, 175, 0.35)'
                   }}
                 >
                   📁 Browse EPUB / PDF File
@@ -383,7 +390,7 @@ export default function BulkImporter() {
               </div>
 
               {file && (
-                <div style={{ marginTop: '16px', fontSize: '13px', color: '#000000', fontWeight: '600' }}>
+                <div style={{ marginTop: '16px', fontSize: '13px', color: 'var(--text-primary)', fontWeight: '600' }}>
                   Selected: <strong>{file.name}</strong> ({(file.size / (1024 * 1024)).toFixed(2)} MB)
                 </div>
               )}
@@ -392,21 +399,32 @@ export default function BulkImporter() {
 
           {/* FINALIZING PREVIEW SCREEN */}
           {parsedBook && (
-            <div className="bg-white border border-slate-300 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xs">
+            <div
+              className="rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xs border"
+              style={{
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border)'
+              }}
+            >
               
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b-2 border-slate-200 pb-4 mb-6 sm:mb-8">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-4 mb-6 sm:mb-8" style={{ borderColor: 'var(--border)' }}>
                 <div>
-                  <span style={{ background: '#e0e7ff', color: '#4338ca', fontSize: '11px', fontWeight: '800', padding: '4px 10px', borderRadius: '6px', textTransform: 'uppercase' }}>
+                  <span style={{ background: 'var(--accent-soft)', color: 'var(--accent)', fontSize: '11px', fontWeight: '800', padding: '4px 10px', borderRadius: '6px', textTransform: 'uppercase' }}>
                     Finalizing Preview ({parsedBook.format.toUpperCase()})
                   </span>
-                  <h2 className="text-xl sm:text-2xl font-black text-[#000000] mt-1.5 m-0">
+                  <h2 className="text-xl sm:text-2xl font-black mt-1.5 m-0" style={{ color: 'var(--text-primary)' }}>
                     Review Novel Metadata & Chapters
                   </h2>
                 </div>
                 
                 <button
                   onClick={() => { setParsedBook(null); setFile(null); }}
-                  className="bg-slate-100 hover:bg-slate-200 text-[#000000] border border-slate-300 px-3.5 py-2 rounded-lg font-bold text-xs cursor-pointer transition-colors shrink-0"
+                  className="px-3.5 py-2 rounded-lg font-bold text-xs cursor-pointer transition-colors shrink-0"
+                  style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border)'
+                  }}
                 >
                   ✕ Discard & Upload Another
                 </button>
@@ -423,15 +441,15 @@ export default function BulkImporter() {
                     aspectRatio: '2/3',
                     borderRadius: '12px',
                     overflow: 'hidden',
-                    background: '#f1f5f9',
-                    border: '1.5px solid #cbd5e1',
+                    background: 'var(--bg-secondary)',
+                    border: '1.5px solid var(--border)',
                     marginBottom: '12px',
-                    boxShadow: '0 4px 10px rgba(0,0,0,0.08)'
+                    boxShadow: 'var(--shadow-sm)'
                   }}>
                     {parsedBook.cover_image ? (
                       <img src={parsedBook.cover_image} alt={parsedBook.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b', fontSize: '13px', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '13px', flexDirection: 'column', gap: '8px' }}>
                         <span>🖼️</span> No cover found in file
                       </div>
                     )}
@@ -530,20 +548,38 @@ export default function BulkImporter() {
 
                   {/* Locking Summary Cards */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-                    <div className="bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-center">
-                      <span className="text-[11px] font-bold text-slate-500 uppercase block">Total Chapters</span>
-                      <div className="text-xl sm:text-2xl font-black text-[#000000] mt-1">{parsedBook.chapters.length}</div>
+                    <div
+                      className="rounded-xl p-3.5 text-center border"
+                      style={{
+                        backgroundColor: 'var(--bg-secondary)',
+                        borderColor: 'var(--border)'
+                      }}
+                    >
+                      <span className="text-[11px] font-bold uppercase block" style={{ color: 'var(--text-muted)' }}>Total Chapters</span>
+                      <div className="text-xl sm:text-2xl font-black mt-1" style={{ color: 'var(--text-primary)' }}>{parsedBook.chapters.length}</div>
                     </div>
-                    <div className="bg-emerald-50 border border-emerald-400 rounded-xl p-3.5 text-center">
-                      <span className="text-[11px] font-extrabold text-emerald-800 uppercase block">Free Chapters</span>
-                      <div className="text-xl sm:text-2xl font-black text-emerald-950 mt-1">
-                        {parsedBook.free_chapters} <span className="text-xs font-semibold text-emerald-700">(Ch 1 - {parsedBook.free_chapters})</span>
+                    <div
+                      className="rounded-xl p-3.5 text-center border"
+                      style={{
+                        backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                        borderColor: 'rgba(16, 185, 129, 0.3)'
+                      }}
+                    >
+                      <span className="text-[11px] font-extrabold uppercase block" style={{ color: '#10b981' }}>Free Chapters</span>
+                      <div className="text-xl sm:text-2xl font-black mt-1" style={{ color: '#10b981' }}>
+                        {parsedBook.free_chapters} <span className="text-xs font-semibold" style={{ color: '#059669' }}>(Ch 1 - {parsedBook.free_chapters})</span>
                       </div>
                     </div>
-                    <div className="bg-amber-50 border border-amber-400 rounded-xl p-3.5 text-center">
-                      <span className="text-[11px] font-extrabold text-amber-800 uppercase block">Coin Locked (10 Coins)</span>
-                      <div className="text-xl sm:text-2xl font-black text-amber-950 mt-1">
-                        {parsedBook.locked_chapters} <span className="text-xs font-semibold text-amber-700">(Ch 51+)</span>
+                    <div
+                      className="rounded-xl p-3.5 text-center border"
+                      style={{
+                        backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                        borderColor: 'rgba(245, 158, 11, 0.3)'
+                      }}
+                    >
+                      <span className="text-[11px] font-extrabold uppercase block" style={{ color: '#f59e0b' }}>Coin Locked (10 Coins)</span>
+                      <div className="text-xl sm:text-2xl font-black mt-1" style={{ color: '#f59e0b' }}>
+                        {parsedBook.locked_chapters} <span className="text-xs font-semibold" style={{ color: '#d97706' }}>(Ch 51+)</span>
                       </div>
                     </div>
                   </div>
@@ -553,9 +589,9 @@ export default function BulkImporter() {
                   <div style={{
                     maxHeight: '280px',
                     overflowY: 'auto',
-                    border: '1.5px solid #cbd5e1',
+                    border: '1.5px solid var(--border)',
                     borderRadius: '12px',
-                    background: '#f8fafc'
+                    background: 'var(--bg-card)'
                   }}>
                     {parsedBook.chapters.map((ch, idx) => (
                       <div
@@ -565,12 +601,12 @@ export default function BulkImporter() {
                           justifyContent: 'space-between',
                           alignItems: 'center',
                           padding: '10px 14px',
-                          borderBottom: idx < parsedBook.chapters.length - 1 ? '1px solid #e2e8f0' : 'none',
-                          background: '#ffffff'
+                          borderBottom: idx < parsedBook.chapters.length - 1 ? '1px solid var(--border-subtle)' : 'none',
+                          background: 'var(--bg-card)'
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <span style={{ fontSize: '12px', fontWeight: '800', color: '#475569', minWidth: '40px' }}>
+                          <span style={{ fontSize: '12px', fontWeight: '800', color: 'var(--text-muted)', minWidth: '40px' }}>
                             #{ch.chapter_number}
                           </span>
                           <input
@@ -586,18 +622,18 @@ export default function BulkImporter() {
                               background: 'transparent',
                               fontWeight: '700',
                               fontSize: '13px',
-                              color: '#000000',
+                              color: 'var(--text-primary)',
                               padding: '2px 6px',
                               borderRadius: '4px',
                               width: '280px'
                             }}
-                            onFocus={e => e.currentTarget.style.border = '1px solid #cbd5e1'}
+                            onFocus={e => e.currentTarget.style.border = '1px solid var(--border)'}
                             onBlur={e => e.currentTarget.style.border = '1px solid transparent'}
                           />
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <span style={{ fontSize: '12px', color: '#64748b' }}>
+                          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                             ~{ch.wordCount} words
                           </span>
 
@@ -606,9 +642,9 @@ export default function BulkImporter() {
                             fontWeight: '800',
                             padding: '3px 8px',
                             borderRadius: '6px',
-                            background: ch.tier === 'free' ? '#d1fae5' : '#fef3c7',
-                            color: ch.tier === 'free' ? '#065f46' : '#92400e',
-                            border: ch.tier === 'free' ? '1px solid #a7f3d0' : '1px solid #fde68a'
+                            background: ch.tier === 'free' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                            color: ch.tier === 'free' ? '#10b981' : '#f59e0b',
+                            border: ch.tier === 'free' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(245, 158, 11, 0.3)'
                           }}>
                             {ch.tier === 'free' ? 'FREE' : '10 COINS'}
                           </span>
@@ -616,9 +652,9 @@ export default function BulkImporter() {
                           <button
                             onClick={() => setPreviewChapter(ch)}
                             style={{
-                              background: '#f1f5f9',
-                              color: '#000000',
-                              border: '1px solid #cbd5e1',
+                              background: 'var(--bg-secondary)',
+                              color: 'var(--text-primary)',
+                              border: '1px solid var(--border)',
                               padding: '4px 10px',
                               borderRadius: '6px',
                               fontSize: '12px',
@@ -637,10 +673,15 @@ export default function BulkImporter() {
               </div>
 
               {/* Bottom Confirm Bar */}
-              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-5 border-t-2 border-slate-200">
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-5 border-t" style={{ borderColor: 'var(--border)' }}>
                 <button
                   onClick={() => { setParsedBook(null); setFile(null); }}
-                  className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-[#000000] border border-slate-300 py-3 px-6 rounded-xl font-bold text-sm cursor-pointer transition-colors"
+                  className="w-full sm:w-auto py-3 px-6 rounded-xl font-bold text-sm cursor-pointer transition-colors"
+                  style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border)'
+                  }}
                 >
                   Cancel
                 </button>
@@ -648,7 +689,11 @@ export default function BulkImporter() {
                 <button
                   onClick={handleConfirmUpload}
                   disabled={isUploading}
-                  className="w-full sm:w-auto bg-[#6366f1] hover:bg-indigo-600 text-white border-0 py-3 px-6 rounded-xl font-black text-sm cursor-pointer shadow-md shadow-indigo-500/20 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto text-white border-0 py-3 px-6 rounded-xl font-black text-sm cursor-pointer shadow-md disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+                  style={{
+                    background: 'var(--accent-gradient)',
+                    boxShadow: '0 4px 14px rgba(142, 107, 175, 0.35)'
+                  }}
                 >
                   {isUploading ? '🚀 Uploading Novel & Syncing Chapters...' : `🚀 Confirm & Upload "${parsedBook.title.slice(0, 22)}${parsedBook.title.length > 22 ? '...' : ''}" to Site`}
                 </button>
@@ -662,8 +707,14 @@ export default function BulkImporter() {
 
       {/* TAB 2: MANUAL TEXT IMPORT (Original Raw Paste Wizard) */}
       {activeTab === 'manual' && (
-        <div className="bg-white border border-slate-300 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xs">
-          <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#000000', borderBottom: '2px solid #e2e8f0', paddingBottom: '12px', marginBottom: '24px' }}>
+        <div
+          className="rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 shadow-xs border"
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            borderColor: 'var(--border)'
+          }}
+        >
+          <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)', borderBottom: '2px solid var(--border)', paddingBottom: '12px', marginBottom: '24px' }}>
             Manual Text & Chapter Slicer
           </h2>
 
@@ -725,14 +776,15 @@ export default function BulkImporter() {
             onClick={handleManualImport}
             disabled={isManualImporting}
             style={{
-              background: '#6366f1',
+              background: 'var(--accent-gradient)',
               color: '#ffffff',
               border: 'none',
               padding: '14px 32px',
               borderRadius: '10px',
               fontWeight: '800',
               fontSize: '15px',
-              cursor: isManualImporting ? 'not-allowed' : 'pointer'
+              cursor: isManualImporting ? 'not-allowed' : 'pointer',
+              boxShadow: '0 4px 14px rgba(142, 107, 175, 0.35)'
             }}
           >
             {isManualImporting ? 'Creating Novel & Slicing...' : 'Publish Novel & Chapters'}
@@ -742,39 +794,52 @@ export default function BulkImporter() {
 
       {/* CHAPTER CONTENT INSPECTION MODAL */}
       {previewChapter && (
-        <div className="fixed inset-0 bg-black/65 flex items-center justify-center z-50 p-3 sm:p-5">
-          <div className="bg-white rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border-2 border-slate-300">
-            <div className="p-4 sm:p-5 border-b border-slate-200 flex justify-between items-center">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center z-50 p-3 sm:p-5">
+          <div
+            className="rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border-2"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border)',
+              color: 'var(--text-primary)'
+            }}
+          >
+            <div className="p-4 sm:p-5 border-b flex justify-between items-center" style={{ borderColor: 'var(--border)' }}>
               <div>
-                <span className="text-[11px] font-extrabold text-indigo-600 uppercase tracking-wider block">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider block" style={{ color: 'var(--accent)' }}>
                   Chapter Inspection
                 </span>
-                <h3 className="text-base sm:text-lg font-black text-[#000000] m-0 mt-0.5">
+                <h3 className="text-base sm:text-lg font-black m-0 mt-0.5" style={{ color: 'var(--text-primary)' }}>
                   {previewChapter.title}
                 </h3>
               </div>
               <button
                 onClick={() => setPreviewChapter(null)}
-                className="bg-slate-100 hover:bg-slate-200 border-0 rounded-full w-8 h-8 cursor-pointer font-bold text-black flex items-center justify-center transition-colors"
+                className="border-0 rounded-full w-8 h-8 cursor-pointer font-bold flex items-center justify-center transition-colors"
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)'
+                }}
               >
                 ✕
               </button>
             </div>
 
-            <div className="p-4 sm:p-6 overflow-y-auto flex-1 text-xs sm:text-sm leading-relaxed text-[#000000]">
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1 text-xs sm:text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
               {Array.isArray(previewChapter.content) ? (
                 previewChapter.content.map((p, idx) => (
-                  <p key={idx} className="mb-3 text-[#000000]">{p}</p>
+                  <p key={idx} className="mb-3">{p}</p>
                 ))
               ) : (
-                <p className="text-[#000000]">{previewChapter.content}</p>
+                <p>{previewChapter.content}</p>
               )}
             </div>
 
-            <div className="p-3 sm:p-4 border-t border-slate-200 flex justify-end">
+            <div className="p-3 sm:p-4 border-t flex justify-end" style={{ borderColor: 'var(--border)' }}>
               <button
                 onClick={() => setPreviewChapter(null)}
-                className="bg-[#6366f1] hover:bg-indigo-600 text-white border-0 py-2 px-5 rounded-lg font-bold text-xs cursor-pointer transition-colors"
+                className="text-white border-0 py-2 px-5 rounded-lg font-bold text-xs cursor-pointer transition-colors"
+                style={{ background: 'var(--accent-gradient)' }}
               >
                 Close Preview
               </button>

@@ -25,8 +25,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading || !user || user.role !== 'admin') {
     return (
-      <div style={{ minHeight: '100vh', background: '#f8fafc', color: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '16px' }}>
-        Loading Admin Panel...
+      <div
+        className="min-h-screen flex items-center justify-center font-bold text-base"
+        style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+      >
+        <div className="flex items-center gap-3">
+          <span className="animate-spin text-xl">⏳</span>
+          <span>Loading Admin Panel...</span>
+        </div>
       </div>
     );
   }
@@ -40,30 +46,55 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-[#000000] flex flex-col lg:flex-row">
-      
+    <div
+      className="min-h-screen flex flex-col lg:flex-row transition-colors duration-200"
+      style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+    >
       {/* MOBILE TOP HEADER (Visible only on < lg) */}
-      <div className="lg:hidden sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+      <div
+        className="lg:hidden sticky top-0 z-40 border-b shadow-xs transition-colors duration-200"
+        style={{
+          backgroundColor: 'var(--bg-card)',
+          borderColor: 'var(--border)',
+        }}
+      >
         <div className="flex items-center justify-between px-4 py-3">
-          <Link href="/admin/dashboard" className="flex items-center gap-2 no-underline text-[#000000]">
-            <span className="text-xl">🛡️</span>
+          <Link href="/admin/dashboard" className="flex items-center gap-2.5 no-underline" style={{ color: 'var(--text-primary)' }}>
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shadow-xs"
+              style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)' }}
+            >
+              🛡️
+            </div>
             <div>
-              <span className="font-extrabold text-base tracking-tight block leading-tight">Segye Admin</span>
-              <span className="text-[10px] font-bold text-slate-500 block leading-none">Mobile Control Hub</span>
+              <span className="font-black text-base tracking-tight block leading-tight">Segye Admin</span>
+              <span className="text-[11px] font-semibold block leading-none" style={{ color: 'var(--text-muted)' }}>
+                Control Center
+              </span>
             </div>
           </Link>
 
           <div className="flex items-center gap-2">
             <Link
               href="/"
-              className="text-xs font-bold text-[#000000] bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg no-underline flex items-center gap-1 transition-colors"
+              className="text-xs font-bold px-3 py-1.5 rounded-lg no-underline flex items-center gap-1.5 transition-colors"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border)',
+              }}
             >
               <span>🏠</span> <span className="hidden sm:inline">Site</span>
             </Link>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle admin navigation"
-              className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#000000] border border-slate-300 font-bold flex items-center justify-center transition-colors"
+              className="p-2 rounded-lg font-bold flex items-center justify-center transition-colors cursor-pointer"
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border)',
+              }}
             >
               {mobileMenuOpen ? '✕' : '☰'}
             </button>
@@ -71,18 +102,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* HORIZONTAL QUICK SCROLL TABS (Always visible on mobile) */}
-        <div className="overflow-x-auto no-scrollbar flex items-center gap-2 px-3 pb-2.5 pt-1 border-t border-slate-100">
+        <div
+          className="overflow-x-auto no-scrollbar flex items-center gap-2 px-3 pb-2.5 pt-1 border-t"
+          style={{ borderColor: 'var(--border-subtle)' }}
+        >
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-extrabold flex items-center gap-1.5 transition-all no-underline ${
-                  isActive
-                    ? 'bg-[#6366f1] text-white shadow-sm'
-                    : 'bg-slate-100 text-[#000000] hover:bg-slate-200 border border-slate-200'
+                className={`whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all no-underline ${
+                  isActive ? 'shadow-sm' : ''
                 }`}
+                style={
+                  isActive
+                    ? {
+                        background: 'var(--accent-gradient)',
+                        color: '#FFFFFF',
+                        boxShadow: '0 2px 10px rgba(142, 107, 175, 0.35)',
+                      }
+                    : {
+                        backgroundColor: 'var(--bg-secondary)',
+                        color: 'var(--text-secondary)',
+                        border: '1px solid var(--border)',
+                      }
+                }
               >
                 <span>{item.icon}</span>
                 <span>{item.name}</span>
@@ -94,16 +139,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* MOBILE SLIDE-OUT DRAWER OVERLAY */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex">
-          <div className="w-[280px] bg-white h-full p-6 flex flex-col shadow-2xl animate-in slide-in-from-left duration-200">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200 mb-6">
-              <div className="flex items-center gap-2">
+        <div className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex">
+          <div
+            className="w-[280px] h-full p-6 flex flex-col shadow-2xl animate-in slide-in-from-left duration-200"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              color: 'var(--text-primary)',
+              borderRight: '1px solid var(--border)',
+            }}
+          >
+            <div className="flex items-center justify-between pb-4 border-b mb-6" style={{ borderColor: 'var(--border)' }}>
+              <div className="flex items-center gap-2.5">
                 <span className="text-2xl">🛡️</span>
-                <span className="font-black text-lg text-[#000000]">Segye Admin</span>
+                <span className="font-black text-lg">Segye Admin</span>
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-slate-500 hover:text-black font-bold p-1 text-lg"
+                className="font-bold p-1 text-lg cursor-pointer"
+                style={{ color: 'var(--text-muted)' }}
               >
                 ✕
               </button>
@@ -117,11 +170,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-extrabold text-sm transition-all no-underline ${
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all no-underline"
+                    style={
                       isActive
-                        ? 'bg-[#6366f1] text-white shadow-md'
-                        : 'text-[#000000] hover:bg-slate-100'
-                    }`}
+                        ? {
+                            background: 'var(--accent-gradient)',
+                            color: '#FFFFFF',
+                            boxShadow: '0 4px 14px rgba(142, 107, 175, 0.35)',
+                          }
+                        : {
+                            color: 'var(--text-secondary)',
+                            backgroundColor: 'transparent',
+                          }
+                    }
                   >
                     <span className="text-lg">{item.icon}</span>
                     <span>{item.name}</span>
@@ -130,10 +191,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               })}
             </nav>
 
-            <div className="pt-4 border-t border-slate-200 mt-auto">
+            <div className="pt-4 border-t mt-auto" style={{ borderColor: 'var(--border)' }}>
               <Link
                 href="/"
-                className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-[#000000] font-extrabold text-sm no-underline transition-colors"
+                className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl font-bold text-sm no-underline transition-colors"
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                }}
               >
                 <span>🏠</span> Return to Live Site
               </Link>
@@ -144,51 +210,96 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* DESKTOP SIDEBAR (Visible on lg and larger) */}
-      <aside className="hidden lg:flex w-[260px] xl:w-[280px] bg-white border-r border-slate-200 p-6 flex-col sticky top-0 h-screen box-border shrink-0">
+      <aside
+        className="hidden lg:flex w-[260px] xl:w-[280px] p-6 flex-col sticky top-0 h-screen box-border shrink-0 border-r transition-colors duration-200"
+        style={{
+          backgroundColor: 'var(--bg-card)',
+          borderColor: 'var(--border)',
+          color: 'var(--text-primary)',
+        }}
+      >
+        {/* Brand Header */}
         <div className="mb-8 px-2">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🛡️</span>
-            <h2 className="text-xl font-black text-[#000000] m-0 tracking-tight">
-              Segye Admin
-            </h2>
+          <div className="flex items-center gap-3 mb-1">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 shadow-xs"
+              style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)' }}
+            >
+              🛡️
+            </div>
+            <div>
+              <h2 className="text-lg font-black m-0 tracking-tight leading-tight">
+                Segye Admin
+              </h2>
+              <p className="text-[11px] font-semibold m-0 leading-tight" style={{ color: 'var(--text-muted)' }}>
+                Content & Systems Hub
+              </p>
+            </div>
           </div>
-          <p className="text-xs text-slate-500 mt-1 font-bold">
-            Control Center & Content Hub
-          </p>
         </div>
 
-        <nav className="grid gap-2">
+        {/* Navigation Menu */}
+        <nav className="flex flex-col gap-1.5 flex-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
             return (
-              <Link 
-                key={item.href} 
+              <Link
+                key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl no-underline font-extrabold text-sm transition-all ${
+                className="flex items-center gap-3 px-4 py-3 rounded-xl no-underline font-bold text-sm transition-all"
+                style={
                   isActive
-                    ? 'bg-[#6366f1] text-white shadow-md shadow-indigo-500/20'
-                    : 'text-[#000000] hover:bg-slate-100'
-                }`}
+                    ? {
+                        background: 'var(--accent-gradient)',
+                        color: '#FFFFFF',
+                        boxShadow: '0 4px 14px rgba(142, 107, 175, 0.35)',
+                      }
+                    : {
+                        color: 'var(--text-secondary)',
+                        backgroundColor: 'transparent',
+                      }
+                }
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
+                    e.currentTarget.style.color = 'var(--text-primary)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                  }
+                }}
               >
                 <span className="text-lg">{item.icon}</span>
-                {item.name}
+                <span>{item.name}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="mt-auto pt-5 px-2 border-t border-slate-200">
+        {/* Footer Link to Site */}
+        <div className="pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
           <Link
             href="/"
-            className="text-[#000000] font-extrabold no-underline text-sm flex items-center gap-2 px-3 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
+            className="font-bold no-underline text-xs flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl transition-all"
+            style={{
+              backgroundColor: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border)',
+            }}
           >
             <span>🏠</span> Back to Live Site
           </Link>
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA (Responsive padding & overflow) */}
-      <main className="flex-1 p-3 sm:p-6 lg:p-8 overflow-y-auto bg-[#f8fafc] text-[#000000] min-w-0">
+      {/* MAIN CONTENT AREA */}
+      <main
+        className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto min-w-0 transition-colors duration-200"
+        style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+      >
         {children}
       </main>
     </div>

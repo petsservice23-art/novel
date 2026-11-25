@@ -202,3 +202,90 @@ nextjs-portal,
   pointer-events: none !important;
   opacity: 0 !important;
 }
+
+/* ==========================================================================
+   Admin Dashboard Theme & Responsive Utility Styles
+   ========================================================================== */
+.admin-layout-root {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+.admin-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.admin-card-hover:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.admin-subcard {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 0.75rem;
+}
+
+.admin-sidebar {
+  background-color: var(--bg-card);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+.admin-input {
+  background-color: var(--bg-card) !important;
+  border: 1.5px solid var(--border) !important;
+  color: var(--text-primary) !important;
+  border-radius: 0.625rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-input:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.admin-input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+.admin-nav-item {
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+}
+
+.admin-nav-item:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.admin-nav-item.active {
+  background: var(--accent-gradient);
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(142, 107, 175, 0.3);
+}
+
+.admin-table th {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-table td {
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.admin-table tr:hover td {
+  background-color: var(--bg-hover);
+}
+
