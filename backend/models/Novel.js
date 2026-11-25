@@ -13,7 +13,8 @@ const novelSchema = new mongoose.Schema({
   ratings_count: { type: Number, default: 0 },
   views: { type: Number, default: 0 },
   reads: { type: Number, default: 0 },
-  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'approved' },
+  status: { type: String, enum: ['pending', 'approved', 'rejected', 'hidden'], default: 'approved' },
+  is_hidden: { type: Boolean, default: false },
   publishing_status: { type: String, enum: ['ongoing', 'completed', 'hiatus'], default: 'ongoing' },
   alternative_titles: { type: String, default: '' },
   published_year: { type: String, default: '' }

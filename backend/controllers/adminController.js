@@ -2,6 +2,8 @@ const Novel = require('../models/Novel');
 const Chapter = require('../models/Chapter');
 const User = require('../models/User');
 const Transaction = require('../models/Transaction');
+const { parseEpub, parsePdf } = require('../utils/bookParser');
+const { uploadChapterContent } = require('../utils/r2Service');
 
 // @desc    Get admin dashboard stats
 // @route   GET /api/admin/stats
@@ -198,6 +200,136 @@ exports.deleteUser = async (req, res) => {
 
     await User.findByIdAndDelete(userId);
     res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Parse uploaded EPUB or PDF file
+// @route   POST /api/admin/parse-book
+exports.parseUploadedBook = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded. Please upload an EPUB or PDF file.' });
+    }
+
+    const filename = req.file.originalname.toLowerCase();
+    let parsedData = null;
+
+    if (filename.endsWith('.epub')) {
+      parsedData = await parseEpub(req.file.buffer);
+    } else if (filename.endsWith('.pdf')) {
+      parsedData = await parsePdf(req.file.buffer);
+    } else {
+      return res.status(400).json({ message: 'Unsupported file format. Please upload a .epub or .pdf file.' });
+    }
+
+    res.json(parsedData);
+  } catch (error) {
+    console.error('Book parsing error:', error);
+    res.status(500).json({ message: 'Failed to parse book: ' + error.message });
+  }
+};
+
+// @desc    Save finalized novel and parsed chapters to database
+// @route   POST /api/admin/save-parsed-book
+exports.saveParsedBook = async (req, res) => {
+  try {
+    const { novel: novelData, chapters: chaptersData } = req.body;
+
+    if (!novelData || !novelData.title) {
+      return res.status(400).json({ message: 'Novel title and metadata are required.' });
+    }
+    if (!Array.isArray(chaptersData) || chaptersData.length === 0) {
+      return res.status(400).json({ message: 'At least one chapter is required.' });
+    }
+
+    // 1. Create Novel document
+    const novel = new Novel({
+      title: novelData.title.trim(),
+      author: novelData.author ? novelData.author.trim() : 'Korean Author',
+      description: novelData.description || '',
+      cover_image: novelData.cover_image || `https://picsum.photos/seed/${encodeURIComponent(novelData.title)}/400/600`,
+      published_year: novelData.published_year || new Date().getFullYear().toString(),
+      alternative_titles: novelData.alternative_titles || '',
+      publishing_status: novelData.publishing_status || 'ongoing',
+      genres: Array.isArray(novelData.genres) ? novelData.genres : (novelData.genres ? novelData.genres.split(',').map(g => g.trim()) : ['Fantasy']),
+      tags: Array.isArray(novelData.tags) ? novelData.tags : [],
+      status: 'approved',
+      is_hidden: false,
+      total_chapters: chaptersData.length,
+      rating: 4.8,
+      ratings_count: 1
+    });
+
+    await novel.save();
+
+    // 2. Insert Chapters (50 free, rest coin)
+    const chaptersToInsert = [];
+    for (let i = 0; i < chaptersData.length; i++) {
+      const ch = chaptersData[i];
+      const chNum = ch.chapter_number || (i + 1);
+      const isFree = chNum <= 50;
+
+      // Try R2 upload if configured
+      let r2Key = null;
+      try {
+        if (ch.content) {
+          r2Key = await uploadChapterContent(novel._id.toString(), chNum, ch.content);
+        }
+      } catch (r2Err) {
+        // Fallback: keep content in Mongo
+      }
+
+      chaptersToInsert.push({
+        novel_id: novel._id,
+        chapter_number: chNum,
+        title: ch.title ? ch.title.trim() : `Chapter ${chNum}`,
+        content: ch.content,
+        r2_key: r2Key,
+        tier: isFree ? 'free' : 'coin',
+        is_locked: !isFree,
+        price: isFree ? 0 : 10
+      });
+    }
+
+    await Chapter.insertMany(chaptersToInsert);
+
+    // Update novel total chapters & timestamp
+    novel.total_chapters = chaptersToInsert.length;
+    novel.updatedAt = new Date();
+    await novel.save();
+
+    res.json({
+      message: `Successfully created "${novel.title}" with ${chaptersToInsert.length} chapters!`,
+      novel,
+      chaptersCount: chaptersToInsert.length
+    });
+  } catch (error) {
+    console.error('Error saving parsed book:', error);
+    res.status(500).json({ message: 'Failed to save book: ' + error.message });
+  }
+};
+
+// @desc    Toggle novel visibility (hide/unhide)
+// @route   PUT /api/admin/novel/:id/toggle-visibility
+exports.toggleNovelVisibility = async (req, res) => {
+  try {
+    const novel = await Novel.findById(req.params.id);
+    if (!novel) {
+      return res.status(404).json({ message: 'Novel not found' });
+    }
+
+    novel.is_hidden = !novel.is_hidden;
+    novel.status = novel.is_hidden ? 'hidden' : 'approved';
+    await novel.save();
+
+    res.json({
+      message: `Novel is now ${novel.is_hidden ? 'hidden from public' : 'visible on site'}`,
+      is_hidden: novel.is_hidden,
+      status: novel.status,
+      novel
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

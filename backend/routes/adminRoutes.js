@@ -1,9 +1,15 @@
 const express = require('express');
+const multer = require('multer');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Chapter = require('../models/Chapter');
 const adminController = require('../controllers/adminController');
 const { uploadChapterContent } = require('../utils/r2Service');
 const router = express.Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 100 * 1024 * 1024 } // 100MB
+});
 
 // Missing Controller Routes
 router.get('/stats', adminController.getAdminStats);
@@ -15,7 +21,10 @@ router.put('/users/:id', adminController.updateUser);
 router.delete('/users/:id', adminController.deleteUser);
 router.put('/novel/:id', adminController.updateNovel);
 router.delete('/novel/:id', adminController.deleteNovel);
+router.put('/novel/:id/toggle-visibility', adminController.toggleNovelVisibility);
 router.post('/import-chapters', adminController.bulkImportChapters);
+router.post('/parse-book', upload.single('book'), adminController.parseUploadedBook);
+router.post('/save-parsed-book', adminController.saveParsedBook);
 
 // Route 1: Direct Chapter Content & Metadata Update
 router.put('/chapter/:id', async (req, res) => {

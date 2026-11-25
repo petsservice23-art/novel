@@ -5,7 +5,7 @@ const Novel = require('../models/Novel');
 // @access  Public
 const getNovels = async (req, res) => {
   try {
-    const novels = await Novel.find().populate('author_id', 'username').sort({ createdAt: -1 });
+    const novels = await Novel.find({ is_hidden: { $ne: true }, status: { $ne: 'hidden' } }).populate('author_id', 'username').sort({ createdAt: -1 });
     res.json(novels);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch novels' });
@@ -89,7 +89,9 @@ const searchNovels = async (req, res) => {
   const pageSize = 20;
   const page = Number(req.query.page) || 1;
 
-  let dbQuery = {};
+  let dbQuery = {
+    is_hidden: { $ne: true }
+  };
 
   if (q) {
     dbQuery.$or = [

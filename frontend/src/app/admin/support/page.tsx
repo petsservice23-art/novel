@@ -61,13 +61,11 @@ export default function AdminSupportPage() {
 
   const handleResolveTicket = async (ticketId: string) => {
     try {
-      const res = await axios.post(`${API_URL}/support/admin/reply`, {
-        ticket_id: ticketId,
-        content: 'Your inquiry has been marked as resolved by our support team. Feel free to message back if you have any further questions!',
+      const res = await axios.put(`${API_URL}/support/admin/tickets/${ticketId}/status`, {
         status: 'resolved'
       }, { withCredentials: true });
 
-      toast.success('Ticket marked as resolved');
+      toast.success('Ticket marked as resolved!');
       setSelectedTicket(res.data);
       fetchTickets();
     } catch (err) {
@@ -76,33 +74,33 @@ export default function AdminSupportPage() {
   };
 
   return (
-    <div style={{ padding: '32px', maxWidth: '1400px', margin: '0 auto', fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', color: '#000000', paddingBottom: '60px' }}>
       
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#fff', marginBottom: '6px' }}>
+          <h1 style={{ fontSize: '30px', fontWeight: '900', color: '#000000', letterSpacing: '-0.02em', marginBottom: '6px' }}>
             Support Inbox 💬
           </h1>
-          <p style={{ color: '#a1a1aa', fontSize: '14px', margin: 0 }}>
+          <p style={{ color: '#374151', fontSize: '15px', margin: 0 }}>
             Manage user inquiries, novel requests, chapter bug reports, and coin questions.
           </p>
         </div>
 
         {/* Filter Tabs */}
-        <div style={{ display: 'flex', gap: '8px', background: '#18181b', padding: '4px', borderRadius: '8px', border: '1px solid #27272a' }}>
+        <div style={{ display: 'flex', gap: '8px', background: '#ffffff', padding: '6px', borderRadius: '10px', border: '1.5px solid #cbd5e1' }}>
           {['all', 'open', 'in_progress', 'resolved'].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
               style={{
-                padding: '6px 14px',
-                borderRadius: '6px',
-                background: filter === f ? '#27272a' : 'transparent',
-                color: filter === f ? '#fff' : '#a1a1aa',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                background: filter === f ? '#6366f1' : 'transparent',
+                color: filter === f ? '#ffffff' : '#000000',
                 border: 'none',
                 fontSize: '13px',
-                fontWeight: '600',
+                fontWeight: '800',
                 cursor: 'pointer',
                 textTransform: 'capitalize',
                 transition: 'all 0.15s'
@@ -115,19 +113,19 @@ export default function AdminSupportPage() {
       </div>
 
       {/* Main Split Layout: Ticket List & Conversation View */}
-      <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: '24px', minHeight: '650px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: '24px', minHeight: '650px' }}>
         
         {/* Left Column: Tickets List */}
-        <div style={{ background: '#18181b', border: '1px solid #27272a', borderRadius: '14px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid #27272a', fontWeight: '700', fontSize: '14px', color: '#a1a1aa' }}>
+        <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1.5px solid #cbd5e1', fontWeight: '800', fontSize: '14px', color: '#000000', background: '#f8fafc' }}>
             CONVERSATIONS ({tickets.length})
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto' }}>
             {loading ? (
-              <div style={{ padding: '32px', textAlign: 'center', color: '#71717a' }}>Loading tickets...</div>
+              <div style={{ padding: '32px', textAlign: 'center', color: '#64748b', fontWeight: '600' }}>Loading tickets...</div>
             ) : tickets.length === 0 ? (
-              <div style={{ padding: '48px 24px', textAlign: 'center', color: '#71717a' }}>
+              <div style={{ padding: '48px 24px', textAlign: 'center', color: '#64748b' }}>
                 No {filter !== 'all' ? filter : ''} inquiries found.
               </div>
             ) : (
@@ -140,36 +138,36 @@ export default function AdminSupportPage() {
                     onClick={() => setSelectedTicket(t)}
                     style={{
                       padding: '16px 20px',
-                      borderBottom: '1px solid #27272a',
-                      background: isSelected ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+                      borderBottom: '1px solid #e2e8f0',
+                      background: isSelected ? '#eff6ff' : '#ffffff',
                       cursor: 'pointer',
                       transition: 'background 0.15s'
                     }}
-                    onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.02)'; }}
-                    onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
+                    onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#f8fafc'; }}
+                    onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = '#ffffff'; }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                      <span style={{ fontWeight: '700', color: '#fafafa', fontSize: '14px' }}>
+                      <span style={{ fontWeight: '800', color: '#000000', fontSize: '14px' }}>
                         {t.user_id?.username || t.sender_name || 'Guest Reader'}
                       </span>
                       <span style={{
                         fontSize: '11px',
-                        fontWeight: '700',
+                        fontWeight: '800',
                         padding: '2px 8px',
-                        borderRadius: '100px',
-                        background: t.status === 'open' ? 'rgba(239, 68, 68, 0.15)' : t.status === 'in_progress' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(34, 197, 94, 0.15)',
-                        color: t.status === 'open' ? '#ef4444' : t.status === 'in_progress' ? '#f59e0b' : '#22c55e',
+                        borderRadius: '6px',
+                        background: t.status === 'open' ? '#fee2e2' : t.status === 'in_progress' ? '#fef3c7' : '#dcfce7',
+                        color: t.status === 'open' ? '#991b1b' : t.status === 'in_progress' ? '#92400e' : '#166534',
                         textTransform: 'uppercase'
                       }}>
                         {t.status}
                       </span>
                     </div>
 
-                    <div style={{ fontSize: '13px', color: '#a1a1aa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '6px' }}>
+                    <div style={{ fontSize: '13px', color: '#334155', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '6px' }}>
                       {lastMsg?.content || 'No message'}
                     </div>
 
-                    <div style={{ fontSize: '11px', color: '#71717a', display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ fontSize: '11px', color: '#64748b', display: 'flex', justifyContent: 'space-between' }}>
                       <span>{t.sender_email || 'No email provided'}</span>
                       <span>{new Date(t.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
@@ -181,23 +179,23 @@ export default function AdminSupportPage() {
         </div>
 
         {/* Right Column: Chat History & Reply */}
-        <div style={{ background: '#18181b', border: '1px solid #27272a', borderRadius: '14px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: '16px', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }}>
           {selectedTicket ? (
             <>
               {/* Ticket Details Bar */}
-              <div style={{ padding: '16px 24px', borderBottom: '1px solid #27272a', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#121212' }}>
+              <div style={{ padding: '16px 24px', borderBottom: '1.5px solid #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontWeight: '700', fontSize: '16px', color: '#fff' }}>
+                    <span style={{ fontWeight: '800', fontSize: '16px', color: '#000000' }}>
                       {selectedTicket.user_id?.username || selectedTicket.sender_name || 'Guest Reader'}
                     </span>
                     {selectedTicket.user_id && (
-                      <span style={{ fontSize: '11px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '2px 8px', borderRadius: '4px', fontWeight: '600' }}>
+                      <span style={{ fontSize: '11px', background: '#e0e7ff', color: '#4338ca', padding: '2px 8px', borderRadius: '4px', fontWeight: '800' }}>
                         Registered User ({selectedTicket.user_id.coins || 0} ©)
                       </span>
                     )}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#a1a1aa', marginTop: '2px' }}>
+                  <div style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}>
                     Email: {selectedTicket.sender_email || 'None'} • Session: {selectedTicket.session_id?.substring(0, 12)}...
                   </div>
                 </div>
@@ -206,13 +204,13 @@ export default function AdminSupportPage() {
                   <button
                     onClick={() => handleResolveTicket(selectedTicket._id)}
                     style={{
-                      background: 'rgba(34, 197, 94, 0.15)',
-                      border: '1px solid #22c55e',
-                      color: '#22c55e',
-                      padding: '6px 14px',
+                      background: '#ecfdf5',
+                      border: '1.5px solid #10b981',
+                      color: '#065f46',
+                      padding: '8px 16px',
                       borderRadius: '8px',
                       fontSize: '12px',
-                      fontWeight: '700',
+                      fontWeight: '800',
                       cursor: 'pointer'
                     }}
                   >
@@ -222,7 +220,7 @@ export default function AdminSupportPage() {
               </div>
 
               {/* Message History */}
-              <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', background: '#ffffff' }}>
                 {selectedTicket.messages?.map((m: any, i: number) => {
                   const isSupport = m.sender === 'support';
                   return (
@@ -236,16 +234,17 @@ export default function AdminSupportPage() {
                         alignItems: isSupport ? 'flex-end' : 'flex-start'
                       }}
                     >
-                      <span style={{ fontSize: '11px', fontWeight: '700', color: isSupport ? '#22c55e' : '#a1a1aa', marginBottom: '4px' }}>
-                        {isSupport ? 'You (Support)' : selectedTicket.sender_name || 'User'}
+                      <span style={{ fontSize: '11px', fontWeight: '800', color: isSupport ? '#4338ca' : '#475569', marginBottom: '4px' }}>
+                        {isSupport ? 'You (Support Admin)' : selectedTicket.sender_name || 'Reader'}
                       </span>
                       <div style={{
-                        background: isSupport ? '#166534' : '#27272a',
-                        color: '#fff',
-                        padding: '12px 16px',
-                        borderRadius: isSupport ? '14px 14px 2px 14px' : '14px 14px 14px 2px',
+                        background: isSupport ? '#6366f1' : '#f1f5f9',
+                        color: isSupport ? '#ffffff' : '#000000',
+                        padding: '12px 18px',
+                        borderRadius: isSupport ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                         fontSize: '14px',
-                        lineHeight: '1.5'
+                        lineHeight: '1.6',
+                        border: isSupport ? 'none' : '1px solid #cbd5e1'
                       }}>
                         {m.content}
                         {m.attachment && (
@@ -256,7 +255,7 @@ export default function AdminSupportPage() {
                           </div>
                         )}
                       </div>
-                      <span style={{ fontSize: '10px', color: '#71717a', marginTop: '4px' }}>
+                      <span style={{ fontSize: '10px', color: '#64748b', marginTop: '4px' }}>
                         {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
@@ -265,23 +264,24 @@ export default function AdminSupportPage() {
               </div>
 
               {/* Reply Box */}
-              <div style={{ padding: '16px 24px', borderTop: '1px solid #27272a', background: '#121212' }}>
+              <div style={{ padding: '16px 24px', borderTop: '1.5px solid #cbd5e1', background: '#f8fafc' }}>
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <textarea
                     value={replyText}
                     onChange={e => setReplyText(e.target.value)}
-                    placeholder="Type your reply to this reader..."
+                    placeholder="Type your official reply to this reader..."
                     rows={2}
                     style={{
                       flex: 1,
-                      background: '#18181b',
-                      border: '1px solid #27272a',
+                      background: '#ffffff',
+                      border: '1.5px solid #cbd5e1',
                       borderRadius: '8px',
                       padding: '10px 14px',
-                      color: '#fafafa',
-                      fontSize: '13px',
+                      color: '#000000',
+                      fontSize: '14px',
                       outline: 'none',
-                      resize: 'none'
+                      resize: 'none',
+                      fontWeight: '500'
                     }}
                     onKeyDown={e => {
                       if (e.key === 'Enter' && !e.shiftKey) {
@@ -294,13 +294,13 @@ export default function AdminSupportPage() {
                     onClick={handleSendReply}
                     disabled={!replyText.trim() || sendingReply}
                     style={{
-                      background: '#749275',
-                      color: '#fff',
+                      background: '#6366f1',
+                      color: '#ffffff',
                       border: 'none',
                       borderRadius: '8px',
-                      padding: '0 20px',
-                      fontWeight: '700',
-                      fontSize: '13px',
+                      padding: '0 24px',
+                      fontWeight: '800',
+                      fontSize: '14px',
                       cursor: replyText.trim() ? 'pointer' : 'not-allowed',
                       opacity: replyText.trim() ? 1 : 0.5
                     }}
@@ -311,10 +311,14 @@ export default function AdminSupportPage() {
               </div>
             </>
           ) : (
-            <div style={{ margin: 'auto', textAlign: 'center', color: '#71717a', padding: '40px' }}>
-              <div style={{ fontSize: '40px', marginBottom: '12px' }}>📬</div>
-              <h3 style={{ color: '#fafafa', fontSize: '18px', fontWeight: '700', marginBottom: '6px' }}>No Conversation Selected</h3>
-              <p style={{ fontSize: '13px', color: '#a1a1aa' }}>Select a ticket from the left panel to read and reply.</p>
+            <div style={{ margin: 'auto', textAlign: 'center', color: '#64748b', padding: '40px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '14px' }}>📬</div>
+              <h3 style={{ color: '#000000', fontSize: '18px', fontWeight: '800', marginBottom: '6px' }}>
+                No Conversation Selected
+              </h3>
+              <p style={{ fontSize: '14px', color: '#475569' }}>
+                Select an inquiry from the left panel to inspect message history and reply.
+              </p>
             </div>
           )}
         </div>
