@@ -74,8 +74,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               ☰
             </button>
-            <Link href="/admin/dashboard" className="flex items-center gap-2 no-underline" style={{ color: 'var(--text-primary)' }}>
-              <span className="text-xl">🛡️</span>
+            <Link href="/admin/dashboard" className="flex items-center gap-2.5 no-underline" style={{ color: 'var(--text-primary)' }}>
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-base shrink-0"
+                style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)' }}
+              >
+                🛡️
+              </div>
               <span className="font-black text-base tracking-tight block">Segye Admin</span>
             </Link>
           </div>
@@ -109,11 +114,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             <div className="flex items-center justify-between pb-4 border-b mb-6" style={{ borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-2.5">
-                <span className="text-2xl">🛡️</span>
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0"
+                  style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)' }}
+                >
+                  🛡️
+                </div>
                 <div>
-                  <span className="font-black text-lg block leading-tight">Segye Admin</span>
-                  <span className="text-[11px] font-semibold block leading-none" style={{ color: 'var(--text-muted)' }}>
-                    Control Center & Content Hub
+                  <span className="font-black text-base block leading-tight">Segye Admin</span>
+                  <span className="text-[11px] font-semibold block leading-tight mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                    Control Center & Hub
                   </span>
                 </div>
               </div>
@@ -130,7 +140,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </button>
             </div>
 
-            <nav className="flex flex-col gap-2 flex-1">
+            <div className="text-[10px] font-black uppercase tracking-widest px-2 mb-2" style={{ color: 'var(--text-muted)' }}>
+              Admin Menu
+            </div>
+
+            <nav className="flex flex-col gap-1.5 flex-1">
               {menuItems.map((item) => {
                 const isActive = pathname === item.href;
                 return (
@@ -138,14 +152,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3.5 px-4 py-3 rounded-xl no-underline font-bold text-sm transition-all"
-                    style={{
-                      color: isActive ? '#ffffff' : 'var(--text-primary)',
-                      background: isActive ? 'var(--accent)' : 'transparent',
-                      boxShadow: isActive ? '0 4px 12px rgba(142, 107, 175, 0.25)' : 'none',
-                    }}
+                    className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl no-underline font-bold text-sm transition-all"
+                    style={
+                      isActive
+                        ? {
+                            color: 'var(--accent)',
+                            backgroundColor: 'var(--accent-soft)',
+                            border: '1px solid var(--border)',
+                          }
+                        : {
+                            color: 'var(--text-secondary)',
+                            backgroundColor: 'transparent',
+                            border: '1px solid transparent',
+                          }
+                    }
                   >
-                    <span className="text-xl">{item.icon}</span>
+                    <span className="text-lg">{item.icon}</span>
                     <span>{item.name}</span>
                   </Link>
                 );
@@ -155,7 +177,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="pt-4 border-t mt-auto" style={{ borderColor: 'var(--border)' }}>
               <Link
                 href="/"
-                className="font-bold no-underline text-xs flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all"
+                className="font-bold no-underline text-xs flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl transition-all"
                 style={{
                   backgroundColor: 'var(--bg-secondary)',
                   color: 'var(--text-primary)',
@@ -198,6 +220,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 }`}
                 style={{
                   background: isActive ? 'var(--accent-soft)' : 'transparent',
+                  border: isActive ? '1px solid var(--border)' : '1px solid transparent',
                 }}
               >
                 {item.icon}
@@ -216,10 +239,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </nav>
 
       {/* =========================================================================
-          DESKTOP SIDEBAR (Visible on lg and larger - Original Clean Style)
+          DESKTOP SIDEBAR (Clean, Minimalist, Aesthetic)
          ========================================================================= */}
       <aside
-        className="hidden lg:flex w-[280px] p-6 flex-col sticky top-0 h-screen box-border shrink-0 border-r transition-colors duration-200"
+        className="hidden lg:flex w-[260px] p-5 flex-col sticky top-16 h-[calc(100vh-4rem)] box-border shrink-0 border-r transition-colors duration-200"
         style={{
           backgroundColor: 'var(--bg-card)',
           borderColor: 'var(--border)',
@@ -227,50 +250,77 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }}
       >
         {/* Brand Header */}
-        <div className="mb-9 px-2">
-          <div className="flex items-center gap-2.5">
-            <span className="text-2xl">🛡️</span>
+        <div className="mb-7 px-2">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-xs"
+              style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)' }}
+            >
+              🛡️
+            </div>
             <div>
               <h2
-                className="text-xl font-black m-0 tracking-tight leading-tight"
+                className="text-base font-black m-0 tracking-tight leading-tight"
                 style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}
               >
                 Segye Admin
               </h2>
-              <p className="text-xs font-bold m-0 mt-1 leading-tight" style={{ color: 'var(--text-muted)' }}>
-                Control Center & Content Hub
+              <p className="text-[11px] font-bold m-0 mt-0.5 leading-tight" style={{ color: 'var(--text-muted)' }}>
+                Control Center Hub
               </p>
             </div>
           </div>
         </div>
 
+        {/* Section Label */}
+        <div className="text-[10px] font-black uppercase tracking-wider px-3 mb-2" style={{ color: 'var(--text-muted)' }}>
+          Navigation
+        </div>
+
         {/* Navigation Menu */}
-        <nav className="flex flex-col gap-2 flex-1">
+        <nav className="flex flex-col gap-1.5 flex-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl no-underline font-bold text-sm transition-all"
-                style={{
-                  color: isActive ? '#ffffff' : 'var(--text-primary)',
-                  backgroundColor: isActive ? 'var(--accent)' : 'transparent',
-                  boxShadow: isActive ? '0 4px 12px rgba(142, 107, 175, 0.25)' : 'none',
-                }}
+                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl no-underline font-bold text-sm transition-all duration-150"
+                style={
+                  isActive
+                    ? {
+                        color: 'var(--accent)',
+                        backgroundColor: 'var(--accent-soft)',
+                        border: '1px solid var(--border)',
+                        boxShadow: 'var(--shadow-sm)',
+                      }
+                    : {
+                        color: 'var(--text-secondary)',
+                        backgroundColor: 'transparent',
+                        border: '1px solid transparent',
+                      }
+                }
                 onMouseEnter={(e) => {
                   if (!isActive) {
                     e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
+                    e.currentTarget.style.color = 'var(--text-primary)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) {
                     e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
                   }
                 }}
               >
-                <span className="text-lg">{item.icon}</span>
+                <span className="text-lg opacity-90">{item.icon}</span>
                 <span>{item.name}</span>
+                {isActive && (
+                  <span
+                    className="ml-auto w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: 'var(--accent)' }}
+                  />
+                )}
               </Link>
             );
           })}
@@ -280,11 +330,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="pt-4 border-t mt-auto" style={{ borderColor: 'var(--border)' }}>
           <Link
             href="/"
-            className="font-bold no-underline text-xs flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg transition-all"
+            className="font-bold no-underline text-xs flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl transition-all"
             style={{
               backgroundColor: 'var(--bg-secondary)',
               color: 'var(--text-primary)',
               border: '1px solid var(--border)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--bg-hover)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--bg-secondary)';
             }}
           >
             <span>🏠</span> Back to Live Site
