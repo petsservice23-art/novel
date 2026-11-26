@@ -13,35 +13,28 @@ interface Stats {
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
-  const [recentNovels, setRecentNovels] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchStats = async () => {
       try {
-        const [statsRes, novelsRes] = await Promise.all([
-          axios.get(`${API_URL}/admin/stats`),
-          axios.get(`${API_URL}/admin/novels`).catch(() => ({ data: [] }))
-        ]);
-        setStats(statsRes.data);
-        if (Array.isArray(novelsRes.data)) {
-          setRecentNovels(novelsRes.data.slice(0, 8));
-        }
+        const res = await axios.get(`${API_URL}/admin/stats`);
+        setStats(res.data);
       } catch (err) {
-        console.error('Failed to fetch dashboard data', err);
+        console.error('Failed to fetch stats', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+    fetchStats();
   }, [API_URL]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex items-center gap-3 font-bold text-sm" style={{ color: 'var(--text-secondary)' }}>
+        <div className="flex items-center gap-3 font-bold text-base" style={{ color: 'var(--text-secondary)' }}>
           <span className="animate-spin text-2xl">⏳</span>
           <span>Loading platform metrics...</span>
         </div>
@@ -50,326 +43,198 @@ export default function AdminDashboard() {
   }
 
   const statCards = [
-    { label: 'Total Users', value: (stats?.users || 0).toLocaleString(), icon: '👥', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.14)' },
-    { label: 'Total Novels', value: (stats?.novels || 0).toLocaleString(), icon: '📚', color: '#10b981', bg: 'rgba(16, 185, 129, 0.14)' },
-    { label: 'Total Chapters', value: (stats?.chapters || 0).toLocaleString(), icon: '📝', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.14)' },
-    { label: 'Platform Revenue', value: `$${(stats?.revenue || 0).toLocaleString()}`, icon: '💰', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.14)' },
+    {
+      label: 'Total Users',
+      value: (stats?.users || 0).toLocaleString(),
+      icon: '👥',
+      color: '#3b82f6',
+      bg: 'rgba(59, 130, 246, 0.12)',
+      border: 'rgba(59, 130, 246, 0.25)',
+      hint: 'Registered readers',
+    },
+    {
+      label: 'Total Novels',
+      value: (stats?.novels || 0).toLocaleString(),
+      icon: '📚',
+      color: '#10b981',
+      bg: 'rgba(16, 185, 129, 0.12)',
+      border: 'rgba(16, 185, 129, 0.25)',
+      hint: 'Published catalog',
+    },
+    {
+      label: 'Total Chapters',
+      value: (stats?.chapters || 0).toLocaleString(),
+      icon: '📝',
+      color: '#f59e0b',
+      bg: 'rgba(245, 158, 11, 0.12)',
+      border: 'rgba(245, 158, 11, 0.25)',
+      hint: 'In database & storage',
+    },
+    {
+      label: 'Platform Revenue',
+      value: `$${(stats?.revenue || 0).toLocaleString()}`,
+      icon: '💰',
+      color: '#8b5cf6',
+      bg: 'rgba(139, 92, 246, 0.12)',
+      border: 'rgba(139, 92, 246, 0.25)',
+      hint: 'Lifetime coin sales',
+    },
   ];
 
   return (
-    <div className="w-full space-y-8 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>
+    <div className="max-w-[1100px] mx-auto w-full space-y-10 transition-colors duration-200">
       {/* Header */}
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-5 border-b" style={{ borderColor: 'var(--border)' }}>
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight m-0" style={{ color: 'var(--text-primary)' }}>
-            Dashboard Overview
-          </h1>
-          <p className="text-xs sm:text-sm font-medium mt-1" style={{ color: 'var(--text-secondary)' }}>
-            Welcome to the SegyeNovels control center. Monitor library size, chapter growth, and reader engagement.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span
-            className="text-xs font-bold px-3 py-1.5 rounded-xl border flex items-center gap-2 shadow-xs"
-            style={{
-              backgroundColor: 'var(--bg-card)',
-              borderColor: 'var(--border)',
-              color: 'var(--text-secondary)',
-            }}
-          >
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-            <span>Live System</span>
-          </span>
-        </div>
+      <header className="space-y-1.5 pb-2">
+        <h1
+          className="text-3xl sm:text-4xl font-black tracking-tight m-0"
+          style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}
+        >
+          Dashboard Overview
+        </h1>
+        <p className="text-sm sm:text-base font-medium m-0" style={{ color: 'var(--text-secondary)' }}>
+          Welcome to the SegyeNovels control center. Monitor library size, chapter growth, and reader engagement.
+        </p>
       </header>
 
       {/* Spacious 4 Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        {statCards.map((card) => (
-          <div
-            key={card.label}
-            className="p-5 sm:p-6 rounded-2xl border transition-all duration-200 shadow-xs flex items-center gap-4 sm:gap-5"
-            style={{
-              backgroundColor: 'var(--bg-card)',
-              borderColor: 'var(--border)',
-            }}
-          >
+      <section>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+          {statCards.map((card) => (
             <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-xs"
+              key={card.label}
+              className="p-6 sm:p-7 rounded-2xl border transition-all duration-200 flex items-center gap-5 shadow-xs hover:shadow-md"
               style={{
-                background: card.bg,
-                border: `1.5px solid ${card.color}35`,
+                backgroundColor: 'var(--bg-card)',
+                borderColor: 'var(--border)',
               }}
             >
-              {card.icon}
-            </div>
-
-            <div className="min-w-0">
-              <p
-                className="text-xs font-extrabold uppercase tracking-wider truncate m-0"
-                style={{ color: 'var(--text-muted)' }}
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-xs"
+                style={{
+                  backgroundColor: card.bg,
+                  border: `1.5px solid ${card.border}`,
+                  color: card.color,
+                }}
               >
-                {card.label}
-              </p>
-              <h2
-                className="text-2xl sm:text-3xl font-black m-0 mt-1 tracking-tight truncate leading-none"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                {card.value}
-              </h2>
+                {card.icon}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p
+                  className="text-xs font-bold uppercase tracking-wider truncate m-0"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  {card.label}
+                </p>
+                <h2
+                  className="text-2xl sm:text-3xl font-black tracking-tight mt-1 mb-0 truncate"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  {card.value}
+                </h2>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Quick Actions Panel */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg sm:text-xl font-black tracking-tight m-0" style={{ color: 'var(--text-primary)' }}>
-            Quick Management Actions
-          </h2>
-          <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
-            Core Administrative Workflows
-          </span>
+          ))}
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Quick Management Actions Panel */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-black tracking-tight m-0" style={{ color: 'var(--text-primary)' }}>
+          Quick Management Actions
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <Link
             href="/admin/importer"
-            className="group p-5 sm:p-6 rounded-2xl border no-underline shadow-xs transition-all duration-200 hover:-translate-y-0.5 block"
+            className="group block p-6 sm:p-7 rounded-2xl border no-underline transition-all duration-200 shadow-xs hover:shadow-lg hover:-translate-y-0.5"
             style={{
               backgroundColor: 'var(--bg-card)',
               borderColor: 'var(--border)',
             }}
           >
-            <div className="flex items-start justify-between mb-3">
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl transition-transform group-hover:scale-105"
-                style={{ background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)' }}
-              >
-                ⚡
-              </div>
-              <span className="text-xs font-bold transition-transform group-hover:translate-x-1" style={{ color: 'var(--accent)' }}>
-                Open →
-              </span>
-            </div>
-            <h3 className="text-base font-extrabold m-0 mb-1 transition-colors group-hover:text-[var(--accent)]" style={{ color: 'var(--text-primary)' }}>
+            <div className="text-3xl mb-4 group-hover:scale-110 transition-transform duration-200">⚡</div>
+            <h3
+              className="text-base sm:text-lg font-bold tracking-tight mb-2 group-hover:text-[var(--accent)] transition-colors"
+              style={{ color: 'var(--text-primary)' }}
+            >
               EPUB / PDF Importer
             </h3>
-            <p className="text-xs sm:text-sm m-0 leading-relaxed font-normal" style={{ color: 'var(--text-secondary)' }}>
-              Auto-parse and upload entire books with cover extraction and 50 free chapters rule.
+            <p className="text-xs sm:text-sm font-medium leading-relaxed m-0" style={{ color: 'var(--text-secondary)' }}>
+              Auto-parse and upload entire books with automatic cover extraction and 50 free chapters.
             </p>
           </Link>
 
           <Link
             href="/admin/novels"
-            className="group p-5 sm:p-6 rounded-2xl border no-underline shadow-xs transition-all duration-200 hover:-translate-y-0.5 block"
+            className="group block p-6 sm:p-7 rounded-2xl border no-underline transition-all duration-200 shadow-xs hover:shadow-lg hover:-translate-y-0.5"
             style={{
               backgroundColor: 'var(--bg-card)',
               borderColor: 'var(--border)',
             }}
           >
-            <div className="flex items-start justify-between mb-3">
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl transition-transform group-hover:scale-105"
-                style={{ background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.25)' }}
-              >
-                📚
-              </div>
-              <span className="text-xs font-bold transition-transform group-hover:translate-x-1" style={{ color: 'var(--accent)' }}>
-                Manage →
-              </span>
-            </div>
-            <h3 className="text-base font-extrabold m-0 mb-1 transition-colors group-hover:text-[var(--accent)]" style={{ color: 'var(--text-primary)' }}>
+            <div className="text-3xl mb-4 group-hover:scale-110 transition-transform duration-200">📚</div>
+            <h3
+              className="text-base sm:text-lg font-bold tracking-tight mb-2 group-hover:text-[var(--accent)] transition-colors"
+              style={{ color: 'var(--text-primary)' }}
+            >
               Manage Novels & Chapters
             </h3>
-            <p className="text-xs sm:text-sm m-0 leading-relaxed font-normal" style={{ color: 'var(--text-secondary)' }}>
-              Hide/unhide novels, edit metadata, delete chapters or novels, and set locking thresholds.
+            <p className="text-xs sm:text-sm font-medium leading-relaxed m-0" style={{ color: 'var(--text-secondary)' }}>
+              Hide/unhide novels, edit metadata, delete individual chapters or full titles, and configure coins.
             </p>
           </Link>
 
           <Link
             href="/admin/users"
-            className="group p-5 sm:p-6 rounded-2xl border no-underline shadow-xs transition-all duration-200 hover:-translate-y-0.5 block"
+            className="group block p-6 sm:p-7 rounded-2xl border no-underline transition-all duration-200 shadow-xs hover:shadow-lg hover:-translate-y-0.5"
             style={{
               backgroundColor: 'var(--bg-card)',
               borderColor: 'var(--border)',
             }}
           >
-            <div className="flex items-start justify-between mb-3">
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl transition-transform group-hover:scale-105"
-                style={{ background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)' }}
-              >
-                👥
-              </div>
-              <span className="text-xs font-bold transition-transform group-hover:translate-x-1" style={{ color: 'var(--accent)' }}>
-                Directory →
-              </span>
-            </div>
-            <h3 className="text-base font-extrabold m-0 mb-1 transition-colors group-hover:text-[var(--accent)]" style={{ color: 'var(--text-primary)' }}>
+            <div className="text-3xl mb-4 group-hover:scale-110 transition-transform duration-200">👥</div>
+            <h3
+              className="text-base sm:text-lg font-bold tracking-tight mb-2 group-hover:text-[var(--accent)] transition-colors"
+              style={{ color: 'var(--text-primary)' }}
+            >
               User Directory & Coins
             </h3>
-            <p className="text-xs sm:text-sm m-0 leading-relaxed font-normal" style={{ color: 'var(--text-secondary)' }}>
-              Inspect user balances, grant promotional coins, or adjust roles and permissions.
+            <p className="text-xs sm:text-sm font-medium leading-relaxed m-0" style={{ color: 'var(--text-secondary)' }}>
+              Inspect registered reader balances, grant promotional coins, and adjust administrator permissions.
             </p>
           </Link>
         </div>
       </section>
 
-      {/* Recent Novel Catalog Overview Table */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-lg sm:text-xl font-black tracking-tight m-0" style={{ color: 'var(--text-primary)' }}>
-              Recent Library Catalog
-            </h2>
-            <p className="text-xs m-0 mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-              Quick glance at latest titles in your database
-            </p>
-          </div>
-          <Link
-            href="/admin/novels"
-            className="text-xs font-extrabold no-underline px-3 py-1.5 rounded-lg border transition-all"
-            style={{
-              backgroundColor: 'var(--bg-card)',
-              borderColor: 'var(--border)',
-              color: 'var(--accent)'
-            }}
-          >
-            View All Novels →
-          </Link>
-        </div>
-
+      {/* Platform Status */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-black tracking-tight m-0" style={{ color: 'var(--text-primary)' }}>
+          Platform Status
+        </h2>
         <div
-          className="rounded-2xl border overflow-hidden shadow-xs"
-          style={{
-            backgroundColor: 'var(--bg-card)',
-            borderColor: 'var(--border)'
-          }}
-        >
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] border-collapse text-left text-xs sm:text-sm">
-              <thead>
-                <tr style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
-                  <th style={{ padding: '14px 18px', fontWeight: '800' }}>NOVEL</th>
-                  <th style={{ padding: '14px 18px', fontWeight: '800' }}>AUTHOR</th>
-                  <th style={{ padding: '14px 18px', fontWeight: '800' }}>CHAPTERS</th>
-                  <th style={{ padding: '14px 18px', fontWeight: '800' }}>STATUS</th>
-                  <th style={{ padding: '14px 18px', fontWeight: '800', textAlign: 'right' }}>ACTION</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentNovels.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                      No novels found.
-                    </td>
-                  </tr>
-                ) : (
-                  recentNovels.map((novel) => {
-                    const isHidden = !!novel.is_hidden || novel.status === 'hidden';
-                    return (
-                      <tr
-                        key={novel._id}
-                        style={{ borderBottom: '1px solid var(--border-subtle)' }}
-                        className="hover:bg-[var(--bg-hover)] transition-colors"
-                      >
-                        <td style={{ padding: '12px 18px', color: 'var(--text-primary)', fontWeight: '700' }}>
-                          <div className="flex items-center gap-3">
-                            <img
-                              src={novel.cover_image}
-                              alt={novel.title}
-                              className="w-8 h-11 object-cover rounded-md border shrink-0"
-                              style={{ borderColor: 'var(--border)' }}
-                              onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${novel._id}/100/150`; }}
-                            />
-                            <div>
-                              <div className="font-extrabold text-sm line-clamp-1">{novel.title}</div>
-                              {novel.alternative_titles && (
-                                <div className="text-[11px] line-clamp-1" style={{ color: 'var(--text-muted)' }}>
-                                  {novel.alternative_titles}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-
-                        <td style={{ padding: '12px 18px', color: 'var(--text-secondary)' }}>
-                          {novel.author || 'Korean Author'}
-                        </td>
-
-                        <td style={{ padding: '12px 18px', fontWeight: '800', color: 'var(--text-primary)' }}>
-                          {novel.total_chapters || 0}
-                        </td>
-
-                        <td style={{ padding: '12px 18px' }}>
-                          <span style={{
-                            fontSize: '11px',
-                            fontWeight: '800',
-                            padding: '3px 8px',
-                            borderRadius: '6px',
-                            background: isHidden ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)',
-                            color: isHidden ? '#f59e0b' : '#10b981',
-                            border: isHidden ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)'
-                          }}>
-                            {isHidden ? '👁️‍🗨️ Hidden' : '🟢 Visible'}
-                          </span>
-                        </td>
-
-                        <td style={{ padding: '12px 18px', textAlign: 'right' }}>
-                          <Link
-                            href="/admin/novels"
-                            className="no-underline px-3 py-1.5 rounded-lg text-xs font-bold transition-colors inline-block"
-                            style={{
-                              background: 'var(--bg-secondary)',
-                              color: 'var(--text-primary)',
-                              border: '1px solid var(--border)'
-                            }}
-                          >
-                            Edit →
-                          </Link>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      {/* System Status */}
-      <section className="pt-2">
-        <div
-          className="rounded-2xl border p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-xs"
+          className="p-6 sm:p-7 rounded-2xl border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-xs"
           style={{
             backgroundColor: 'var(--bg-card)',
             borderColor: 'var(--border)',
           }}
         >
-          <div className="flex items-center gap-3">
-            <div className="relative flex h-3.5 w-3.5 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500"></span>
-            </div>
-            <div>
-              <strong className="text-sm font-bold block" style={{ color: 'var(--text-primary)' }}>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse shrink-0"></span>
+              <strong className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>
                 Database & Cloud Storage Operational
               </strong>
-              <p className="text-xs m-0 mt-0.5 font-medium" style={{ color: 'var(--text-secondary)' }}>
-                Connected to MongoDB Atlas cluster and Cloudflare R2 object storage endpoints.
-              </p>
             </div>
+            <p className="text-xs sm:text-sm font-medium m-0 pl-5" style={{ color: 'var(--text-secondary)' }}>
+              Connected to MongoDB Atlas cluster and Cloudflare R2 object storage endpoints.
+            </p>
           </div>
+
           <span
-            className="text-xs font-black px-3 py-1 rounded-xl border shrink-0 tracking-wide uppercase"
+            className="self-start sm:self-auto text-xs font-black px-3.5 py-1.5 rounded-xl uppercase tracking-wider shrink-0"
             style={{
               backgroundColor: 'rgba(16, 185, 129, 0.12)',
               color: '#10b981',
-              borderColor: 'rgba(16, 185, 129, 0.3)',
+              border: '1px solid rgba(16, 185, 129, 0.28)',
             }}
           >
             ONLINE
