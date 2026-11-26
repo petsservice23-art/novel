@@ -34,9 +34,19 @@ const getChaptersByNovel = async (req, res) => {
       .sort({ chapter_number: 1 });
 
     const existingNumbers = chapters.map(c => c.chapter_number);
+    const maxRealChapter = existingNumbers.length > 0 ? Math.max(...existingNumbers) : 0;
+    const effectiveTotal = Math.max(novel.total_chapters || 0, maxRealChapter);
+
+    // Auto-heal novel total_chapters if it was desynced
+    if (novel.total_chapters !== effectiveTotal && effectiveTotal > 0) {
+      novel.total_chapters = effectiveTotal;
+      novel.updatedAt = new Date();
+      await novel.save().catch(() => {});
+    }
+
     const fullList = [...chapters.map(ch => ch.toObject())];
 
-    for (let i = 1; i <= novel.total_chapters; i++) {
+    for (let i = 1; i <= effectiveTotal; i++) {
       if (!existingNumbers.includes(i)) {
         const isLocked = i >= 201;
         fullList.push({
@@ -163,13 +173,13 @@ const getChapterByNumber = async (req, res) => {
     const novel = await Novel.findById(novelId);
     if (!novel) return res.status(404).json({ message: 'Novel not found' });
 
-    if (chapterNum < 1 || chapterNum > novel.total_chapters) {
-      return res.status(404).json({ message: 'Chapter not found' });
-    }
-
     let chapter = await Chapter.findOne({ novel_id: novelId, chapter_number: chapterNum });
 
     if (!chapter) {
+      if (chapterNum < 1 || chapterNum > (novel.total_chapters || 0)) {
+        return res.status(404).json({ message: 'Chapter not found' });
+      }
+
       const isLocked = chapterNum > 3;
       chapter = new Chapter({
         novel_id: novelId,
@@ -185,6 +195,11 @@ const getChapterByNumber = async (req, res) => {
         price: isLocked ? 10 : 0
       });
       await chapter.save();
+    } else if (chapterNum > (novel.total_chapters || 0)) {
+      // Auto-heal total_chapters if higher chapter exists
+      novel.total_chapters = chapterNum;
+      novel.updatedAt = new Date();
+      await novel.save().catch(() => {});
     }
 
     const isPaid = chapter.tier === 'coin' || chapter.tier === 'paid' || chapter.is_locked === true;

@@ -169,7 +169,19 @@ router.post('/chapter', async (req, res) => {
       price: isLocked ? 10 : 0
     });
     await newChapter.save();
-    res.json({ message: 'Chapter created successfully', chapter: newChapter });
+
+    // Automatically recalculate and update novel total_chapters and touch updatedAt
+    const latestChapter = await Chapter.find({ novel_id }).sort({ chapter_number: -1 }).limit(1);
+    const maxChNum = latestChapter.length > 0 ? latestChapter[0].chapter_number : chapter_number;
+    const countTotal = await Chapter.countDocuments({ novel_id });
+    const realTotal = Math.max(maxChNum, countTotal);
+
+    await Novel.findByIdAndUpdate(novel_id, {
+      total_chapters: realTotal,
+      updatedAt: new Date()
+    });
+
+    res.json({ message: 'Chapter created successfully', chapter: newChapter, total_chapters: realTotal });
   } catch (error) {
     console.error("Error creating chapter:", error);
     res.status(500).json({ message: 'Server error' });
