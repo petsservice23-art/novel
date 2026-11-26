@@ -328,7 +328,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         className="flex-1 p-6 sm:p-8 lg:p-10 pb-28 lg:pb-12 overflow-y-auto min-w-0 transition-colors duration-200"
         style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
       >
-        <div className="w-full max-w-[1100px] mx-auto">
+        <div className="w-full max-w-7xl mx-auto">
           {children}
         </div>
       </main>
