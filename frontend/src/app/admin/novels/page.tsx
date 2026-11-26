@@ -27,6 +27,10 @@ export default function ManageNovels() {
   const [novelToDelete, setNovelToDelete] = useState<any | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Chapter Deletion Modal State
+  const [chapterToDelete, setChapterToDelete] = useState<any | null>(null);
+  const [isDeletingChapter, setIsDeletingChapter] = useState(false);
+
   // Editor Modal State
   const [editingChapter, setEditingChapter] = useState<any>(null);
   const [rawText, setRawText] = useState('');
@@ -123,6 +127,30 @@ export default function ManageNovels() {
       toast.error(err.response?.data?.message || 'Failed to delete novel');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  // 2.5 Delete Individual Chapter
+  const handleConfirmDeleteChapter = async () => {
+    if (!chapterToDelete) return;
+    setIsDeletingChapter(true);
+
+    try {
+      const res = await axios.delete(`${API_URL}/admin/chapter/${chapterToDelete._id}`);
+      toast.success(res.data.message || `Chapter ${chapterToDelete.chapter_number} deleted!`);
+
+      // Remove from chapter state
+      setChapters(prev => prev.filter(c => c._id !== chapterToDelete._id));
+
+      // Update novels total_chapters in state
+      if (res.data.remainingCount !== undefined) {
+        setNovels(prev => prev.map(n => n._id === selectedNovel ? { ...n, total_chapters: res.data.remainingCount } : n));
+      }
+      setChapterToDelete(null);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to delete chapter');
+    } finally {
+      setIsDeletingChapter(false);
     }
   };
 
@@ -754,7 +782,7 @@ export default function ManageNovels() {
 
             <div className="overflow-x-auto">
               <div
-                className="grid grid-cols-[80px_1fr_180px_110px] min-w-[560px] gap-4 p-3.5 px-5 border-b text-xs font-black"
+                className="grid grid-cols-[80px_1fr_160px_160px] min-w-[600px] gap-4 p-3.5 px-5 border-b text-xs font-black"
                 style={{
                   backgroundColor: 'var(--bg-secondary)',
                   borderColor: 'var(--border)',
@@ -771,7 +799,7 @@ export default function ManageNovels() {
                 {chapters.map(c => (
                   <div
                     key={c._id}
-                    className="grid grid-cols-[80px_1fr_180px_110px] min-w-[560px] gap-4 p-3.5 px-5 border-b items-center text-xs sm:text-sm transition-colors"
+                    className="grid grid-cols-[80px_1fr_160px_160px] min-w-[600px] gap-4 p-3.5 px-5 border-b items-center text-xs sm:text-sm transition-colors"
                     style={{
                       borderColor: 'var(--border-subtle)',
                       color: 'var(--text-primary)'
@@ -843,7 +871,7 @@ export default function ManageNovels() {
                     </select>
                   </div>
 
-                  <div style={{ textAlign: 'right' }}>
+                  <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
                     <button
                       onClick={() => openEditor(c)}
                       style={{
@@ -858,6 +886,22 @@ export default function ManageNovels() {
                       }}
                     >
                       Edit Text
+                    </button>
+                    <button
+                      onClick={() => setChapterToDelete(c)}
+                      title="Delete this chapter"
+                      style={{
+                        background: 'rgba(239, 68, 68, 0.12)',
+                        color: '#ef4444',
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: '800',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      🗑️
                     </button>
                   </div>
                 </div>
@@ -954,6 +998,85 @@ export default function ManageNovels() {
                 }}
               >
                 {isDeleting ? 'Deleting...' : 'Yes, Delete Permanently'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRM DELETE CHAPTER MODAL */}
+      {chapterToDelete && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.7)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 110,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: 'var(--bg-card)',
+            color: 'var(--text-primary)',
+            borderRadius: '20px',
+            maxWidth: '460px',
+            width: '100%',
+            padding: '24px',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+            border: '2px solid #ef4444'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+                🗑️
+              </div>
+              <div>
+                <h3 style={{ fontSize: '17px', fontWeight: '900', color: '#ef4444', margin: 0 }}>
+                  Delete Chapter {chapterToDelete.chapter_number}?
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '12px', margin: '2px 0 0' }}>
+                  "{chapterToDelete.title}"
+                </p>
+              </div>
+            </div>
+
+            <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.5', marginBottom: '20px' }}>
+              Are you sure you want to delete this chapter? Its content will be removed from the database and Cloudflare storage.
+            </p>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button
+                onClick={() => setChapterToDelete(null)}
+                style={{
+                  background: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontWeight: '700',
+                  fontSize: '13px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleConfirmDeleteChapter}
+                disabled={isDeletingChapter}
+                style={{
+                  background: '#dc2626',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '8px 20px',
+                  borderRadius: '8px',
+                  fontWeight: '800',
+                  fontSize: '13px',
+                  cursor: isDeletingChapter ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {isDeletingChapter ? 'Deleting...' : 'Yes, Delete Chapter'}
               </button>
             </div>
           </div>

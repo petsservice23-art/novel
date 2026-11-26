@@ -2,8 +2,9 @@ const express = require('express');
 const multer = require('multer');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Chapter = require('../models/Chapter');
+const Novel = require('../models/Novel');
 const adminController = require('../controllers/adminController');
-const { uploadChapterContent } = require('../utils/r2Service');
+const { uploadChapterContent, deleteR2Object } = require('../utils/r2Service');
 const router = express.Router();
 
 const upload = multer({
@@ -61,6 +62,48 @@ router.put('/chapter/:id', async (req, res) => {
   } catch (error) {
     console.error("Error updating chapter:", error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Route 1.1: Delete an Individual Chapter
+router.delete('/chapter/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const chapter = await Chapter.findById(id);
+    if (!chapter) {
+      return res.status(404).json({ message: 'Chapter not found' });
+    }
+
+    const novelId = chapter.novel_id;
+    const chapNum = chapter.chapter_number;
+
+    // Delete from R2 storage if key exists
+    if (chapter.r2_key) {
+      try {
+        await deleteR2Object(chapter.r2_key);
+      } catch (r2Err) {
+        console.error(`Failed to delete chapter ${chapNum} from R2:`, r2Err.message);
+      }
+    }
+
+    // Delete from MongoDB
+    await Chapter.findByIdAndDelete(id);
+
+    // Update novel total_chapters count and updatedAt
+    const remainingCount = await Chapter.countDocuments({ novel_id: novelId });
+    await Novel.findByIdAndUpdate(novelId, {
+      total_chapters: remainingCount,
+      updatedAt: new Date()
+    });
+
+    res.json({
+      message: `Chapter ${chapNum} deleted successfully`,
+      chapterId: id,
+      remainingCount
+    });
+  } catch (error) {
+    console.error("Error deleting chapter:", error);
+    res.status(500).json({ message: 'Server error deleting chapter' });
   }
 });
 

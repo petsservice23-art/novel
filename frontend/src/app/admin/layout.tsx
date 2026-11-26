@@ -38,11 +38,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const menuItems = [
-    { name: 'Dashboard', href: '/admin/dashboard', icon: '📊' },
-    { name: 'Manage Novels', href: '/admin/novels', icon: '📚' },
-    { name: 'EPUB / PDF Importer', href: '/admin/importer', icon: '⚡' },
-    { name: 'Users', href: '/admin/users', icon: '👥' },
-    { name: 'Support Inbox', href: '/admin/support', icon: '💬' },
+    { name: 'Dashboard', shortName: 'Overview', href: '/admin/dashboard', icon: '📊' },
+    { name: 'Manage Novels', shortName: 'Novels', href: '/admin/novels', icon: '📚' },
+    { name: 'EPUB / PDF Importer', shortName: 'Importer', href: '/admin/importer', icon: '⚡' },
+    { name: 'Users', shortName: 'Users', href: '/admin/users', icon: '👥' },
+    { name: 'Support Inbox', shortName: 'Support', href: '/admin/support', icon: '💬' },
   ];
 
   return (
@@ -59,81 +59,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }}
       >
         <div className="flex items-center justify-between px-4 py-3">
-          <Link href="/admin/dashboard" className="flex items-center gap-2.5 no-underline" style={{ color: 'var(--text-primary)' }}>
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shadow-xs"
-              style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)' }}
-            >
-              🛡️
-            </div>
-            <div>
-              <span className="font-black text-base tracking-tight block leading-tight">Segye Admin</span>
-              <span className="text-[11px] font-semibold block leading-none" style={{ color: 'var(--text-muted)' }}>
-                Control Center
-              </span>
-            </div>
-          </Link>
-
-          <div className="flex items-center gap-2">
-            <Link
-              href="/"
-              className="text-xs font-bold px-3 py-1.5 rounded-lg no-underline flex items-center gap-1.5 transition-colors"
-              style={{
-                backgroundColor: 'var(--bg-secondary)',
-                color: 'var(--text-primary)',
-                border: '1px solid var(--border)',
-              }}
-            >
-              <span>🏠</span> <span className="hidden sm:inline">Site</span>
-            </Link>
+          <div className="flex items-center gap-2.5">
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle admin navigation"
-              className="p-2 rounded-lg font-bold flex items-center justify-center transition-colors cursor-pointer"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open admin drawer navigation"
+              className="p-2 rounded-xl font-bold flex items-center justify-center transition-colors cursor-pointer"
               style={{
                 backgroundColor: 'var(--bg-secondary)',
                 color: 'var(--text-primary)',
                 border: '1px solid var(--border)',
               }}
             >
-              {mobileMenuOpen ? '✕' : '☰'}
+              ☰
             </button>
+            <Link href="/admin/dashboard" className="flex items-center gap-2 no-underline" style={{ color: 'var(--text-primary)' }}>
+              <span className="font-black text-base tracking-tight block">Segye Admin</span>
+            </Link>
           </div>
-        </div>
 
-        {/* HORIZONTAL QUICK SCROLL TABS (Always visible on mobile) */}
-        <div
-          className="overflow-x-auto no-scrollbar flex items-center gap-2 px-3 pb-2.5 pt-1 border-t"
-          style={{ borderColor: 'var(--border-subtle)' }}
-        >
-          {menuItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all no-underline ${
-                  isActive ? 'shadow-sm' : ''
-                }`}
-                style={
-                  isActive
-                    ? {
-                        background: 'var(--accent-gradient)',
-                        color: '#FFFFFF',
-                        boxShadow: '0 2px 10px rgba(142, 107, 175, 0.35)',
-                      }
-                    : {
-                        backgroundColor: 'var(--bg-secondary)',
-                        color: 'var(--text-secondary)',
-                        border: '1px solid var(--border)',
-                      }
-                }
-              >
-                <span>{item.icon}</span>
-                <span>{item.name}</span>
-              </Link>
-            );
-          })}
+          <Link
+            href="/"
+            className="text-xs font-bold px-3 py-1.5 rounded-lg no-underline flex items-center gap-1.5 transition-colors"
+            style={{
+              backgroundColor: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <span>🏠</span> <span>Live Site</span>
+          </Link>
         </div>
       </div>
 
@@ -151,11 +105,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center justify-between pb-4 border-b mb-6" style={{ borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-2.5">
                 <span className="text-2xl">🛡️</span>
-                <span className="font-black text-lg">Segye Admin</span>
+                <div>
+                  <span className="font-black text-lg block leading-tight">Segye Admin</span>
+                  <span className="text-[11px] font-semibold block leading-none" style={{ color: 'var(--text-muted)' }}>
+                    Navigation Drawer
+                  </span>
+                </div>
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="font-bold p-1 text-lg cursor-pointer"
+                className="font-bold p-1 text-lg cursor-pointer rounded-lg hover:opacity-80"
                 style={{ color: 'var(--text-muted)' }}
               >
                 ✕
@@ -209,9 +168,64 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       )}
 
+      {/* MOBILE BOTTOM NAVIGATION BAR (Fixed at bottom on mobile < lg) */}
+      <nav
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-md px-2 py-1.5 flex items-center justify-around shadow-lg transition-colors"
+        style={{
+          backgroundColor: 'var(--bg-card)',
+          borderColor: 'var(--border)',
+        }}
+      >
+        {menuItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all no-underline flex-1 text-center"
+              style={
+                isActive
+                  ? {
+                      color: 'var(--accent)',
+                    }
+                  : {
+                      color: 'var(--text-muted)',
+                    }
+              }
+            >
+              <div
+                className={`w-8 h-8 rounded-lg flex items-center justify-center text-base mb-0.5 transition-all ${
+                  isActive ? 'shadow-xs scale-105' : ''
+                }`}
+                style={
+                  isActive
+                    ? {
+                        background: 'var(--accent-soft)',
+                        border: '1px solid var(--accent)',
+                      }
+                    : {
+                        background: 'transparent',
+                      }
+                }
+              >
+                {item.icon}
+              </div>
+              <span
+                className="text-[10px] font-extrabold tracking-tight truncate leading-none"
+                style={{
+                  color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                }}
+              >
+                {item.shortName}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+
       {/* DESKTOP SIDEBAR (Visible on lg and larger) */}
       <aside
-        className="hidden lg:flex w-[260px] xl:w-[280px] p-6 flex-col sticky top-0 h-screen box-border shrink-0 border-r transition-colors duration-200"
+        className="hidden lg:flex w-[250px] xl:w-[270px] p-5 flex-col sticky top-16 h-[calc(100vh-4rem)] box-border shrink-0 border-r transition-colors duration-200"
         style={{
           backgroundColor: 'var(--bg-card)',
           borderColor: 'var(--border)',
@@ -219,8 +233,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }}
       >
         {/* Brand Header */}
-        <div className="mb-8 px-2">
-          <div className="flex items-center gap-3 mb-1">
+        <div className="mb-6 px-1">
+          <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 shadow-xs"
               style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)' }}
@@ -228,25 +242,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               🛡️
             </div>
             <div>
-              <h2 className="text-lg font-black m-0 tracking-tight leading-tight">
+              <h2 className="text-base font-black m-0 tracking-tight leading-tight">
                 Segye Admin
               </h2>
               <p className="text-[11px] font-semibold m-0 leading-tight" style={{ color: 'var(--text-muted)' }}>
-                Content & Systems Hub
+                Control Center Hub
               </p>
             </div>
           </div>
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex flex-col gap-1.5 flex-1">
+        <nav className="flex flex-col gap-1 flex-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl no-underline font-bold text-sm transition-all"
+                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl no-underline font-bold text-sm transition-all"
                 style={
                   isActive
                     ? {
@@ -272,7 +286,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   }
                 }}
               >
-                <span className="text-lg">{item.icon}</span>
+                <span className="text-base">{item.icon}</span>
                 <span>{item.name}</span>
               </Link>
             );
@@ -280,7 +294,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         {/* Footer Link to Site */}
-        <div className="pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
+        <div className="pt-3 border-t mt-auto" style={{ borderColor: 'var(--border)' }}>
           <Link
             href="/"
             className="font-bold no-underline text-xs flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl transition-all"
@@ -295,12 +309,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
+      {/* MAIN CONTENT AREA (with bottom padding for mobile bottom bar) */}
       <main
-        className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto min-w-0 transition-colors duration-200"
+        className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 sm:pb-28 lg:pb-8 overflow-y-auto min-w-0 transition-colors duration-200"
         style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
       >
-        {children}
+        <div className="max-w-6xl mx-auto w-full">
+          {children}
+        </div>
       </main>
     </div>
   );
