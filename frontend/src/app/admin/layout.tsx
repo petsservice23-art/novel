@@ -4,7 +4,79 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ReactNode } from 'react';
+
+// =========================================================================
+// Minimalist, Professional Vector SVG Icons (No Emojis)
+// =========================================================================
+
+function OverviewIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="9" rx="1.5" />
+      <rect x="14" y="3" width="7" height="5" rx="1.5" />
+      <rect x="14" y="12" width="7" height="9" rx="1.5" />
+      <rect x="3" y="16" width="7" height="5" rx="1.5" />
+    </svg>
+  );
+}
+
+function NovelsIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+      <path d="M6 6h10" />
+      <path d="M6 10h10" />
+    </svg>
+  );
+}
+
+function ImporterIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" y1="3" x2="12" y2="15" />
+    </svg>
+  );
+}
+
+function UsersIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  );
+}
+
+function SupportIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+function ExternalLinkIcon({ className = "w-3.5 h-3.5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  );
+}
+
+function ShieldIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  );
+}
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -26,23 +98,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (loading || !user || user.role !== 'admin') {
     return (
       <div
-        className="min-h-screen flex items-center justify-center font-bold text-base"
+        className="min-h-screen flex items-center justify-center font-bold text-sm"
         style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
       >
-        <div className="flex items-center gap-3">
-          <span className="animate-spin text-xl">⏳</span>
-          <span>Loading Admin Panel...</span>
+        <div className="flex items-center gap-2.5">
+          <span className="animate-spin text-lg">◌</span>
+          <span>Authenticating Admin...</span>
         </div>
       </div>
     );
   }
 
   const menuItems = [
-    { name: 'Dashboard', shortName: 'Overview', href: '/admin/dashboard', icon: '📊' },
-    { name: 'Manage Novels', shortName: 'Novels', href: '/admin/novels', icon: '📚' },
-    { name: 'EPUB / PDF Importer', shortName: 'Importer', href: '/admin/importer', icon: '⚡' },
-    { name: 'Users', shortName: 'Users', href: '/admin/users', icon: '👥' },
-    { name: 'Support Inbox', shortName: 'Support', href: '/admin/support', icon: '💬' },
+    { name: 'Dashboard', shortName: 'Overview', href: '/admin/dashboard', icon: OverviewIcon },
+    { name: 'Manage Novels', shortName: 'Novels', href: '/admin/novels', icon: NovelsIcon },
+    { name: 'EPUB / PDF Importer', shortName: 'Importer', href: '/admin/importer', icon: ImporterIcon },
+    { name: 'Users', shortName: 'Users', href: '/admin/users', icon: UsersIcon },
+    { name: 'Support Inbox', shortName: 'Support', href: '/admin/support', icon: SupportIcon },
   ];
 
   return (
@@ -64,37 +136,42 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              aria-label="Open admin navigation drawer"
-              className="p-2 rounded-xl font-bold flex items-center justify-center transition-colors cursor-pointer"
+              aria-label="Open navigation drawer"
+              className="p-2 rounded-lg flex items-center justify-center transition-colors cursor-pointer"
               style={{
                 backgroundColor: 'var(--bg-secondary)',
                 color: 'var(--text-primary)',
                 border: '1px solid var(--border)',
               }}
             >
-              ☰
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
             </button>
-            <Link href="/admin/dashboard" className="flex items-center gap-2.5 no-underline" style={{ color: 'var(--text-primary)' }}>
+            <Link href="/admin/dashboard" className="flex items-center gap-2 no-underline" style={{ color: 'var(--text-primary)' }}>
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-base shrink-0"
-                style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)' }}
+                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)', color: 'var(--accent)' }}
               >
-                🛡️
+                <ShieldIcon className="w-4 h-4" />
               </div>
-              <span className="font-black text-base tracking-tight block">Segye Admin</span>
+              <span className="font-extrabold text-sm tracking-tight block">Segye Admin</span>
             </Link>
           </div>
 
           <Link
             href="/"
-            className="text-xs font-bold px-3 py-1.5 rounded-lg no-underline flex items-center gap-1.5 transition-colors"
+            className="text-xs font-semibold px-2.5 py-1.5 rounded-lg no-underline flex items-center gap-1.5 transition-colors"
             style={{
               backgroundColor: 'var(--bg-secondary)',
               color: 'var(--text-primary)',
               border: '1px solid var(--border)',
             }}
           >
-            <span>🏠</span> <span>Live Site</span>
+            <span>Live Site</span>
+            <ExternalLinkIcon className="w-3 h-3 opacity-70" />
           </Link>
         </div>
       </div>
@@ -105,31 +182,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex">
           <div
-            className="w-[280px] h-full p-6 flex flex-col shadow-2xl animate-in slide-in-from-left duration-200"
+            className="w-[270px] h-full p-5 flex flex-col shadow-2xl animate-in slide-in-from-left duration-200"
             style={{
               backgroundColor: 'var(--bg-card)',
               color: 'var(--text-primary)',
               borderRight: '1px solid var(--border)',
             }}
           >
-            <div className="flex items-center justify-between pb-4 border-b mb-6" style={{ borderColor: 'var(--border)' }}>
+            <div className="flex items-center justify-between pb-4 border-b mb-5" style={{ borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-2.5">
                 <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0"
-                  style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)' }}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)', color: 'var(--accent)' }}
                 >
-                  🛡️
+                  <ShieldIcon className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="font-black text-base block leading-tight">Segye Admin</span>
-                  <span className="text-[11px] font-semibold block leading-tight mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                    Control Center & Hub
+                  <span className="font-extrabold text-sm block leading-tight">Segye Admin</span>
+                  <span className="text-[10px] font-medium block leading-tight mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                    Management Console
                   </span>
                 </div>
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-1.5 rounded-lg text-sm font-bold cursor-pointer transition-colors"
+                className="p-1 rounded-md text-sm cursor-pointer transition-colors"
                 style={{
                   backgroundColor: 'var(--bg-secondary)',
                   color: 'var(--text-primary)',
@@ -140,25 +217,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </button>
             </div>
 
-            <div className="text-[10px] font-black uppercase tracking-widest px-2 mb-2" style={{ color: 'var(--text-muted)' }}>
-              Admin Menu
+            <div className="text-[10px] font-bold uppercase tracking-wider px-2 mb-2" style={{ color: 'var(--text-muted)' }}>
+              Menu
             </div>
 
-            <nav className="flex flex-col gap-1.5 flex-1">
+            <nav className="flex flex-col gap-1 flex-1">
               {menuItems.map((item) => {
                 const isActive = pathname === item.href;
+                const IconComponent = item.icon;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl no-underline font-bold text-sm transition-all"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg no-underline font-medium text-xs transition-all"
                     style={
                       isActive
                         ? {
                             color: 'var(--accent)',
                             backgroundColor: 'var(--accent-soft)',
                             border: '1px solid var(--border)',
+                            fontWeight: '600',
                           }
                         : {
                             color: 'var(--text-secondary)',
@@ -167,24 +246,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           }
                     }
                   >
-                    <span className="text-lg">{item.icon}</span>
+                    <IconComponent className="w-4 h-4 shrink-0" />
                     <span>{item.name}</span>
                   </Link>
                 );
               })}
             </nav>
 
-            <div className="pt-4 border-t mt-auto" style={{ borderColor: 'var(--border)' }}>
+            <div className="pt-3 border-t mt-auto" style={{ borderColor: 'var(--border)' }}>
               <Link
                 href="/"
-                className="font-bold no-underline text-xs flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl transition-all"
+                className="font-medium no-underline text-xs flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg transition-all"
                 style={{
                   backgroundColor: 'var(--bg-secondary)',
                   color: 'var(--text-primary)',
                   border: '1px solid var(--border)',
                 }}
               >
-                <span>🏠</span> Back to Live Site
+                <span>Live Website</span>
+                <ExternalLinkIcon className="w-3 h-3 opacity-70" />
               </Link>
             </div>
           </div>
@@ -197,7 +277,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
          ========================================================================= */}
       <nav
         aria-label="Mobile Admin Navigation"
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t px-2 py-2 flex items-center justify-around shadow-2xl backdrop-blur-md"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t px-2 py-1.5 flex items-center justify-around shadow-2xl backdrop-blur-md"
         style={{
           backgroundColor: 'var(--bg-card)',
           borderColor: 'var(--border)',
@@ -205,28 +285,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       >
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
+          const IconComponent = item.icon;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all no-underline flex-1 text-center"
+              className="flex flex-col items-center justify-center py-1 px-1 rounded-lg transition-all no-underline flex-1 text-center"
               style={{
                 color: isActive ? 'var(--accent)' : 'var(--text-muted)',
               }}
             >
               <div
-                className={`w-8 h-8 rounded-lg flex items-center justify-center text-base mb-0.5 transition-all ${
-                  isActive ? 'scale-105 shadow-xs' : ''
+                className={`w-7 h-7 rounded-md flex items-center justify-center mb-0.5 transition-all ${
+                  isActive ? 'scale-105' : ''
                 }`}
                 style={{
                   background: isActive ? 'var(--accent-soft)' : 'transparent',
                   border: isActive ? '1px solid var(--border)' : '1px solid transparent',
                 }}
               >
-                {item.icon}
+                <IconComponent className="w-3.5 h-3.5" />
               </div>
               <span
-                className="text-[10px] font-extrabold tracking-tight truncate leading-none"
+                className="text-[10px] font-semibold tracking-tight truncate leading-none"
                 style={{
                   color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
                 }}
@@ -239,10 +320,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </nav>
 
       {/* =========================================================================
-          DESKTOP SIDEBAR (Clean, Minimalist, Aesthetic)
+          DESKTOP SIDEBAR (Sleek, Professional SaaS Tabs, Vector Icons)
          ========================================================================= */}
       <aside
-        className="hidden lg:flex w-[260px] p-5 flex-col sticky top-16 h-[calc(100vh-4rem)] box-border shrink-0 border-r transition-colors duration-200"
+        className="hidden lg:flex w-[250px] xl:w-[260px] p-4 flex-col sticky top-16 h-[calc(100vh-4rem)] box-border shrink-0 border-r transition-colors duration-200 select-none"
         style={{
           backgroundColor: 'var(--bg-card)',
           borderColor: 'var(--border)',
@@ -250,54 +331,56 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }}
       >
         {/* Brand Header */}
-        <div className="mb-7 px-2">
-          <div className="flex items-center gap-3">
+        <div className="pb-4 mb-3 border-b px-2" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex items-center gap-2.5">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0 shadow-xs"
-              style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)' }}
+              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-xs"
+              style={{ background: 'var(--accent-soft)', border: '1px solid var(--border)', color: 'var(--accent)' }}
             >
-              🛡️
+              <ShieldIcon className="w-4 h-4" />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <h2
-                className="text-base font-black m-0 tracking-tight leading-tight"
-                style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}
+                className="text-sm font-extrabold m-0 tracking-tight leading-tight truncate"
+                style={{ color: 'var(--text-primary)' }}
               >
                 Segye Admin
               </h2>
-              <p className="text-[11px] font-bold m-0 mt-0.5 leading-tight" style={{ color: 'var(--text-muted)' }}>
-                Control Center Hub
+              <p className="text-[10px] font-medium m-0 mt-0.5 leading-tight truncate" style={{ color: 'var(--text-muted)' }}>
+                Control Center
               </p>
             </div>
           </div>
         </div>
 
-        {/* Section Label */}
-        <div className="text-[10px] font-black uppercase tracking-wider px-3 mb-2" style={{ color: 'var(--text-muted)' }}>
+        {/* Section Header */}
+        <div className="text-[10px] font-bold uppercase tracking-wider px-2.5 mb-1.5" style={{ color: 'var(--text-muted)' }}>
           Navigation
         </div>
 
-        {/* Navigation Menu */}
-        <nav className="flex flex-col gap-1.5 flex-1">
+        {/* Professional Navigation Tabs */}
+        <nav className="flex flex-col gap-1 flex-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
+            const IconComponent = item.icon;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl no-underline font-bold text-sm transition-all duration-150"
+                className="relative flex items-center gap-2.5 px-3 py-2 rounded-lg no-underline text-xs transition-all duration-150 group"
                 style={
                   isActive
                     ? {
                         color: 'var(--accent)',
                         backgroundColor: 'var(--accent-soft)',
                         border: '1px solid var(--border)',
-                        boxShadow: 'var(--shadow-sm)',
+                        fontWeight: '600',
                       }
                     : {
                         color: 'var(--text-secondary)',
                         backgroundColor: 'transparent',
                         border: '1px solid transparent',
+                        fontWeight: '500',
                       }
                 }
                 onMouseEnter={(e) => {
@@ -313,24 +396,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   }
                 }}
               >
-                <span className="text-lg opacity-90">{item.icon}</span>
-                <span>{item.name}</span>
+                {/* Active Indicator Bar */}
                 {isActive && (
                   <span
-                    className="ml-auto w-1.5 h-1.5 rounded-full"
+                    className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full"
                     style={{ backgroundColor: 'var(--accent)' }}
                   />
                 )}
+
+                <IconComponent
+                  className={`w-4 h-4 shrink-0 transition-colors ${
+                    isActive ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] group-hover:text-[var(--text-primary)]'
+                  }`}
+                />
+                <span className="truncate">{item.name}</span>
               </Link>
             );
           })}
         </nav>
 
         {/* Footer Link to Site */}
-        <div className="pt-4 border-t mt-auto" style={{ borderColor: 'var(--border)' }}>
+        <div className="pt-3 border-t mt-auto" style={{ borderColor: 'var(--border)' }}>
           <Link
             href="/"
-            className="font-bold no-underline text-xs flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl transition-all"
+            className="font-medium no-underline text-xs flex items-center justify-between px-3 py-2 rounded-lg transition-all"
             style={{
               backgroundColor: 'var(--bg-secondary)',
               color: 'var(--text-primary)',
@@ -343,7 +432,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               e.currentTarget.style.backgroundColor = 'var(--bg-secondary)';
             }}
           >
-            <span>🏠</span> Back to Live Site
+            <span>Live Website</span>
+            <ExternalLinkIcon className="w-3.5 h-3.5 opacity-60" />
           </Link>
         </div>
       </aside>
