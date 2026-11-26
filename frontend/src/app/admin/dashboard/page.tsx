@@ -13,29 +13,36 @@ interface Stats {
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [recentNovels, setRecentNovels] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get(`${API_URL}/admin/stats`);
-        setStats(res.data);
+        const [statsRes, novelsRes] = await Promise.all([
+          axios.get(`${API_URL}/admin/stats`),
+          axios.get(`${API_URL}/admin/novels`).catch(() => ({ data: [] }))
+        ]);
+        setStats(statsRes.data);
+        if (Array.isArray(novelsRes.data)) {
+          setRecentNovels(novelsRes.data.slice(0, 8));
+        }
       } catch (err) {
-        console.error('Failed to fetch stats');
+        console.error('Failed to fetch dashboard data', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchStats();
+    fetchData();
   }, [API_URL]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[350px]">
+      <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex items-center gap-3 font-bold text-sm" style={{ color: 'var(--text-secondary)' }}>
-          <span className="animate-spin text-xl">⏳</span>
+          <span className="animate-spin text-2xl">⏳</span>
           <span>Loading platform metrics...</span>
         </div>
       </div>
@@ -43,89 +50,83 @@ export default function AdminDashboard() {
   }
 
   const statCards = [
-    { label: 'Total Users', value: (stats?.users || 0).toLocaleString(), icon: '👥', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.12)', hint: 'Registered readers' },
-    { label: 'Total Novels', value: (stats?.novels || 0).toLocaleString(), icon: '📚', color: '#10b981', bg: 'rgba(16, 185, 129, 0.12)', hint: 'Published catalog' },
-    { label: 'Total Chapters', value: (stats?.chapters || 0).toLocaleString(), icon: '📝', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)', hint: 'In database & storage' },
-    { label: 'Platform Revenue', value: `$${(stats?.revenue || 0).toLocaleString()}`, icon: '💰', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.12)', hint: 'Lifetime coin sales' },
+    { label: 'Total Users', value: (stats?.users || 0).toLocaleString(), icon: '👥', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.14)' },
+    { label: 'Total Novels', value: (stats?.novels || 0).toLocaleString(), icon: '📚', color: '#10b981', bg: 'rgba(16, 185, 129, 0.14)' },
+    { label: 'Total Chapters', value: (stats?.chapters || 0).toLocaleString(), icon: '📝', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.14)' },
+    { label: 'Platform Revenue', value: `$${(stats?.revenue || 0).toLocaleString()}`, icon: '💰', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.14)' },
   ];
 
   return (
-    <div className="w-full transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>
+    <div className="w-full space-y-8 transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>
       {/* Header */}
-      <header className="mb-6 sm:mb-8 pb-4 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight mb-1" style={{ color: 'var(--text-primary)' }}>
-              Dashboard Overview
-            </h1>
-            <p className="text-xs sm:text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-              Welcome to the SegyeNovels control center. Monitor library size, chapter growth, and reader engagement.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span
-              className="text-[11px] font-bold px-3 py-1.5 rounded-lg border flex items-center gap-1.5"
-              style={{
-                backgroundColor: 'var(--bg-secondary)',
-                borderColor: 'var(--border)',
-                color: 'var(--text-secondary)'
-              }}
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-              Live System
-            </span>
-          </div>
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-5 border-b" style={{ borderColor: 'var(--border)' }}>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight m-0" style={{ color: 'var(--text-primary)' }}>
+            Dashboard Overview
+          </h1>
+          <p className="text-xs sm:text-sm font-medium mt-1" style={{ color: 'var(--text-secondary)' }}>
+            Welcome to the SegyeNovels control center. Monitor library size, chapter growth, and reader engagement.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span
+            className="text-xs font-bold px-3 py-1.5 rounded-xl border flex items-center gap-2 shadow-xs"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border)',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+            <span>Live System</span>
+          </span>
         </div>
       </header>
 
-      {/* Stat Cards (2 cols on mobile, 4 on desktop) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 mb-8">
+      {/* Spacious 4 Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {statCards.map((card) => (
           <div
             key={card.label}
-            className="p-4 sm:p-5 rounded-2xl border transition-all duration-200 shadow-xs flex flex-col justify-between"
+            className="p-5 sm:p-6 rounded-2xl border transition-all duration-200 shadow-xs flex items-center gap-4 sm:gap-5"
             style={{
               backgroundColor: 'var(--bg-card)',
               borderColor: 'var(--border)',
             }}
           >
-            <div className="flex items-center justify-between mb-3">
-              <span
-                className="text-[11px] font-bold uppercase tracking-wider truncate"
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-xs"
+              style={{
+                background: card.bg,
+                border: `1.5px solid ${card.color}35`,
+              }}
+            >
+              {card.icon}
+            </div>
+
+            <div className="min-w-0">
+              <p
+                className="text-xs font-extrabold uppercase tracking-wider truncate m-0"
                 style={{ color: 'var(--text-muted)' }}
               >
                 {card.label}
-              </span>
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0"
-                style={{
-                  background: card.bg,
-                  border: `1px solid ${card.color}35`,
-                }}
-              >
-                {card.icon}
-              </div>
-            </div>
-
-            <div>
+              </p>
               <h2
-                className="text-2xl sm:text-3xl font-black m-0 tracking-tight leading-none"
+                className="text-2xl sm:text-3xl font-black m-0 mt-1 tracking-tight truncate leading-none"
                 style={{ color: 'var(--text-primary)' }}
               >
                 {card.value}
               </h2>
-              <p className="text-[11px] font-medium m-0 mt-2 truncate" style={{ color: 'var(--text-muted)' }}>
-                {card.hint}
-              </p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Quick Actions Panel */}
-      <section className="mb-8">
+      <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base sm:text-lg font-black tracking-tight m-0" style={{ color: 'var(--text-primary)' }}>
+          <h2 className="text-lg sm:text-xl font-black tracking-tight m-0" style={{ color: 'var(--text-primary)' }}>
             Quick Management Actions
           </h2>
           <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
@@ -136,7 +137,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Link
             href="/admin/importer"
-            className="group p-5 rounded-2xl border no-underline shadow-xs transition-all duration-200 hover:-translate-y-0.5 block"
+            className="group p-5 sm:p-6 rounded-2xl border no-underline shadow-xs transition-all duration-200 hover:-translate-y-0.5 block"
             style={{
               backgroundColor: 'var(--bg-card)',
               borderColor: 'var(--border)',
@@ -144,7 +145,7 @@ export default function AdminDashboard() {
           >
             <div className="flex items-start justify-between mb-3">
               <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center text-xl transition-transform group-hover:scale-105"
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl transition-transform group-hover:scale-105"
                 style={{ background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)' }}
               >
                 ⚡
@@ -163,7 +164,7 @@ export default function AdminDashboard() {
 
           <Link
             href="/admin/novels"
-            className="group p-5 rounded-2xl border no-underline shadow-xs transition-all duration-200 hover:-translate-y-0.5 block"
+            className="group p-5 sm:p-6 rounded-2xl border no-underline shadow-xs transition-all duration-200 hover:-translate-y-0.5 block"
             style={{
               backgroundColor: 'var(--bg-card)',
               borderColor: 'var(--border)',
@@ -171,7 +172,7 @@ export default function AdminDashboard() {
           >
             <div className="flex items-start justify-between mb-3">
               <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center text-xl transition-transform group-hover:scale-105"
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl transition-transform group-hover:scale-105"
                 style={{ background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.25)' }}
               >
                 📚
@@ -190,7 +191,7 @@ export default function AdminDashboard() {
 
           <Link
             href="/admin/users"
-            className="group p-5 rounded-2xl border no-underline shadow-xs transition-all duration-200 hover:-translate-y-0.5 block"
+            className="group p-5 sm:p-6 rounded-2xl border no-underline shadow-xs transition-all duration-200 hover:-translate-y-0.5 block"
             style={{
               backgroundColor: 'var(--bg-card)',
               borderColor: 'var(--border)',
@@ -198,7 +199,7 @@ export default function AdminDashboard() {
           >
             <div className="flex items-start justify-between mb-3">
               <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center text-xl transition-transform group-hover:scale-105"
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl transition-transform group-hover:scale-105"
                 style={{ background: 'rgba(245, 158, 11, 0.12)', border: '1px solid rgba(245, 158, 11, 0.25)' }}
               >
                 👥
@@ -217,8 +218,131 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      {/* System Status */}
+      {/* Recent Novel Catalog Overview Table */}
       <section>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg sm:text-xl font-black tracking-tight m-0" style={{ color: 'var(--text-primary)' }}>
+              Recent Library Catalog
+            </h2>
+            <p className="text-xs m-0 mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+              Quick glance at latest titles in your database
+            </p>
+          </div>
+          <Link
+            href="/admin/novels"
+            className="text-xs font-extrabold no-underline px-3 py-1.5 rounded-lg border transition-all"
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              borderColor: 'var(--border)',
+              color: 'var(--accent)'
+            }}
+          >
+            View All Novels →
+          </Link>
+        </div>
+
+        <div
+          className="rounded-2xl border overflow-hidden shadow-xs"
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            borderColor: 'var(--border)'
+          }}
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] border-collapse text-left text-xs sm:text-sm">
+              <thead>
+                <tr style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
+                  <th style={{ padding: '14px 18px', fontWeight: '800' }}>NOVEL</th>
+                  <th style={{ padding: '14px 18px', fontWeight: '800' }}>AUTHOR</th>
+                  <th style={{ padding: '14px 18px', fontWeight: '800' }}>CHAPTERS</th>
+                  <th style={{ padding: '14px 18px', fontWeight: '800' }}>STATUS</th>
+                  <th style={{ padding: '14px 18px', fontWeight: '800', textAlign: 'right' }}>ACTION</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentNovels.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} style={{ padding: '30px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                      No novels found.
+                    </td>
+                  </tr>
+                ) : (
+                  recentNovels.map((novel) => {
+                    const isHidden = !!novel.is_hidden || novel.status === 'hidden';
+                    return (
+                      <tr
+                        key={novel._id}
+                        style={{ borderBottom: '1px solid var(--border-subtle)' }}
+                        className="hover:bg-[var(--bg-hover)] transition-colors"
+                      >
+                        <td style={{ padding: '12px 18px', color: 'var(--text-primary)', fontWeight: '700' }}>
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={novel.cover_image}
+                              alt={novel.title}
+                              className="w-8 h-11 object-cover rounded-md border shrink-0"
+                              style={{ borderColor: 'var(--border)' }}
+                              onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${novel._id}/100/150`; }}
+                            />
+                            <div>
+                              <div className="font-extrabold text-sm line-clamp-1">{novel.title}</div>
+                              {novel.alternative_titles && (
+                                <div className="text-[11px] line-clamp-1" style={{ color: 'var(--text-muted)' }}>
+                                  {novel.alternative_titles}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+
+                        <td style={{ padding: '12px 18px', color: 'var(--text-secondary)' }}>
+                          {novel.author || 'Korean Author'}
+                        </td>
+
+                        <td style={{ padding: '12px 18px', fontWeight: '800', color: 'var(--text-primary)' }}>
+                          {novel.total_chapters || 0}
+                        </td>
+
+                        <td style={{ padding: '12px 18px' }}>
+                          <span style={{
+                            fontSize: '11px',
+                            fontWeight: '800',
+                            padding: '3px 8px',
+                            borderRadius: '6px',
+                            background: isHidden ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                            color: isHidden ? '#f59e0b' : '#10b981',
+                            border: isHidden ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)'
+                          }}>
+                            {isHidden ? '👁️‍🗨️ Hidden' : '🟢 Visible'}
+                          </span>
+                        </td>
+
+                        <td style={{ padding: '12px 18px', textAlign: 'right' }}>
+                          <Link
+                            href="/admin/novels"
+                            className="no-underline px-3 py-1.5 rounded-lg text-xs font-bold transition-colors inline-block"
+                            style={{
+                              background: 'var(--bg-secondary)',
+                              color: 'var(--text-primary)',
+                              border: '1px solid var(--border)'
+                            }}
+                          >
+                            Edit →
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* System Status */}
+      <section className="pt-2">
         <div
           className="rounded-2xl border p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-xs"
           style={{

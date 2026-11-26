@@ -18,7 +18,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [user, loading, router]);
 
-  // Close mobile menu on route change
+  // Close mobile drawer on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
@@ -50,7 +50,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       className="min-h-screen flex flex-col lg:flex-row transition-colors duration-200"
       style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
     >
-      {/* MOBILE TOP HEADER (Visible only on < lg) */}
+      {/* =========================================================================
+          MOBILE TOP BAR (Visible on screens < lg)
+         ========================================================================= */}
       <div
         className="lg:hidden sticky top-0 z-40 border-b shadow-xs transition-colors duration-200"
         style={{
@@ -62,7 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              aria-label="Open admin drawer navigation"
+              aria-label="Open admin navigation drawer"
               className="p-2 rounded-xl font-bold flex items-center justify-center transition-colors cursor-pointer"
               style={{
                 backgroundColor: 'var(--bg-secondary)',
@@ -73,6 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               ☰
             </button>
             <Link href="/admin/dashboard" className="flex items-center gap-2 no-underline" style={{ color: 'var(--text-primary)' }}>
+              <span className="text-xl">🛡️</span>
               <span className="font-black text-base tracking-tight block">Segye Admin</span>
             </Link>
           </div>
@@ -91,7 +94,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </div>
 
-      {/* MOBILE SLIDE-OUT DRAWER OVERLAY */}
+      {/* =========================================================================
+          MOBILE SLIDE-OUT DRAWER OVERLAY
+         ========================================================================= */}
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex">
           <div
@@ -168,9 +173,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       )}
 
-      {/* MOBILE BOTTOM NAVIGATION BAR (Fixed at bottom on mobile < lg) */}
+      {/* =========================================================================
+          MOBILE BOTTOM NAVIGATION BAR (Fixed at bottom on mobile < lg)
+         ========================================================================= */}
       <nav
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-md px-2 py-1.5 flex items-center justify-around shadow-lg transition-colors"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-md px-1 py-1 flex items-center justify-around shadow-xl transition-colors"
         style={{
           backgroundColor: 'var(--bg-card)',
           borderColor: 'var(--border)',
@@ -182,7 +189,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all no-underline flex-1 text-center"
+              className="flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all no-underline flex-1 text-center"
               style={
                 isActive
                   ? {
@@ -195,7 +202,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               <div
                 className={`w-8 h-8 rounded-lg flex items-center justify-center text-base mb-0.5 transition-all ${
-                  isActive ? 'shadow-xs scale-105' : ''
+                  isActive ? 'scale-105' : ''
                 }`}
                 style={
                   isActive
@@ -223,11 +230,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         })}
       </nav>
 
-      {/* DESKTOP SIDEBAR (Visible on lg and larger) */}
+      {/* =========================================================================
+          DESKTOP SIDEBAR (Visible on lg and larger)
+         ========================================================================= */}
       <aside
-        className="hidden lg:flex w-[250px] xl:w-[270px] p-5 flex-col sticky top-16 h-[calc(100vh-4rem)] box-border shrink-0 border-r transition-colors duration-200"
+        className="hidden lg:flex w-[260px] xl:w-[270px] p-6 flex-col sticky top-16 h-[calc(100vh-4rem)] box-border shrink-0 border-r transition-colors duration-200"
         style={{
-          backgroundColor: 'var(--bg-card)',
+          backgroundColor: 'var(--bg-secondary)',
           borderColor: 'var(--border)',
           color: 'var(--text-primary)',
         }}
@@ -242,18 +251,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               🛡️
             </div>
             <div>
-              <h2 className="text-base font-black m-0 tracking-tight leading-tight">
-                Segye Admin
+              <h2 className="text-base font-black m-0 tracking-tight leading-tight" style={{ color: 'var(--accent)' }}>
+                Admin Panel
               </h2>
               <p className="text-[11px] font-semibold m-0 leading-tight" style={{ color: 'var(--text-muted)' }}>
-                Control Center Hub
+                SegyeNovels Management
               </p>
             </div>
           </div>
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex flex-col gap-1 flex-1">
+        <nav className="flex flex-col gap-1.5 flex-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -286,7 +295,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   }
                 }}
               >
-                <span className="text-base">{item.icon}</span>
+                <span className="text-lg">{item.icon}</span>
                 <span>{item.name}</span>
               </Link>
             );
@@ -294,12 +303,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         {/* Footer Link to Site */}
-        <div className="pt-3 border-t mt-auto" style={{ borderColor: 'var(--border)' }}>
+        <div className="pt-4 border-t mt-auto" style={{ borderColor: 'var(--border)' }}>
           <Link
             href="/"
             className="font-bold no-underline text-xs flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl transition-all"
             style={{
-              backgroundColor: 'var(--bg-secondary)',
+              backgroundColor: 'var(--bg-card)',
               color: 'var(--text-primary)',
               border: '1px solid var(--border)',
             }}
@@ -309,12 +318,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA (with bottom padding for mobile bottom bar) */}
+      {/* =========================================================================
+          MAIN CONTENT AREA (Spacious, fills available width, with mobile padding)
+         ========================================================================= */}
       <main
-        className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 sm:pb-28 lg:pb-8 overflow-y-auto min-w-0 transition-colors duration-200"
+        className="flex-1 p-4 sm:p-6 lg:p-8 pb-28 lg:pb-12 overflow-y-auto min-w-0 transition-colors duration-200"
         style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
       >
-        <div className="max-w-6xl mx-auto w-full">
+        <div className="w-full max-w-7xl mx-auto">
           {children}
         </div>
       </main>
