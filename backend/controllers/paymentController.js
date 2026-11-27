@@ -16,7 +16,7 @@ const getRazorpayInstance = () => {
 // Exact Package Pricing Mapping
 const packages = {
   // Current Active Packages (matching frontend/src/app/coins/page.tsx)
-  'Mini': { coins: 150, bonus: 10, priceUSD: 1.99, priceINR: 149 },
+  'Mini': { coins: 100, bonus: 10, priceUSD: 1.99, priceINR: 149 },
   'Starter': { coins: 400, bonus: 50, priceUSD: 4.99, priceINR: 499 },
   'Pro': { coins: 900, bonus: 180, priceUSD: 9.99, priceINR: 999 },
   'Elite': { coins: 2000, bonus: 600, priceUSD: 19.99, priceINR: 1999 },

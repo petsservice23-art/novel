@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
 const packages = [
-  { name: 'Mini', coins: 150, bonus: 10, priceUSD: 1.99, priceINR: 149, bonusText: '+7% bonus', popular: false, badge: 'TRIAL' },
+  { name: 'Mini', coins: 100, bonus: 10, priceUSD: 1.99, priceINR: 149, bonusText: '+10% bonus', popular: false, badge: 'TRIAL' },
   { name: 'Starter', coins: 400, bonus: 50, priceUSD: 4.99, priceINR: 499, bonusText: '+12.5% bonus', popular: false, badge: 'STARTER' },
   { name: 'Pro', coins: 900, bonus: 180, priceUSD: 9.99, priceINR: 999, bonusText: '+20% bonus', popular: false, badge: 'WEEKEND' },
   { name: 'Elite', coins: 2000, bonus: 600, priceUSD: 19.99, priceINR: 1999, bonusText: '+30% bonus', popular: true, badge: 'MOST POPULAR' },
