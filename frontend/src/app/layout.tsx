@@ -19,6 +19,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.segyenovels.space"),
+  alternates: {
+    canonical: "https://www.segyenovels.space",
+  },
   title: {
     default: "SegyeNovels — Read Web Novels Online",
     template: "%s | SegyeNovels",

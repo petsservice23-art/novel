@@ -1,7 +1,16 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { fetchAllNovels, NovelItem } from '@/utils/ssrApi';
 import { formatTimeAgo } from '@/utils/timeAgo';
 import HeroCarousel from '@/components/HeroCarousel';
+
+export const metadata: Metadata = {
+  title: "SegyeNovels — Read Web Novels Online | Free Daily Updates",
+  description: "Discover and read thousands of Korean web novels, fantasy, romance, regression, and martial arts serials online for free on SegyeNovels. Free daily chapters with high quality translations.",
+  alternates: {
+    canonical: "https://www.segyenovels.space",
+  },
+};
 
 export const revalidate = 120; // ISR: revalidate every 2 minutes
 
