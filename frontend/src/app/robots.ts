@@ -7,7 +7,15 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: ['/', '/favicon.ico', '/favicon*.png', '/apple-touch-icon.png', '/images/'],
-      disallow: ['/admin/', '/api/', '/coins/checkout'],
+      disallow: [
+        '/admin/',
+        '/api/',
+        '/login',
+        '/register',
+        '/profile',
+        '/reset-password',
+        '/coins/checkout'
+      ],
     },
     sitemap: `${baseUrl}/sitemap.xml`,
   };

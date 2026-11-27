@@ -1,10 +1,9 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import API_URL from '@/config';
-import axios from 'axios';
+import { fetchAllNovels, NovelItem } from '@/utils/ssrApi';
 import { formatTimeAgo } from '@/utils/timeAgo';
+import HeroCarousel from '@/components/HeroCarousel';
+
+export const revalidate = 120; // ISR: revalidate every 2 minutes
 
 const getCleanAuthor = (author?: string) => {
   if (!author) return 'Korean Author';
@@ -15,12 +14,11 @@ const getCleanAuthor = (author?: string) => {
   return author;
 };
 
-// Novel Card (Strictly 2-col on mobile, 3 on small, 4 on tablet, 6 on desktop)
-const NovelCard = ({ novel, badge }: { novel: any; badge?: string }) => {
+// Novel Card component - Pure SSR HTML for 100% crawlability
+const NovelCard = ({ novel, badge }: { novel: NovelItem; badge?: string }) => {
   const isCompleted = (novel.publishing_status || 'completed').toLowerCase() === 'completed';
   const authorName = getCleanAuthor(novel.author);
 
-  // Safeguard: Ensure the displayed timeline is always recent (never older than novel creation date)
   const displayDate = (novel.updatedAt && novel.createdAt && new Date(novel.updatedAt).getTime() < new Date(novel.createdAt).getTime())
     ? novel.createdAt
     : (novel.updatedAt || novel.createdAt);
@@ -32,17 +30,8 @@ const NovelCard = ({ novel, badge }: { novel: any; badge?: string }) => {
           display: 'flex',
           flexDirection: 'column',
           gap: '8px',
-          transition: 'transform 0.2s ease, opacity 0.2s ease',
           width: '100%',
           cursor: 'pointer'
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.transform = 'translateY(-4px)';
-          e.currentTarget.style.opacity = '0.94';
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.transform = 'none';
-          e.currentTarget.style.opacity = '1';
         }}
       >
         {/* Cover Image Container */}
@@ -57,13 +46,12 @@ const NovelCard = ({ novel, badge }: { novel: any; badge?: string }) => {
         }}>
           <img 
             src={novel.cover_image} 
-            alt={novel.title} 
+            alt={`${novel.title} by ${authorName}`}
             loading="lazy"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-            onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${novel._id}/400/600`; }}
           />
 
-          {/* Frosted Transparent Status Tag in Top-Left (Matches Ownverso) */}
+          {/* Frosted Transparent Status Tag in Top-Left */}
           <span style={{ 
             position: 'absolute',
             top: '6px',
@@ -101,7 +89,7 @@ const NovelCard = ({ novel, badge }: { novel: any; badge?: string }) => {
           )}
         </div>
 
-        {/* Text Container: Pure black bold title, 2 lines clamp */}
+        {/* Text Container: Semantically indexed H3 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <h3 style={{ 
             fontSize: '13px', 
@@ -130,53 +118,28 @@ const NovelCard = ({ novel, badge }: { novel: any; badge?: string }) => {
   );
 };
 
-export default function Home() {
-  const [novels, setNovels] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [heroIndex, setHeroIndex] = useState(0);
+export default async function Home() {
+  const novels = await fetchAllNovels();
 
-  useEffect(() => {
-    const fetchNovels = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/novels`);
-        const data = Array.isArray(res.data) ? res.data : (res.data.novels || []);
-        setNovels(data);
-      } catch (err) {
-        console.error("Failed to fetch novels:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchNovels();
-  }, []);
-
-  const total = novels.length;
-  const heroList = novels.slice(0, 15);
-  const heroTotal = heroList.length || 1;
-
-  // Auto slide carousel every 5 seconds
-  useEffect(() => {
-    if (heroTotal <= 1) return;
-    const timer = setInterval(() => {
-      setHeroIndex(prev => (prev + 1) % heroTotal);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [heroTotal]);
-
-  const prevHero = () => setHeroIndex(prev => (prev - 1 + heroTotal) % heroTotal);
-  const nextHero = () => setHeroIndex(prev => (prev + 1) % heroTotal);
-
-  const prevIndex = (heroIndex - 1 + heroTotal) % heroTotal;
-  const nextIndex = (heroIndex + 1) % heroTotal;
-
-  const activeNovel = heroList[heroIndex];
-  const prevNovel = heroList[prevIndex];
-  const nextNovel = heroList[nextIndex];
-
-  // Data slices (14 items each to perfectly fill 2 rows of 7 cards without gaps)
+  // Data slices for sections
   const newArrivals = novels.slice(0, 14);
   const recentlyUpdated = [...novels].sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime()).slice(0, 14);
   const topRanked = [...novels].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 14);
+
+  // Schema.org ItemList for Google rich results
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Top Web Novels on SegyeNovels",
+    "description": "Popular Korean translated web novels, fantasy and romance serials.",
+    "itemListElement": topRanked.map((n, idx) => ({
+      "@type": "ListItem",
+      "position": idx + 1,
+      "name": n.title,
+      "url": `https://www.segyenovels.space/novel/${n._id}`,
+      "image": n.cover_image
+    }))
+  };
 
   return (
     <div style={{ 
@@ -186,245 +149,16 @@ export default function Home() {
       paddingBottom: '80px',
       transition: 'background-color 0.2s, color 0.2s'
     }}>
+      {/* Structured Data for Search Engines */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
 
-      {/* 1. KAKAOPAGE 3-CARD CAROUSEL (Image 1 Style: Full Cover without Cutouts) */}
-      <section style={{ maxWidth: '1240px', margin: '20px auto 40px', padding: '0 16px', overflow: 'hidden' }}>
-        <div style={{ position: 'relative', width: '100%', minHeight: '380px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          
-          {loading || !activeNovel ? (
-            <div style={{ width: '280px', height: '400px', background: 'var(--bg-card)', borderRadius: '20px' }} />
-          ) : (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              position: 'relative'
-            }}>
-              
-              {/* Left Peeking Card (Clickable to switch) */}
-              {prevNovel && (
-                <div 
-                  onClick={prevHero}
-                  className="hidden md:block"
-                  style={{
-                    width: '240px',
-                    height: '340px',
-                    borderRadius: '16px',
-                    overflow: 'hidden',
-                    opacity: 0.55,
-                    transform: 'scale(0.88) translateX(30px)',
-                    cursor: 'pointer',
-                    boxShadow: 'var(--shadow-md)',
-                    border: '1px solid var(--border)',
-                    position: 'relative',
-                    transition: 'all 0.3s ease',
-                    flexShrink: 0,
-                    zIndex: 2
-                  }}
-                >
-                  <img 
-                    src={prevNovel.cover_image} 
-                    alt={prevNovel.title} 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
-                </div>
-              )}
+      {/* 1. HERO CAROUSEL */}
+      <HeroCarousel novels={novels.slice(0, 15)} />
 
-              {/* Center Active Novel Card (Full Cover Artwork, Never Cutout!) */}
-              <div style={{
-                width: '100%',
-                maxWidth: '380px',
-                position: 'relative',
-                zIndex: 10,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                margin: '0 12px'
-              }}>
-                <Link href={`/novel/${activeNovel._id}`} style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
-                  <div style={{
-                    width: '100%',
-                    aspectRatio: '3/4',
-                    maxHeight: '440px',
-                    borderRadius: '20px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    boxShadow: '0 16px 40px rgba(0,0,0,0.22)',
-                    border: '1px solid var(--border)',
-                    background: 'var(--bg-card)'
-                  }}>
-                    {/* Full cover image */}
-                    <img 
-                      src={activeNovel.cover_image} 
-                      alt={activeNovel.title} 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                      onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/${activeNovel._id}/400/600`; }}
-                    />
-
-                    {/* Gradient scrim for bottom text */}
-                    <div style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      padding: '80px 20px 20px',
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '4px'
-                    }}>
-                      <span style={{
-                        color: '#f59e0b',
-                        fontSize: '11px',
-                        fontWeight: '800',
-                        letterSpacing: '0.05em',
-                        textTransform: 'uppercase'
-                      }}>
-                        {activeNovel.publishing_status || 'Featured'} · {activeNovel.genres?.[0] || 'Web Novel'}
-                      </span>
-                      <h2 style={{
-                        color: '#ffffff',
-                        fontSize: '18px',
-                        fontWeight: '800',
-                        lineHeight: '1.25',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        textShadow: '0 2px 6px rgba(0,0,0,0.6)'
-                      }}>
-                        {activeNovel.title}
-                      </h2>
-                      <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px' }}>
-                        {activeNovel.total_chapters || 0} chapters available
-                      </p>
-                    </div>
-
-                    {/* Slide Counter (e.g. 11 / 17, matching Image 1) */}
-                    <div style={{
-                      position: 'absolute',
-                      top: '12px',
-                      right: '12px',
-                      background: 'rgba(0,0,0,0.6)',
-                      backdropFilter: 'blur(6px)',
-                      color: '#ffffff',
-                      fontSize: '11px',
-                      fontWeight: '700',
-                      padding: '3px 9px',
-                      borderRadius: '100px',
-                      zIndex: 10
-                    }}>
-                      {heroIndex + 1} / {heroTotal}
-                    </div>
-                  </div>
-                </Link>
-
-                {/* Subtitle / CTA under active card */}
-                <div style={{ textAlign: 'center', marginTop: '12px' }}>
-                  <Link href={`/novel/${activeNovel._id}`} style={{
-                    color: 'var(--text-primary)',
-                    fontSize: '14px',
-                    fontWeight: '700',
-                    textDecoration: 'none',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}>
-                    <span>Read on SegyeNovels</span>
-                    <span style={{ color: 'var(--accent)' }}>★</span>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Right Peeking Card (Clickable to switch) */}
-              {nextNovel && (
-                <div 
-                  onClick={nextHero}
-                  className="hidden md:block"
-                  style={{
-                    width: '240px',
-                    height: '340px',
-                    borderRadius: '16px',
-                    overflow: 'hidden',
-                    opacity: 0.55,
-                    transform: 'scale(0.88) translateX(-30px)',
-                    cursor: 'pointer',
-                    boxShadow: 'var(--shadow-md)',
-                    border: '1px solid var(--border)',
-                    position: 'relative',
-                    transition: 'all 0.3s ease',
-                    flexShrink: 0,
-                    zIndex: 2
-                  }}
-                >
-                  <img 
-                    src={nextNovel.cover_image} 
-                    alt={nextNovel.title} 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
-                </div>
-              )}
-
-              {/* Arrow navigation buttons */}
-              <button 
-                onClick={prevHero}
-                aria-label="Previous Novel"
-                style={{
-                  position: 'absolute',
-                  left: '12px',
-                  top: '42%',
-                  transform: 'translateY(-50%)',
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '50%',
-                  background: 'rgba(0,0,0,0.65)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 20
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m15 18-6-6 6-6"/></svg>
-              </button>
-
-              <button 
-                onClick={nextHero}
-                aria-label="Next Novel"
-                style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '42%',
-                  transform: 'translateY(-50%)',
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '50%',
-                  background: 'rgba(0,0,0,0.65)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 20
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m9 18 6-6-6-6"/></svg>
-              </button>
-
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* 2. NOVEL GRID CONTAINERS (Strictly 2 columns on mobile, 6 on desktop) */}
+      {/* 2. NOVEL GRID SECTIONS (Raw SSR HTML for Googlebot) */}
       <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 16px' }}>
 
         {/* SECTION A: NEW ARRIVALS */}
@@ -441,21 +175,14 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Strict 2-col on mobile, up to 6 on desktop */}
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
             gap: '14px' 
           }}>
-            {loading ? (
-              [1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} style={{ aspectRatio: '2/3', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }} />
-              ))
-            ) : (
-              newArrivals.map((novel, idx) => (
-                <NovelCard key={novel._id} novel={novel} badge={idx < 2 ? 'NEW' : undefined} />
-              ))
-            )}
+            {newArrivals.map((novel, idx) => (
+              <NovelCard key={novel._id} novel={novel} badge={idx < 2 ? 'NEW' : undefined} />
+            ))}
           </div>
         </section>
 
@@ -478,19 +205,13 @@ export default function Home() {
             gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', 
             gap: '14px' 
           }}>
-            {loading ? (
-              [1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} style={{ aspectRatio: '2/3', background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)' }} />
-              ))
-            ) : (
-              recentlyUpdated.map((novel) => (
-                <NovelCard key={novel._id} novel={novel} />
-              ))
-            )}
+            {recentlyUpdated.map((novel) => (
+              <NovelCard key={novel._id} novel={novel} />
+            ))}
           </div>
         </section>
 
-        {/* SECTION C: TOP RANKED (밀리언 페이지) */}
+        {/* SECTION C: TOP RANKED NOVELS */}
         <section style={{ marginBottom: '48px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
@@ -511,6 +232,55 @@ export default function Home() {
           }}>
             {topRanked.map((novel, idx) => (
               <NovelCard key={novel._id} novel={novel} badge={`#${idx + 1}`} />
+            ))}
+          </div>
+        </section>
+
+        {/* SECTION D: SEO INTERNAL LINK DIRECTORY (Helps Google discover all genres & stories) */}
+        <section style={{
+          marginTop: '64px',
+          padding: '32px 24px',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: '16px'
+        }}>
+          <h2 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '12px', color: 'var(--text-primary)' }}>
+            Read Popular Web Novels & Light Novels Online
+          </h2>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '20px' }}>
+            SegyeNovels is a premier digital reading platform for translated Korean web novels, fantasy epics, romance novels, and reincarnation stories. Discover ongoing serialized novels updated daily with the first 50 chapters free for all readers.
+          </p>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+            {['Romance', 'Fantasy', 'Action', 'Drama', 'Regression', 'Reincarnation', 'Comedy', 'Martial Arts', 'Sci-Fi'].map((genre) => (
+              <Link
+                key={genre}
+                href={`/browse?genre=${encodeURIComponent(genre)}`}
+                style={{
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  padding: '6px 12px',
+                  borderRadius: '100px',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-primary)',
+                  textDecoration: 'none'
+                }}
+              >
+                {genre} Novels
+              </Link>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', fontSize: '12px', color: 'var(--text-muted)' }}>
+            {novels.slice(0, 18).map(n => (
+              <Link
+                key={n._id}
+                href={`/novel/${n._id}`}
+                style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}
+              >
+                {n.title}
+              </Link>
             ))}
           </div>
         </section>

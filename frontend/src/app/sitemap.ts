@@ -1,10 +1,10 @@
 import { MetadataRoute } from 'next';
+import { API_BASE_URL } from '@/utils/ssrApi';
 
 export const revalidate = 3600; // Revalidate sitemap every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.segyenovels.space';
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://novel-production-a7e3b704.up.railway.app/api';
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -66,12 +66,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let dynamicRoutes: MetadataRoute.Sitemap = [];
 
   try {
-    const res = await fetch(`${apiUrl}/novels`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${API_BASE_URL}/novels`, { next: { revalidate: 3600 } });
     if (res.ok) {
       const data = await res.json();
-      const novels = Array.isArray(data) ? data : (data.novels || []);
+      const rawNovels = Array.isArray(data) ? data : (data.novels || []);
+      
+      // Exclude unverified or hidden novels to strictly protect content rights
+      const visibleNovels = rawNovels.filter((n: any) => !n.is_hidden && n.status !== 'hidden');
 
-      dynamicRoutes = novels.flatMap((n: any) => {
+      dynamicRoutes = visibleNovels.flatMap((n: any) => {
         const lastMod = n.updatedAt ? new Date(n.updatedAt) : new Date(n.createdAt || Date.now());
         const routes: MetadataRoute.Sitemap = [
           {
@@ -101,8 +104,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         return routes;
       });
     }
-  } catch (error) {
-    console.error('Failed to fetch novels for dynamic sitemap:', error);
+  } catch (e) {
+    console.warn('Failed to fetch novels for dynamic sitemap:', e);
   }
 
   return [...staticRoutes, ...dynamicRoutes];
