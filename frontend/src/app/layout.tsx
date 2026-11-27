@@ -126,7 +126,8 @@ export default function RootLayout({
                   "sameAs": [
                     "https://twitter.com/segyenovels",
                     "https://www.instagram.com/segyenovels",
-                    "https://www.youtube.com/@segyenovels"
+                    "https://www.youtube.com/@segyenovels",
+                    "https://discord.gg/tYpfqW9vj"
                   ]
                 },
                 {
