@@ -88,7 +88,8 @@ export default function BulkImporter() {
 
     try {
       const res = await axios.post(`${API_URL}/admin/parse-book`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 300000 // 5 minutes for parsing large book files
       });
 
       const data: ParsedBook = res.data;
@@ -130,7 +131,7 @@ export default function BulkImporter() {
       };
 
       const res = await axios.post(`${API_URL}/admin/save-parsed-book`, payload, {
-        timeout: 120000,
+        timeout: 600000, // 10 minutes for large books (200-500+ chapters)
         headers: { 'Content-Type': 'application/json' }
       });
 
@@ -182,7 +183,7 @@ export default function BulkImporter() {
         novel_id: newNovelId,
         text: manualBulkText,
         delimiter: manualDelimiter
-      });
+      }, { timeout: 300000 });
 
       toast.success(`Success! Created ${manualTitle} with ${res.data.count} chapters!`, { id: 'manual-import' });
       setManualTitle(''); setManualAltTitle(''); setManualAuthor(''); setManualYear(''); setManualCoverUrl(''); setManualGenres(''); setManualDescription(''); setManualBulkText('');

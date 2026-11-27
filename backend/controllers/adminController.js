@@ -271,19 +271,32 @@ exports.saveParsedBook = async (req, res) => {
           const buffer = Buffer.from(matches[2], 'base64');
           const ext = contentType.includes('png') ? 'png' : 'jpg';
           const coverKey = `novels/${novel._id}/cover_${Date.now()}.${ext}`;
-          const cdnUrl = await uploadImage(coverKey, buffer, contentType);
+          
+          // 6s timeout safeguard for cover upload
+          const cdnUrl = await Promise.race([
+            uploadImage(coverKey, buffer, contentType),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Cover R2 timeout')), 6000))
+          ]);
           if (cdnUrl) novel.cover_image = cdnUrl;
         }
       } catch (covErr) {
-        console.warn('Cover R2 upload failed, keeping base64:', covErr.message);
+        console.warn('Cover R2 upload failed or timed out, keeping base64:', covErr.message);
       }
     }
 
     await novel.save();
 
-    // 2. Parallel upload chapters to R2 in chunks of 15 (fast & prevents timeouts)
-    const concurrency = 15;
+    // 2. Ultra-fast parallel upload chapters to R2 in chunks of 50 with 5s timeout safeguard
+    const concurrency = 50;
     const r2Keys = new Array(chaptersData.length).fill(null);
+
+    const uploadSingleChapterWithTimeout = async (novelId, chNum, content) => {
+      const uploadPromise = uploadChapterContent(novelId, chNum, content);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('R2 chapter upload timed out')), 5000)
+      );
+      return Promise.race([uploadPromise, timeoutPromise]);
+    };
 
     for (let i = 0; i < chaptersData.length; i += concurrency) {
       const slice = chaptersData.slice(i, i + concurrency);
@@ -293,9 +306,10 @@ exports.saveParsedBook = async (req, res) => {
           const chNum = ch.chapter_number || (globalIdx + 1);
           if (ch.content) {
             try {
-              r2Keys[globalIdx] = await uploadChapterContent(novel._id.toString(), chNum, ch.content);
+              r2Keys[globalIdx] = await uploadSingleChapterWithTimeout(novel._id.toString(), chNum, ch.content);
             } catch (err) {
-              // Fallback: keep content in Mongo if R2 upload fails
+              // Fallback: keep content in Mongo if R2 upload fails or times out
+              r2Keys[globalIdx] = null;
             }
           }
         })
