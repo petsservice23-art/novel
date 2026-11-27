@@ -7,11 +7,12 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
 const packages = [
-  { name: 'Starter', coins: 1000, bonus: 50, priceUSD: 9.99, priceINR: 999, bonusText: '+5% bonus', popular: false, badge: '' },
-  { name: 'Pro', coins: 2400, bonus: 360, priceUSD: 23.99, priceINR: 1399, bonusText: '+15% bonus', popular: false, badge: 'BEST DEAL' },
-  { name: 'Elite', coins: 4200, bonus: 1050, priceUSD: 41.99, priceINR: 4199, bonusText: '+25% bonus', popular: true, badge: 'POPULAR' },
-  { name: 'Master', coins: 6000, bonus: 2100, priceUSD: 59.99, priceINR: 5999, bonusText: '+35% bonus', popular: false, badge: '' },
-  { name: 'Legend', coins: 10000, bonus: 4500, priceUSD: 99.99, priceINR: 9999, bonusText: '+45% bonus', popular: false, badge: '' },
+  { name: 'Mini', coins: 150, bonus: 10, priceUSD: 1.99, priceINR: 149, bonusText: '+7% bonus', popular: false, badge: 'TRIAL' },
+  { name: 'Starter', coins: 400, bonus: 50, priceUSD: 4.99, priceINR: 499, bonusText: '+12.5% bonus', popular: false, badge: 'STARTER' },
+  { name: 'Pro', coins: 900, bonus: 180, priceUSD: 9.99, priceINR: 999, bonusText: '+20% bonus', popular: false, badge: 'WEEKEND' },
+  { name: 'Elite', coins: 2000, bonus: 600, priceUSD: 19.99, priceINR: 1999, bonusText: '+30% bonus', popular: true, badge: 'MOST POPULAR' },
+  { name: 'Master', coins: 4400, bonus: 1760, priceUSD: 39.99, priceINR: 3999, bonusText: '+40% bonus', popular: false, badge: 'BEST VALUE' },
+  { name: 'Legend', coins: 8500, bonus: 4250, priceUSD: 69.99, priceINR: 6999, bonusText: '+50% bonus', popular: false, badge: 'WHALE PACK' },
 ];
 
 export default function CoinsPage() {
@@ -328,16 +329,18 @@ export default function CoinsPage() {
           </span>
         </div>
 
-        {/* Coin Packages: Strictly 2 Columns Grid */}
+        {/* Coin Packages: Responsive 6-Tier Grid */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-          gap: '14px',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '16px',
           marginBottom: '48px'
         }}>
           {packages.map((pkg) => {
             const isPopular = pkg.popular;
             const priceDisplay = currency === 'INR' ? `₹${pkg.priceINR.toLocaleString('en-IN')}` : `$${pkg.priceUSD.toFixed(2)}`;
+            const totalCoins = pkg.coins + pkg.bonus;
+            const approxChapters = Math.floor(totalCoins / 10);
 
             return (
               <div
@@ -346,13 +349,13 @@ export default function CoinsPage() {
                   background: 'var(--bg-card)',
                   border: isPopular ? '2px solid var(--accent)' : '1px solid var(--border)',
                   borderRadius: '18px',
-                  padding: '20px 16px',
+                  padding: '22px 18px',
                   position: 'relative',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
                   gap: '16px',
-                  boxShadow: isPopular ? '0 8px 24px rgba(142, 107, 175, 0.18)' : 'var(--shadow-sm)',
+                  boxShadow: isPopular ? '0 8px 24px rgba(142, 107, 175, 0.22)' : 'var(--shadow-sm)',
                   transition: 'transform 0.2s ease, box-shadow 0.2s ease'
                 }}
                 onMouseEnter={e => {
@@ -362,44 +365,49 @@ export default function CoinsPage() {
                   e.currentTarget.style.transform = 'none';
                 }}
               >
-                {/* Popular / Best Deal Badge */}
-                {isPopular && (
+                {/* Badge Pill */}
+                {pkg.badge && (
                   <span style={{
                     position: 'absolute',
                     top: '12px',
                     right: '12px',
-                    background: 'var(--accent)',
-                    color: '#fff',
-                    fontSize: '9px',
+                    background: isPopular ? 'var(--accent)' : 'var(--bg-secondary)',
+                    color: isPopular ? '#fff' : 'var(--text-secondary)',
+                    border: isPopular ? 'none' : '1px solid var(--border)',
+                    fontSize: '10px',
                     fontWeight: '800',
                     letterSpacing: '0.06em',
-                    padding: '2px 7px',
+                    padding: '3px 8px',
                     borderRadius: '100px'
                   }}>
-                    POPULAR
+                    {pkg.badge}
                   </span>
                 )}
 
                 <div>
-                  <p style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+                  <p style={{ fontSize: '11px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
                     {pkg.name}
                   </p>
 
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '10px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '5px', marginBottom: '6px', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '18px', color: '#f59e0b', fontWeight: '800' }}>©</span>
-                    <span style={{ fontSize: 'clamp(20px, 3.2vw, 28px)', fontWeight: '900', color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1 }}>
+                    <span style={{ fontSize: 'clamp(22px, 3.2vw, 28px)', fontWeight: '900', color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1 }}>
                       {pkg.coins.toLocaleString()}
                     </span>
-                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#d97706' }}>
-                      +{pkg.bonus}
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: '#10b981' }}>
+                      +{pkg.bonus} bonus
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
-                    <span style={{ fontSize: 'clamp(15px, 2.4vw, 19px)', fontWeight: '800', color: 'var(--text-primary)' }}>
+                  <p style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                    Total: <strong style={{ color: 'var(--text-primary)' }}>{totalCoins.toLocaleString()} coins</strong> • Unlocks ~{approxChapters} chapters
+                  </p>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: '12px' }}>
+                    <span style={{ fontSize: 'clamp(16px, 2.4vw, 20px)', fontWeight: '800', color: 'var(--text-primary)' }}>
                       {priceDisplay}
                     </span>
-                    <span style={{ fontSize: '11px', fontWeight: '700', color: '#d97706' }}>
+                    <span style={{ fontSize: '11px', fontWeight: '700', color: '#10b981', background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '6px' }}>
                       {pkg.bonusText}
                     </span>
                   </div>
@@ -410,7 +418,7 @@ export default function CoinsPage() {
                   disabled={buying === pkg.name}
                   style={{
                     width: '100%',
-                    padding: '11px 12px',
+                    padding: '12px 14px',
                     borderRadius: '10px',
                     background: isPopular ? 'var(--accent)' : 'var(--bg-secondary)',
                     color: isPopular ? '#fff' : 'var(--text-primary)',
@@ -421,7 +429,7 @@ export default function CoinsPage() {
                     transition: 'all 0.15s ease'
                   }}
                 >
-                  {buying === pkg.name ? 'Processing...' : (pkg.badge ? pkg.badge.toLowerCase() : 'Choose plan')}
+                  {buying === pkg.name ? 'Processing...' : 'Get Coins'}
                 </button>
               </div>
             );

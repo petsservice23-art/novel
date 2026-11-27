@@ -16,11 +16,12 @@ const getRazorpayInstance = () => {
 // Exact Package Pricing Mapping
 const packages = {
   // Current Active Packages (matching frontend/src/app/coins/page.tsx)
-  'Starter': { coins: 1000, bonus: 50, priceUSD: 9.99, priceINR: 999 },
-  'Pro': { coins: 2400, bonus: 360, priceUSD: 23.99, priceINR: 1399 },
-  'Elite': { coins: 4200, bonus: 1050, priceUSD: 41.99, priceINR: 4199 },
-  'Master': { coins: 6000, bonus: 2100, priceUSD: 59.99, priceINR: 5999 },
-  'Legend': { coins: 10000, bonus: 4500, priceUSD: 99.99, priceINR: 9999 },
+  'Mini': { coins: 150, bonus: 10, priceUSD: 1.99, priceINR: 149 },
+  'Starter': { coins: 400, bonus: 50, priceUSD: 4.99, priceINR: 499 },
+  'Pro': { coins: 900, bonus: 180, priceUSD: 9.99, priceINR: 999 },
+  'Elite': { coins: 2000, bonus: 600, priceUSD: 19.99, priceINR: 1999 },
+  'Master': { coins: 4400, bonus: 1760, priceUSD: 39.99, priceINR: 3999 },
+  'Legend': { coins: 8500, bonus: 4250, priceUSD: 69.99, priceINR: 6999 },
   // Backward compatibility for legacy package requests
   'Standard': { coins: 499, bonus: 51, priceUSD: 5.99, priceINR: 499 }
 };
@@ -294,8 +295,8 @@ const verifyRazorpay = async (req, res) => {
       coinsToAward = pkg.coins + pkg.bonus;
     }
     if (!coinsToAward) {
-      // Default fallback: Starter package (1050 coins)
-      coinsToAward = 1050;
+      // Default fallback: Starter package (450 coins)
+      coinsToAward = 450;
     }
 
     let updatedCoins = 0;
@@ -372,7 +373,7 @@ const verifyPayPal = async (req, res) => {
       }
 
       const targetUserId = transaction?.user_id || req.user?._id || clientUserId;
-      let coinsToAward = transaction?.coins_awarded || 1050; // default Starter
+      let coinsToAward = transaction?.coins_awarded || 450; // default Starter
 
       let updatedCoins = 0;
       if (targetUserId) {
