@@ -216,7 +216,7 @@ export default function GenresPage() {
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
               {topGenres.map((genre) => (
-                <Link key={genre.name} href={`/browse?genre=${genre.name}`} style={{ textDecoration: 'none' }}>
+                <Link key={genre.name} href={`/genres/${encodeURIComponent(genre.name.toLowerCase().trim().replace(/\s+/g, '-'))}`} style={{ textDecoration: 'none' }}>
                   <div style={{
                     background: 'var(--bg-card)',
                     border: '1px solid var(--border)',
@@ -279,7 +279,7 @@ export default function GenresPage() {
             gap: '12px'
           }}>
             {filtered.map((genre) => (
-              <Link key={genre.name} href={`/browse?genre=${genre.name}`} style={{ textDecoration: 'none' }}>
+              <Link key={genre.name} href={`/genres/${encodeURIComponent(genre.name.toLowerCase().trim().replace(/\s+/g, '-'))}`} style={{ textDecoration: 'none' }}>
                 <div style={{
                   background: 'var(--bg-card)',
                   border: '1px solid var(--border)',

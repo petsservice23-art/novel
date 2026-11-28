@@ -21,6 +21,10 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.segyenovels.space"),
   alternates: {
     canonical: "https://www.segyenovels.space",
+    languages: {
+      "en": "https://www.segyenovels.space",
+      "x-default": "https://www.segyenovels.space",
+    },
   },
   title: {
     default: "SegyeNovels — Read Web Novels Online",
@@ -33,6 +37,12 @@ export const metadata: Metadata = {
     "read online web novels",
     "web novels online",
     "read web novels",
+    "read korean web novels in english",
+    "korean web novel translation",
+    "korean light novels english translation",
+    "free web novels worldwide",
+    "novel translations",
+    "manhwa web novels",
     "translated web novels",
     "fantasy web novels",
     "romance web novels",
@@ -70,6 +80,7 @@ export const metadata: Metadata = {
       },
     ],
     locale: "en_US",
+    alternateLocale: ["en_GB", "en_CA", "en_AU", "id_ID", "pt_BR", "es_ES", "tl_PH", "fr_FR", "de_DE"],
     type: "website",
   },
   twitter: {

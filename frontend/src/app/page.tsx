@@ -33,7 +33,7 @@ const NovelCard = ({ novel, badge }: { novel: NovelItem; badge?: string }) => {
     : (novel.updatedAt || novel.createdAt);
 
   return (
-    <Link href={`/novel/${novel._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+    <Link href={`/novel/${novel.slug || novel._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
       <div 
         style={{ 
           display: 'flex',
@@ -57,6 +57,7 @@ const NovelCard = ({ novel, badge }: { novel: NovelItem; badge?: string }) => {
             src={novel.cover_image} 
             alt={`${novel.title} by ${authorName}`}
             loading="lazy"
+            decoding="async"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
           />
 
@@ -264,7 +265,7 @@ export default async function Home() {
             {['Romance', 'Fantasy', 'Action', 'Drama', 'Regression', 'Reincarnation', 'Comedy', 'Martial Arts', 'Sci-Fi'].map((genre) => (
               <Link
                 key={genre}
-                href={`/browse?genre=${encodeURIComponent(genre)}`}
+                href={`/genres/${genre.toLowerCase().trim().replace(/\s+/g, '-')}`}
                 style={{
                   fontSize: '12px',
                   fontWeight: '600',
@@ -285,7 +286,7 @@ export default async function Home() {
             {novels.slice(0, 18).map(n => (
               <Link
                 key={n._id}
-                href={`/novel/${n._id}`}
+                href={`/novel/${n.slug || n._id}`}
                 style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}
               >
                 {n.title}

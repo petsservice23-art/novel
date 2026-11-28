@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { permanentRedirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import Link from 'next/link';
 import { fetchNovelById, fetchChapterByNum } from '@/utils/ssrApi';
@@ -29,17 +30,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const isHidden = novel.is_hidden || novel.status === 'hidden';
   const titleStr = `${novel.title} - Chapter ${num}: ${chapterTitle} | Read Online SegyeNovels`;
   const descStr = `Read ${novel.title} Chapter ${num} online for free. Continue following ${novel.title} (${novel.author || 'Korean Author'}) in English translation on SegyeNovels.`;
+  const canonicalSlug = novel.slug || id;
 
   return {
     title: titleStr,
     description: descStr,
     alternates: {
-      canonical: `https://www.segyenovels.space/novel/${id}/chapter/${num}`,
+      canonical: `https://www.segyenovels.space/novel/${canonicalSlug}/chapter/${num}`,
     },
     openGraph: {
       title: titleStr,
       description: descStr,
-      url: `https://www.segyenovels.space/novel/${id}/chapter/${num}`,
+      url: `https://www.segyenovels.space/novel/${canonicalSlug}/chapter/${num}`,
       type: 'article',
       images: [
         {
@@ -86,6 +88,12 @@ export default async function ChapterReadingPage({ params }: PageProps) {
     );
   }
 
+  // 301 Permanent Redirect: If visitor or Googlebot hits raw MongoDB ID, redirect to clean keyword slug!
+  if (novel.slug && id !== novel.slug) {
+    permanentRedirect(`/novel/${novel.slug}/chapter/${num}`);
+  }
+
+  const canonicalSlug = novel.slug || id;
   const isLocked = Boolean(chapter.is_locked);
   const rawContent = chapter.content;
 
@@ -116,13 +124,13 @@ export default async function ChapterReadingPage({ params }: PageProps) {
         "@type": "ListItem",
         "position": 2,
         "name": novel.title,
-        "item": `https://www.segyenovels.space/novel/${id}`
+        "item": `https://www.segyenovels.space/novel/${canonicalSlug}`
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": `Chapter ${num}`,
-        "item": `https://www.segyenovels.space/novel/${id}/chapter/${num}`
+        "item": `https://www.segyenovels.space/novel/${canonicalSlug}/chapter/${num}`
       }
     ]
   };
@@ -174,7 +182,7 @@ export default async function ChapterReadingPage({ params }: PageProps) {
         novel={novel}
         chapter={chapter}
         chapterNum={num}
-        novelId={id}
+        novelId={canonicalSlug}
         isLocked={isLocked}
       />
 
@@ -185,7 +193,7 @@ export default async function ChapterReadingPage({ params }: PageProps) {
         <nav aria-label="Breadcrumb" style={{ marginBottom: '24px', fontSize: '13px', color: 'var(--text-muted)', fontFamily: 'Inter, system-ui, sans-serif' }}>
           <Link href="/" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>&gt;</span>
-          <Link href={`/novel/${id}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>{novel.title}</Link>
+          <Link href={`/novel/${canonicalSlug}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>{novel.title}</Link>
           <span style={{ margin: '0 8px' }}>&gt;</span>
           <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>Chapter {num}</span>
         </nav>
@@ -258,7 +266,7 @@ export default async function ChapterReadingPage({ params }: PageProps) {
             <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>
               {prevChapter && (
                 <Link 
-                  href={`/novel/${id}/chapter/${prevChapter}`}
+                  href={`/novel/${canonicalSlug}/chapter/${prevChapter}`}
                   style={{
                     padding: '12px 24px',
                     borderRadius: '100px',
@@ -275,7 +283,7 @@ export default async function ChapterReadingPage({ params }: PageProps) {
               )}
               {nextChapter ? (
                 <Link 
-                  href={`/novel/${id}/chapter/${nextChapter}`}
+                  href={`/novel/${canonicalSlug}/chapter/${nextChapter}`}
                   style={{
                     padding: '12px 28px',
                     borderRadius: '100px',
@@ -292,7 +300,7 @@ export default async function ChapterReadingPage({ params }: PageProps) {
                 </Link>
               ) : (
                 <Link 
-                  href={`/novel/${id}`}
+                  href={`/novel/${canonicalSlug}`}
                   style={{
                     padding: '12px 24px',
                     borderRadius: '100px',

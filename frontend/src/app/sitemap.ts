@@ -85,7 +85,7 @@ export default async function sitemap(props: {
         const visibleNovels = rawNovels.filter((n: any) => !n.is_hidden && n.status !== 'hidden');
 
         const novelRoutes: MetadataRoute.Sitemap = visibleNovels.map((n: any) => ({
-          url: `${baseUrl}/novel/${n._id}`,
+          url: `${baseUrl}/novel/${n.slug || n._id}`,
           lastModified: n.updatedAt ? new Date(n.updatedAt) : new Date(n.createdAt || Date.now()),
           changeFrequency: (n.publishing_status === 'completed' ? 'weekly' : 'daily') as any,
           priority: 0.85,
@@ -108,6 +108,7 @@ export default async function sitemap(props: {
       const visibleNovels = rawNovels.filter((n: any) => !n.is_hidden && n.status !== 'hidden');
 
       const chapterRoutes: MetadataRoute.Sitemap = visibleNovels.flatMap((n: any) => {
+        const novelSlug = n.slug || n._id;
         const lastMod = n.updatedAt ? new Date(n.updatedAt) : new Date(n.createdAt || Date.now());
         const total = n.total_chapters || 0;
         const chaptersToIndex = new Set([1, 2, 3]);
@@ -117,7 +118,7 @@ export default async function sitemap(props: {
         chaptersToIndex.forEach(chNum => {
           if (chNum <= total) {
             list.push({
-              url: `${baseUrl}/novel/${n._id}/chapter/${chNum}`,
+              url: `${baseUrl}/novel/${novelSlug}/chapter/${chNum}`,
               lastModified: lastMod,
               changeFrequency: 'weekly' as any,
               priority: 0.75,

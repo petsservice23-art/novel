@@ -15,6 +15,7 @@ export const API_BASE_URL = getApiBaseUrl();
 
 export interface NovelItem {
   _id: string;
+  slug?: string;
   title: string;
   author: string;
   description?: string;

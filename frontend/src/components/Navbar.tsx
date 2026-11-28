@@ -65,6 +65,18 @@ export default function Navbar() {
     setMobileMenuOpen(false);
   }, [router]);
 
+  // Global Ctrl+K / Cmd+K search shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        router.push('/search');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [router]);
+
   const getInitials = (name?: string) => {
     if (!name) return 'U';
     const parts = name.trim().split(/\s+/);
@@ -154,6 +166,17 @@ export default function Navbar() {
               <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
             </svg>
             <span style={{ flex: 1 }}>Search novels...</span>
+            <kbd style={{
+              fontSize: '10px',
+              fontWeight: '700',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: '4px',
+              padding: '1px 5px',
+              color: 'var(--text-muted)',
+              fontFamily: 'inherit',
+              letterSpacing: '0.04em'
+            }}>Ctrl K</kbd>
           </Link>
 
           {/* Mobile Search Icon Button */}

@@ -1,7 +1,18 @@
+const mongoose = require('mongoose');
 const Chapter = require('../models/Chapter');
 const Novel = require('../models/Novel');
 const User = require('../models/User');
 const { uploadChapterContent, getChapterContent } = require('../utils/r2Service');
+
+// Helper to find novel by MongoDB ObjectId OR by unique slug
+const findNovelByIdOrSlug = async (identifier) => {
+  if (!identifier) return null;
+  const isObjectId = mongoose.Types.ObjectId.isValid(identifier);
+  const query = isObjectId
+    ? { $or: [{ _id: identifier }, { slug: identifier }] }
+    : { slug: identifier };
+  return await Novel.findOne(query);
+};
 
 // Helper: Resolve chapter content from R2 if stored externally
 const resolveChapterPayload = async (chapter, tier) => {
@@ -26,10 +37,10 @@ const getChapterTier = (chapterNum, totalChapters) => {
 // @access  Public
 const getChaptersByNovel = async (req, res) => {
   try {
-    const novel = await Novel.findById(req.params.novelId);
+    const novel = await findNovelByIdOrSlug(req.params.novelId);
     if (!novel) return res.status(404).json({ message: 'Novel not found' });
 
-    const chapters = await Chapter.find({ novel_id: req.params.novelId })
+    const chapters = await Chapter.find({ novel_id: novel._id })
       .select('-content')
       .sort({ chapter_number: 1 });
 
@@ -168,12 +179,11 @@ const getChapterById = async (req, res) => {
 // @access  Tiered
 const getChapterByNumber = async (req, res) => {
   try {
-    const novelId = req.params.novelId;
-    const chapterNum = Number(req.params.chapterNumber);
-    const novel = await Novel.findById(novelId);
+    const novel = await findNovelByIdOrSlug(req.params.novelId);
     if (!novel) return res.status(404).json({ message: 'Novel not found' });
+    const chapterNum = Number(req.params.chapterNumber);
 
-    let chapter = await Chapter.findOne({ novel_id: novelId, chapter_number: chapterNum });
+    let chapter = await Chapter.findOne({ novel_id: novel._id, chapter_number: chapterNum });
 
     if (!chapter) {
       if (chapterNum < 1 || chapterNum > (novel.total_chapters || 0)) {
@@ -182,7 +192,7 @@ const getChapterByNumber = async (req, res) => {
 
       const isLocked = chapterNum > 3;
       chapter = new Chapter({
-        novel_id: novelId,
+        novel_id: novel._id,
         chapter_number: chapterNum,
         title: `Chapter ${chapterNum}: The Journey Unfolds`,
         content: [
@@ -335,9 +345,9 @@ const addChapter = async (req, res) => {
 // @access  Private
 const unlockAllChapters = async (req, res) => {
   try {
-    const novelId = req.params.novelId;
-    const novel = await Novel.findById(novelId);
+    const novel = await findNovelByIdOrSlug(req.params.novelId);
     if (!novel) return res.status(404).json({ message: 'Novel not found' });
+    const novelId = novel._id;
 
     const user = await User.findById(req.user._id);
     if (!user) return res.status(401).json({ message: 'User not found' });

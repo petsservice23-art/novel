@@ -7,6 +7,7 @@ import { formatTimeAgo } from '@/utils/timeAgo';
 
 interface Novel {
   _id: string;
+  slug?: string;
   title: string;
   author: string;
   cover_image: string;
@@ -306,7 +307,7 @@ export default function BrowsePage() {
                 : (novel.updatedAt || novel.createdAt);
 
               return (
-                <Link key={novel._id} href={`/novel/${novel._id}`} style={{ textDecoration: 'none' }}>
+                <Link key={novel._id} href={`/novel/${novel.slug || novel._id}`} style={{ textDecoration: 'none' }}>
                   <div 
                     style={{ 
                       display: 'flex',

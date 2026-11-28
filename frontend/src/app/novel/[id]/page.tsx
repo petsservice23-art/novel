@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
+import { permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
-import { fetchNovelById, fetchNovelChapters } from '@/utils/ssrApi';
+import { fetchNovelById, fetchNovelChapters, fetchAllNovels } from '@/utils/ssrApi';
 import NovelInteractiveClient from '@/components/NovelInteractiveClient';
 
 interface PageProps {
@@ -25,17 +26,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     : `Read ${novel.title} online for free on SegyeNovels. Explore high quality Korean web novel translations with daily updates.`;
 
   const titleStr = `${novel.title} - Read Online All Chapters | SegyeNovels`;
+  const canonicalSlug = novel.slug || id;
 
   return {
     title: titleStr,
     description: cleanDesc,
     alternates: {
-      canonical: `https://www.segyenovels.space/novel/${id}`,
+      canonical: `https://www.segyenovels.space/novel/${canonicalSlug}`,
     },
     openGraph: {
       title: titleStr,
       description: cleanDesc,
-      url: `https://www.segyenovels.space/novel/${id}`,
+      url: `https://www.segyenovels.space/novel/${canonicalSlug}`,
       type: 'book',
       images: [
         {
@@ -59,9 +61,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function NovelDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const [novel, chapters] = await Promise.all([
+  const [novel, chapters, allNovels] = await Promise.all([
     fetchNovelById(id),
-    fetchNovelChapters(id)
+    fetchNovelChapters(id),
+    fetchAllNovels()
   ]);
 
   if (!novel) {
@@ -76,8 +79,20 @@ export default async function NovelDetailPage({ params }: PageProps) {
     );
   }
 
+  // 301 Permanent Redirect: If visitor or Googlebot hits raw MongoDB ID, redirect to clean keyword slug!
+  if (novel.slug && id !== novel.slug) {
+    permanentRedirect(`/novel/${novel.slug}`);
+  }
+
+  const canonicalSlug = novel.slug || id;
   const isCompleted = (novel.publishing_status || 'completed').toLowerCase() === 'completed';
   const freeChaptersCount = chapters.filter(c => c.tier === 'free' || (!c.is_locked && c.chapter_number <= 50)).length;
+
+  // Find 6 similar/recommended novels from the same genres
+  const relatedNovels = allNovels
+    .filter(n => (n.slug || n._id) !== canonicalSlug && n._id !== novel._id)
+    .filter(n => n.genres?.some(g => novel.genres?.includes(g)))
+    .slice(0, 6);
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -99,7 +114,7 @@ export default async function NovelDetailPage({ params }: PageProps) {
         "@type": "ListItem",
         "position": 3,
         "name": novel.title,
-        "item": `https://www.segyenovels.space/novel/${id}`
+        "item": `https://www.segyenovels.space/novel/${canonicalSlug}`
       }
     ]
   };
@@ -107,7 +122,7 @@ export default async function NovelDetailPage({ params }: PageProps) {
   const bookJsonLd = {
     "@context": "https://schema.org",
     "@type": "Book",
-    "@id": `https://www.segyenovels.space/novel/${id}#book`,
+    "@id": `https://www.segyenovels.space/novel/${canonicalSlug}#book`,
     "name": novel.title,
     "alternateName": novel.alternative_titles ? novel.alternative_titles.split(',').map(s => s.trim()) : undefined,
     "author": {
@@ -165,7 +180,7 @@ export default async function NovelDetailPage({ params }: PageProps) {
             <>
               <li aria-hidden="true">&gt;</li>
               <li>
-                <Link href={`/browse?genre=${encodeURIComponent(novel.genres[0])}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>
+                <Link href={`/genres/${encodeURIComponent(novel.genres[0].toLowerCase().trim().replace(/\s+/g, '-'))}`} style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>
                   {novel.genres[0]}
                 </Link>
               </li>
@@ -238,45 +253,57 @@ export default async function NovelDetailPage({ params }: PageProps) {
             color: isCompleted ? '#10b981' : '#3b82f6', 
             background: isCompleted ? 'rgba(16, 185, 129, 0.12)' : 'rgba(59, 130, 246, 0.12)',
             border: isCompleted ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(59, 130, 246, 0.3)',
-            fontWeight: '700'
+            fontWeight: '600'
           }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: isCompleted ? '#10b981' : '#3b82f6', display: 'inline-block' }} />
             {isCompleted ? 'Completed' : 'Ongoing'}
           </div>
           <div style={badgeStyle}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-            {novel.total_chapters || chapters.length} chapters
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            {novel.total_chapters || chapters.length} Chapters
           </div>
-          <div style={{ ...badgeStyle, color: '#10b981', background: 'rgba(16, 185, 129, 0.12)' }}>
-            ✓ {freeChaptersCount} free chapters
+          <div style={badgeStyle}>
+            <span style={{ color: '#10b981', fontWeight: '700' }}>✓ {freeChaptersCount} Free Chapters</span>
+          </div>
+          <div style={badgeStyle}>
+            <span style={{ color: '#f59e0b', fontWeight: '700' }}>★ {novel.rating ? novel.rating.toFixed(1) : '4.8'}</span>
+            <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>({novel.ratings_count || 120})</span>
           </div>
         </div>
 
-        {/* Genres List */}
+        {/* Genre Tags */}
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '32px' }}>
-          {novel.genres?.map((g: string) => (
-            <Link 
-              key={g} 
-              href={`/browse?genre=${encodeURIComponent(g)}`} 
-              style={{ textDecoration: 'none' }}
-            >
-              <span style={tagStyle}>{g}</span>
-            </Link>
-          ))}
+          {(novel.genres || ['Fantasy', 'Action', 'Romance']).map((g) => {
+            const genreSlug = g.toLowerCase().trim().replace(/\s+/g, '-');
+            return (
+              <Link 
+                key={g} 
+                href={`/genres/${encodeURIComponent(genreSlug)}`}
+                style={{ textDecoration: 'none' }}
+              >
+                <span style={tagStyle}>
+                  {g}
+                </span>
+              </Link>
+            );
+          })}
         </div>
 
-        {/* Primary Start Reading CTA */}
-        <div style={{ width: '100%', maxWidth: '340px', marginBottom: '32px' }}>
-          <Link href={`/novel/${id}/chapter/1`} style={{ textDecoration: 'none' }}>
-            <button style={{ 
-              width: '100%', 
-              padding: '14px 20px', 
-              borderRadius: '100px', 
-              border: 'none', 
-              background: 'var(--accent-gradient)', 
-              color: '#fff', 
-              fontSize: '15px', 
-              fontWeight: '700', 
-              cursor: 'pointer', 
+        {/* Primary Call to Action */}
+        <div style={{ marginBottom: '36px', display: 'flex', gap: '14px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Link href={`/novel/${canonicalSlug}/chapter/1`} style={{ textDecoration: 'none' }}>
+            <button style={{
+              background: 'linear-gradient(135deg, var(--accent), #e11d48)',
+              color: '#fff',
+              border: 'none',
+              padding: '14px 32px',
+              borderRadius: '14px',
+              fontSize: '15px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
               boxShadow: 'var(--shadow-sm)'
             }}>
               Start Reading (Chapter 1) →
@@ -308,8 +335,78 @@ export default async function NovelDetailPage({ params }: PageProps) {
 
         {/* Interactive Chapters Client with Search, Range Tabs, Library & Unlock-All */}
         <section style={{ width: '100%' }}>
-          <NovelInteractiveClient novel={novel} chapters={chapters} />
+          <NovelInteractiveClient novel={{ ...novel, _id: canonicalSlug }} chapters={chapters} />
         </section>
+
+        {/* Recommended / Similar Novels (Internal link SEO & Retention) */}
+        {relatedNovels.length > 0 && (
+          <section aria-labelledby="related-heading" style={{ width: '100%', marginTop: '54px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+              <h2 id="related-heading" style={{ fontSize: '20px', fontWeight: '800', color: 'var(--text-primary)' }}>
+                Readers Also Enjoyed
+              </h2>
+              <Link href="/browse" style={{ fontSize: '13px', color: 'var(--accent)', textDecoration: 'none', fontWeight: '600' }}>
+                Browse All Novels →
+              </Link>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(145px, 1fr))',
+              gap: '14px'
+            }}>
+              {relatedNovels.map((rel) => {
+                const relSlug = rel.slug || rel._id;
+                return (
+                  <Link
+                    key={rel._id}
+                    href={`/novel/${relSlug}`}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      background: 'var(--bg-card)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '14px',
+                      overflow: 'hidden',
+                      textDecoration: 'none',
+                      color: 'inherit',
+                      transition: 'transform 0.2s, border-color 0.2s',
+                    }}
+                  >
+                    <div style={{ width: '100%', aspectRatio: '2/3', position: 'relative', overflow: 'hidden', background: 'var(--bg-secondary)' }}>
+                      <img
+                        src={rel.cover_image || '/images/logo-wordmark.png'}
+                        alt={`${rel.title} Cover`}
+                        loading="lazy"
+                        decoding="async"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </div>
+                    <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between' }}>
+                      <h3 style={{
+                        fontSize: '12px',
+                        fontWeight: '700',
+                        color: 'var(--text-primary)',
+                        lineHeight: '1.4',
+                        marginBottom: '4px',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden'
+                      }}>
+                        {rel.title}
+                      </h3>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)' }}>
+                        <span>{rel.genres?.[0] || 'Novel'}</span>
+                        <span>★ {rel.rating ? rel.rating.toFixed(1) : '4.8'}</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
       </main>
     </div>

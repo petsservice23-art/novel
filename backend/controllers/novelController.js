@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Novel = require('../models/Novel');
 
 // @desc    Get all approved novels
@@ -12,12 +13,18 @@ const getNovels = async (req, res) => {
   }
 };
 
-// @desc    Get novel by ID
+// @desc    Get novel by ID or Slug
 // @route   GET /api/novels/:id
 // @access  Public
 const getNovelById = async (req, res) => {
   try {
-    const novel = await Novel.findById(req.params.id).populate('author_id', 'username avatar');
+    const identifier = req.params.id;
+    const isObjectId = mongoose.Types.ObjectId.isValid(identifier);
+    const query = isObjectId
+      ? { $or: [{ _id: identifier }, { slug: identifier }] }
+      : { slug: identifier };
+
+    const novel = await Novel.findOne(query).populate('author_id', 'username avatar');
     if (novel) {
       // Increment views without changing updatedAt
       await Novel.updateOne({ _id: novel._id }, { $inc: { views: 1 } }, { timestamps: false });

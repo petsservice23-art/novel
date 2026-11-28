@@ -83,7 +83,7 @@ export default function HeroCarousel({ novels }: { novels: NovelItem[] }) {
             alignItems: 'center',
             margin: '0 12px'
           }}>
-            <Link href={`/novel/${activeNovel._id}`} style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
+            <Link href={`/novel/${activeNovel.slug || activeNovel._id}`} style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
               <div style={{
                 width: '100%',
                 aspectRatio: '3/4',
@@ -160,7 +160,7 @@ export default function HeroCarousel({ novels }: { novels: NovelItem[] }) {
             </Link>
 
             <div style={{ textAlign: 'center', marginTop: '12px' }}>
-              <Link href={`/novel/${activeNovel._id}`} style={{
+              <Link href={`/novel/${activeNovel.slug || activeNovel._id}`} style={{
                 color: 'var(--text-primary)',
                 fontSize: '14px',
                 fontWeight: '700',

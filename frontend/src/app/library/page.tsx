@@ -7,6 +7,7 @@ import axios from 'axios';
 
 interface Novel {
   _id: string;
+  slug?: string;
   title: string;
   author: string;
   cover_image: string;
@@ -64,7 +65,7 @@ export default function LibraryPage() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '14px', rowGap: '20px' }}>
           {novels.map((novel) => (
-            <Link key={novel._id} href={`/novel/${novel._id}`} style={{ textDecoration: 'none', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column' }}
+            <Link key={novel._id} href={`/novel/${novel.slug || novel._id}`} style={{ textDecoration: 'none', transition: 'transform 0.2s', display: 'flex', flexDirection: 'column' }}
               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
             >

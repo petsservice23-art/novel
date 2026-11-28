@@ -7,6 +7,7 @@ import axios from 'axios';
 
 interface Novel {
   _id: string;
+  slug?: string;
   title: string;
   author: string;
   cover_image: string;
@@ -120,7 +121,7 @@ function SearchContent() {
       ) : (
         <div style={{ display: 'grid', gap: '32px' }}>
           {results.map((novel) => (
-            <Link key={novel._id} href={`/novel/${novel._id}`} style={{ textDecoration: 'none' }}>
+            <Link key={novel._id} href={`/novel/${novel.slug || novel._id}`} style={{ textDecoration: 'none' }}>
               <div style={{ 
                 background: 'var(--bg-secondary)', 
                 borderRadius: '24px', 
@@ -148,7 +149,7 @@ function SearchContent() {
                 }} />
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                    {novel.genres?.map(g => (
+                    {novel.genres?.map((g: string) => (
                       <span key={g} style={{ fontSize: '11px', fontWeight: '800', background: 'var(--bg-card)', color: 'var(--text-secondary)', padding: '4px 10px', borderRadius: '6px', border: '1px solid var(--border)' }}>{g}</span>
                     ))}
                   </div>

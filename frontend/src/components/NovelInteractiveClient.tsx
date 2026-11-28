@@ -303,7 +303,7 @@ export default function NovelInteractiveClient({
           return (
             <Link
               key={ch.chapter_number}
-              href={`/novel/${novel._id}/chapter/${ch.chapter_number}`}
+              href={`/novel/${novel.slug || novel._id}/chapter/${ch.chapter_number}`}
               style={{
                 display: 'flex',
                 alignItems: 'center',
