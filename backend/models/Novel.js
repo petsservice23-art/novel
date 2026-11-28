@@ -34,7 +34,7 @@ const novelSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Pre-save hook: Auto-generate unique slug if not provided or title changed
-novelSchema.pre('save', async function (next) {
+novelSchema.pre('save', async function () {
   if (!this.slug || this.isModified('title')) {
     let baseSlug = slugify(this.title) || 'novel';
     let candidateSlug = baseSlug;
@@ -52,7 +52,6 @@ novelSchema.pre('save', async function (next) {
       candidateSlug = `${baseSlug}-${count}`;
     }
   }
-  next();
 });
 
 // Text indexing for search

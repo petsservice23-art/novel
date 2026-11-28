@@ -137,7 +137,7 @@ export default function BulkImporter() {
 
       toast.success(`Success! Created "${parsedBook.title}" with ${res.data.chaptersCount} chapters live!`, { id: 'save-book' });
       setUploadSuccess({
-        novelId: res.data.novel._id,
+        novelId: res.data.novel.slug || res.data.novel._id,
         title: parsedBook.title,
         count: res.data.chaptersCount
       });
